@@ -1,0 +1,59 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "lerobot-remote-module"
+version = "0.1.0"
+description = "LeRobot plug-and-play remote training & inference module"
+readme = "README.md"
+requires-python = ">=3.10"
+
+# ─── Core (both desktop and server) ──────────────────────────────────────────
+dependencies = [
+    "numpy>=1.24",
+    "PyYAML>=6.0",
+]
+
+[project.optional-dependencies]
+
+# Desktop: robot connection + gRPC client
+desktop = [
+    "grpcio>=1.60",
+    "grpcio-tools>=1.60",
+    "lerobot>=0.1.0",
+    "opencv-python>=4.8",
+]
+
+# Server: GPU training + gRPC server
+server = [
+    "grpcio>=1.60",
+    "grpcio-tools>=1.60",
+    "lerobot>=0.1.0",
+    "torch>=2.2",
+    "torchvision>=0.17",
+]
+
+# Full install (development)
+all = [
+    "grpcio>=1.60",
+    "grpcio-tools>=1.60",
+    "lerobot>=0.1.0",
+    "torch>=2.2",
+    "torchvision>=0.17",
+    "opencv-python>=4.8",
+    "diffusers>=0.27",
+    "transformers>=4.40",
+    "huggingface-hub>=0.22",
+    "datasets>=2.18",
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["module*"]
+
+[project.scripts]
+lerobot-server  = "module.server.grpc_server:main"
+lerobot-desktop = "scripts.run_desktop:main"

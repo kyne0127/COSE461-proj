@@ -1,0 +1,231 @@
+syntax = "proto3";
+
+package lerobot;
+
+// ============================================================
+//  LeRobot Remote Training & Inference gRPC Service Definitions
+//  Desktop (RTX 3060) <--gRPC--> GPU Server
+// ============================================================
+
+// ────────────────────────────────────────────────────────────
+// Common Types
+// ────────────────────────────────────────────────────────────
+
+message Tensor {
+  repeated int64 shape     = 1;
+  repeated float data      = 2;  // flattened float32
+  string         dtype     = 3;  // "float32" | "int64" | ...
+  string         name      = 4;
+}
+
+message Metadata {
+  map<string, string> fields = 1;
+}
+
+// ────────────────────────────────────────────────────────────
+// 1. Inference Service  (Desktop → Server)
+// ────────────────────────────────────────────────────────────
+
+service InferenceService {
+  // Load a model onto the server GPU
+  rpc LoadModel     (LoadModelRequest)     returns (LoadModelResponse);
+  // Unload a model from GPU memory
+  rpc UnloadModel   (UnloadModelRequest)   returns (UnloadModelResponse);
+  // List currently loaded models
+  rpc ListModels    (ListModelsRequest)    returns (ListModelsResponse);
+  // Single-step action prediction
+  rpc GetAction     (ObservationRequest)   returns (ActionResponse);
+  // Streaming action prediction (for chunk-based policies like ACT)
+  rpc GetActionStream (ObservationRequest) returns (stream ActionChunk);
+}
+
+message LoadModelRequest {
+  string model_type      = 1;  // "act" | "diffusion" | "tdmpc2" | "pi0" | "custom"
+  string model_id        = 2;  // unique identifier / checkpoint path
+  string checkpoint_path = 3;  // absolute path on server
+  string config_yaml     = 4;  // YAML config string (optional override)
+  Metadata extra         = 5;
+}
+
+message LoadModelResponse {
+  bool   success  = 1;
+  string model_id = 2;
+  string message  = 3;
+}
+
+message UnloadModelRequest {
+  string model_id = 1;
+}
+
+message UnloadModelResponse {
+  bool   success = 1;
+  string message = 2;
+}
+
+message ListModelsRequest {}
+
+message ListModelsResponse {
+  repeated ModelInfo models = 1;
+}
+
+message ModelInfo {
+  string model_id   = 1;
+  string model_type = 2;
+  string status     = 3;  // "loaded" | "loading" | "error"
+}
+
+message ObservationRequest {
+  string         model_id    = 1;
+  repeated Tensor images     = 2;  // camera images (N, H, W, C)
+  Tensor          state      = 3;  // proprioceptive state
+  string          task_text  = 4;  // VLA task description (Pi0 등)
+  int32           episode_id = 5;
+  int64           step       = 6;
+  Metadata        extra      = 7;
+}
+
+message ActionResponse {
+  Tensor   action    = 1;  // predicted action
+  float    timestamp = 2;
+  Metadata debug     = 3;
+}
+
+message ActionChunk {
+  repeated Tensor actions = 1;  // chunk of actions (ACT style)
+  int32 chunk_size        = 2;
+  float timestamp         = 3;
+}
+
+// ────────────────────────────────────────────────────────────
+// 2. Training Service  (Desktop → Server)
+// ────────────────────────────────────────────────────────────
+
+service TrainingService {
+  // Upload a single episode frame stream
+  rpc StreamEpisode    (stream EpisodeFrame)    returns (EpisodeUploadResponse);
+  // Trigger training job on uploaded dataset
+  rpc StartTraining    (TrainingRequest)        returns (TrainingJobResponse);
+  // Poll training status
+  rpc GetTrainingStatus(TrainingStatusRequest)  returns (TrainingStatusResponse);
+  // Stream live training logs
+  rpc StreamTrainingLogs(TrainingStatusRequest) returns (stream TrainingLog);
+  // Stop a running training job
+  rpc StopTraining     (TrainingStatusRequest)  returns (TrainingJobResponse);
+  // List all training jobs
+  rpc ListJobs         (ListJobsRequest)        returns (ListJobsResponse);
+}
+
+message EpisodeFrame {
+  string         dataset_id  = 1;
+  int32          episode_idx = 2;
+  int64          frame_idx   = 3;
+  repeated Tensor images     = 4;
+  Tensor          state      = 5;
+  Tensor          action     = 6;
+  bool            done       = 7;
+  float           reward     = 8;
+  Metadata        extra      = 9;
+}
+
+message EpisodeUploadResponse {
+  bool   success      = 1;
+  string dataset_id   = 2;
+  int32  episode_idx  = 3;
+  int64  total_frames = 4;
+  string message      = 5;
+}
+
+message TrainingRequest {
+  string model_type     = 1;
+  string dataset_id     = 2;
+  string config_yaml    = 3;  // full training config as YAML
+  string output_dir     = 4;  // checkpoint output directory on server
+  string resume_from    = 5;  // optional: resume checkpoint path
+  Metadata extra        = 6;
+}
+
+message TrainingJobResponse {
+  bool   success = 1;
+  string job_id  = 2;
+  string message = 3;
+}
+
+message TrainingStatusRequest {
+  string job_id = 1;
+}
+
+message TrainingStatusResponse {
+  string job_id       = 1;
+  string status       = 2;  // "queued"|"running"|"done"|"failed"|"stopped"
+  int32  epoch        = 3;
+  int32  total_epochs = 4;
+  float  loss         = 5;
+  string checkpoint   = 6;
+  float  elapsed_secs = 7;
+  string message      = 8;
+}
+
+message TrainingLog {
+  string job_id    = 1;
+  string level     = 2;  // "INFO" | "WARNING" | "ERROR"
+  string message   = 3;
+  float  timestamp = 4;
+}
+
+message ListJobsRequest {
+  string status_filter = 1;  // "" = all
+}
+
+message ListJobsResponse {
+  repeated TrainingStatusResponse jobs = 1;
+}
+
+// ────────────────────────────────────────────────────────────
+// 3. Generic Inference Service  (범용 JSON RPC — baseline 공용)
+// ────────────────────────────────────────────────────────────
+
+service GenericInferenceService {
+  // 단일 요청 / 단일 응답
+  rpc Infer       (GenericRequest)  returns (GenericResponse);
+  // 서버 → 클라이언트 스트리밍 (대용량 응답 / 점진적 결과)
+  rpc InferStream (GenericRequest)  returns (stream GenericResponse);
+}
+
+message GenericRequest {
+  // 어떤 핸들러를 쓸지 (e.g. "ambres", "knowno")
+  string handler_id   = 1;
+  // 핸들러 내 어떤 메서드를 호출할지 (e.g. "query", "respond", "reset")
+  string method       = 2;
+  // 모든 파라미터를 JSON 문자열로 직렬화해서 전달
+  string payload_json = 3;
+  // 이미지 등 바이너리 텐서 (JSON base64 인코딩 부하 회피)
+  repeated Tensor tensors = 4;
+  // 멀티턴 세션 관리용 ID (선택)
+  string session_id   = 5;
+}
+
+message GenericResponse {
+  bool   success      = 1;
+  // 결과를 JSON 문자열로 직렬화해서 반환
+  string payload_json = 2;
+  string error        = 3;
+  // 세션 ID 에코 (멀티턴용)
+  string session_id   = 4;
+}
+
+// ────────────────────────────────────────────────────────────
+// 4. Health Check
+// ────────────────────────────────────────────────────────────
+
+service HealthService {
+  rpc Ping (PingRequest) returns (PingResponse);
+}
+
+message PingRequest  { string client_id = 1; }
+message PingResponse {
+  bool   ok          = 1;
+  string server_id   = 2;
+  string gpu_info    = 3;
+  float  gpu_mem_gb  = 4;
+  float  timestamp   = 5;
+}

@@ -1,0 +1,38 @@
+# TD-MPC2 (Model-based RL) 학습 설정
+
+model_type: tdmpc2
+
+# MPC 설정
+mpc_horizon: 5
+n_samples: 512            # MPPI 샘플 수
+num_elites: 64
+temperature: 0.5
+iterations: 6             # CEM 이터레이션
+
+# 모델 하이퍼파라미터
+latent_dim: 512
+task_dim: 96              # multi-task embedding dim
+mlp_dim: 512
+enc_dim: 256
+
+# 학습 설정
+num_epochs: 500
+batch_size: 256
+lr: 3.0e-4
+grad_clip: 20.0
+tau: 0.01                 # target network soft update
+discount: 0.99
+use_amp: true
+
+# 데이터
+num_workers: 4
+buffer_capacity: 1000000
+save_every_epochs: 50
+log_every_steps: 100
+
+# 입력/출력 형상
+input_shapes:
+  observation.images.top:   [3, 480, 640]
+  observation.state:        [14]
+output_shapes:
+  action:                   [14]

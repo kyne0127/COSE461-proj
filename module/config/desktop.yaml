@@ -1,0 +1,70 @@
+# ============================================================
+# LeRobot Desktop Configuration (RTX 3060 데스크탑)
+# 로봇 연결 및 gRPC 클라이언트 설정
+# ============================================================
+
+# ──────────────────────────────────────────────────────────
+# gRPC 서버 접속 정보
+#
+# 연결 방식별 설정 예시:
+#
+# [A] SSH 터널 (권장)
+#   → python scripts/open_tunnel.py --pod-id <POD_ID> --ssh-port <PORT> 실행 후
+#   host: "localhost"
+#   port: 50051
+#
+# [B] RunPod TCP 포트 직접 노출
+#   → RunPod 대시보드 → Pod → Connect → TCP Port Mappings 에서 확인
+#   host: "abc123def456-50051.proxy.runpod.net"
+#   port: 15432   ← RunPod이 발급한 외부 포트
+#
+# [C] 로컬 네트워크 GPU 서버
+#   host: "192.168.1.100"
+#   port: 50051
+# ──────────────────────────────────────────────────────────
+grpc:
+  host: "localhost"        # SSH 터널 사용 시 localhost (권장)
+  port: 50051
+  use_tls: false
+  timeout_secs: 5.0        # 단일 inference RPC 타임아웃
+
+# 로봇 설정
+robot:
+  robot_type: "koch"      # koch | so100 | moss | lekiwi | aloha | koch_bimanual
+  fps: 30.0               # 제어 주파수
+  robot_config:           # lerobot 로봇 클래스 생성자 인자
+    leader_arms:
+      main:
+        port: "/dev/ttyUSB0"
+        baudrate: 1000000
+    follower_arms:
+      main:
+        port: "/dev/ttyUSB1"
+        baudrate: 1000000
+    cameras:
+      top:
+        camera_index: 0
+        fps: 30
+        width: 640
+        height: 480
+      wrist:
+        camera_index: 2
+        fps: 30
+        width: 640
+        height: 480
+
+# 데이터 수집 설정
+collection:
+  max_episode_steps: 500  # 에피소드당 최대 스텝 수
+  warmup_steps: 10        # 카메라 노출 안정화 대기 스텝
+  dataset_id: "my_dataset"  # 업로드할 데이터셋 ID
+
+# 추론 설정
+inference:
+  model_id: "run_001"     # 서버에 로드된 모델 ID
+  model_type: "act"       # act | diffusion | tdmpc2 | pi0 | custom
+
+# 로깅
+logging:
+  level: "INFO"
+  log_file: null          # null = stdout만

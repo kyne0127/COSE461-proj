@@ -1,0 +1,26 @@
+# ============================================================
+# LeRobot GPU Server Configuration
+# 서버(GPU 머신)에서 실행할 때 사용하는 설정파일
+# ============================================================
+
+server:
+  host: "0.0.0.0"      # 모든 인터페이스에서 수신 (방화벽으로 보안)
+  port: 50051
+  max_workers: 10       # gRPC 스레드풀 크기
+  train_workers: 2      # 동시 학습 잡 수
+
+# 데이터 / 체크포인트 경로 (서버 절대경로)
+data_root:        "/data/lerobot/datasets"
+checkpoint_root:  "/data/lerobot/checkpoints"
+log_dir:          "/data/lerobot/logs"
+
+# 로깅
+logging:
+  level: "INFO"           # DEBUG | INFO | WARNING | ERROR
+  log_file: "/data/lerobot/logs/server.log"
+
+# GPU 설정
+gpu:
+  device: "cuda"          # "cuda" | "cpu"
+  mixed_precision: true   # AMP 사용 여부
+  cudnn_benchmark: true   # 고정 입력 크기일 때 성능 향상

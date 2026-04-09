@@ -1,0 +1,32 @@
+# Pi0 / VLA (Vision-Language-Action) 학습 설정
+
+model_type: pi0
+
+# 모델 소스 (HuggingFace 또는 로컬 경로)
+model_id: "lerobot/pi0"         # HuggingFace model ID
+
+# 추론 설정
+action_horizon: 1               # 청크에서 실행할 스텝 수
+language_instruction: ""        # 기본 task instruction (비워두면 per-step 사용)
+
+# 파인튜닝 설정
+num_epochs: 50
+batch_size: 8                   # VLA는 배치 크기 작게
+lr: 1.0e-5
+weight_decay: 1.0e-5
+grad_clip: 1.0
+use_amp: true
+freeze_vision_encoder: true     # 비전 인코더 동결 (메모리 절약)
+
+# 데이터
+num_workers: 2
+save_every_epochs: 10
+log_every_steps: 20
+
+# 입력/출력 형상
+input_shapes:
+  observation.images.top:   [3, 224, 224]   # Pi0 기본 해상도
+  observation.images.wrist: [3, 224, 224]
+  observation.state:        [14]
+output_shapes:
+  action:                   [14]
