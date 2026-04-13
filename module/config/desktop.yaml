@@ -28,19 +28,26 @@ grpc:
   use_tls: false
   timeout_secs: 5.0        # 단일 inference RPC 타임아웃
 
-# 로봇 설정
+# 로봇 설정 (lerobot 0.5.x API 기준)
 robot:
-  robot_type: "koch"      # koch | so100 | moss | lekiwi | aloha | koch_bimanual
+  robot_type: "so101"     # so100 | so101
   fps: 30.0               # 제어 주파수
-  robot_config:           # lerobot 로봇 클래스 생성자 인자
-    leader_arms:
-      main:
-        port: "/dev/ttyUSB0"
-        baudrate: 1000000
+  robot_config:
+    # Follower arm (팔로워) 포트 매핑 (양팔)
+    # NOTE: 현재 RobotConnector 구현은 첫 번째 arm만 사용하므로
+    #       right를 먼저 배치해 우선 포트로 사용합니다.
     follower_arms:
-      main:
-        port: "/dev/ttyUSB1"
-        baudrate: 1000000
+      right:
+        port: "/dev/ttyACM3"
+      left:
+        port: "/dev/ttyACM2"
+    # Leader arm (리더, 텔레오퍼레이션용) 포트 매핑 (양팔)
+    leader_arms:
+      right:
+        port: "/dev/ttyACM1"
+      left:
+        port: "/dev/ttyACM0"
+    # 카메라 설정 (OpenCV)
     cameras:
       top:
         camera_index: 0

@@ -1,0 +1,3 @@
+[console_scripts]
+lerobot-desktop = scripts.run_desktop:main
+lerobot-server = module.server.grpc_server:main

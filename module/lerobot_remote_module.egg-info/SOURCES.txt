@@ -1,0 +1,7 @@
+pyproject.toml
+lerobot_remote_module.egg-info/PKG-INFO
+lerobot_remote_module.egg-info/SOURCES.txt
+lerobot_remote_module.egg-info/dependency_links.txt
+lerobot_remote_module.egg-info/entry_points.txt
+lerobot_remote_module.egg-info/requires.txt
+lerobot_remote_module.egg-info/top_level.txt
