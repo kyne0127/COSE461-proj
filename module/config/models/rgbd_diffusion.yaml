@@ -1,0 +1,46 @@
+# RGB-D Diffusion Policy 설정
+#
+# 이 모델은 RGB-D 입력을 지원합니다:
+#   Global: RGBD [4, H, W] from ZED Mini (RGB concat Depth in metres)
+#   Ego: USB RGB [3, H, W]
+#   State: Joint angles [6] (radians)
+#
+# Paper Type: RGB-D (Case B - concatenate RGB and depth on channel axis)
+
+model_type: rgbd_diffusion
+observation_type: rgbd
+
+# 모델 하이퍼파라미터
+obs_horizon: 2
+action_horizon: 8
+pred_horizon: 16
+num_inference_steps: 10    # DDIM 추론 스텝 수 (적을수록 빠름, 최소 1)
+num_train_timesteps: 100   # DDPM 학습 노이즈 스텝
+noise_scheduler: ddim      # ddim | ddpm
+
+# UNet 백본 (4-channel RGBD 입력 처리)
+down_dims: [256, 512, 1024]
+kernel_size: 5
+n_groups: 8
+
+# 학습 설정
+num_epochs: 200
+batch_size: 32
+lr: 1.0e-4
+weight_decay: 1.0e-6
+grad_clip: 1.0
+use_amp: true
+
+# 데이터
+num_workers: 4
+save_every_epochs: 20
+log_every_steps: 100
+
+# 입력/출력 형상
+input_shapes:
+  observation.images.zed_rgbd: [4, 360, 640]  # RGBD from ZED [H, W, 4] → [4, H, W]
+  observation.images.usb_rgb:  [3, 480, 640]  # USB wrist camera
+  observation.state:           [6]            # Joint angles (radians)
+
+output_shapes:
+  action: [6]  # Delta joint commands

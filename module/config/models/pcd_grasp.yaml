@@ -1,0 +1,51 @@
+# Configuration for PCD Grasping Model
+# ====================================
+# 3D Point Cloud-based 6D Object Grasping
+# Paper Type: PointCloud (Case C)
+
+model_type: pcd_grasp
+observation_type: pointcloud  # RGB-D with server-side depth→PCD conversion
+
+# Input specifications
+input_shapes:
+  pcd: [2048, 3]           # Sampled point cloud (xyz coordinates)
+  zed_rgb: [360, 640, 3]   # ZED Mini VGA resolution
+  zed_depth: [360, 640, 1] # Depth map (metres)
+  usb_rgb: [480, 640, 3]   # USB camera ego view (unused for this model)
+  state: [6]               # Joint angles (radians)
+
+# Output specification
+output_shapes:
+  action: [7]              # Grasp pose: position[3] + quaternion[4]
+  # Alternative: action: [6] for 6D rotation representation
+
+# Model hyperparameters
+num_points: 2048           # Number of points after FPS sampling
+use_rgb: true              # Whether to concatenate RGB features with PCD
+
+# Camera intrinsics (ZED Mini VGA 360p)
+# VGA resolution: 640×360
+camera_intrinsics:
+  fx: 350.0                # Focal length x
+  fy: 350.0                # Focal length y
+  cx: 336.0                # Principal point x
+  cy: 188.0                # Principal point y
+  depth_min: 0.3           # Min depth threshold (metres)
+  depth_max: 3.0           # Max depth threshold (metres)
+
+# Point Cloud processing
+pointcloud_processing:
+  fps_enabled: true        # Use Farthest Point Sampling
+  normalize: true          # Normalize PCD to unit sphere
+  outlier_removal: true    # Remove invalid depth points
+
+# Output type: pose_7 (position + quaternion), pose_6 (position + rot6d), action_6
+output_type: pose_7
+
+# Device and compute
+device: cuda               # cuda | cpu
+dtype: float32
+
+# Checkpoints
+checkpoint_dir: ./checkpoints/pcd_grasp/
+pretrained_model: null     # Path to pretrained PointNet++ weights (optional)

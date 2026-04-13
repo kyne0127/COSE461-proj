@@ -59,10 +59,26 @@ collection:
   warmup_steps: 10        # 카메라 노출 안정화 대기 스텝
   dataset_id: "my_dataset"  # 업로드할 데이터셋 ID
 
+# 센서 설정 (RGB-D 모델용)
+sensors:
+  zed_mini:
+    enabled: true
+    resolution: "VGA"        # HD720 | VGA (VGA=360p, 더 빠름)
+    fps: 30
+    depth_mode: "PERFORMANCE" # ULTRA | QUALITY | PERFORMANCE
+    depth_min_dist: 0.3      # metres
+    depth_max_dist: 3.0      # metres
+  usb_camera:
+    enabled: true
+    device_index: 0
+    fps: 30
+    width: 640
+    height: 480
+
 # 추론 설정
 inference:
   model_id: "run_001"     # 서버에 로드된 모델 ID
-  model_type: "act"       # act | diffusion | tdmpc2 | pi0 | custom
+  model_type: "rgbd_diffusion"  # act | diffusion | rgbd_diffusion | tdmpc2 | pi0 | custom
 
 # 로깅
 logging:
