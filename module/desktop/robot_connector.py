@@ -420,6 +420,7 @@ class RobotConnector:
     def _build_followers(self, ports: Dict[str, str]) -> Dict[str, Any]:
         """Build one SOFollower instance per follower arm."""
         followers: Dict[str, Any] = {}
+        multi_arm = len(ports) > 1
         for idx, (arm_name, port) in enumerate(ports.items()):
             # Attach shared cameras only to the first follower to avoid
             # opening identical camera devices multiple times.
@@ -427,11 +428,18 @@ class RobotConnector:
             followers[arm_name] = self._build_follower(
                 arm_name=arm_name,
                 port=port,
+                multi_arm=multi_arm,
                 include_cameras=include_cameras,
             )
         return followers
 
-    def _build_follower(self, arm_name: str, port: str, include_cameras: bool = False):
+    def _build_follower(
+        self,
+        arm_name: str,
+        port: str,
+        multi_arm: bool = False,
+        include_cameras: bool = False,
+    ):
         """Build lerobot 0.5.x SOFollower with optional camera config."""
         import importlib
         spec = self._spec
@@ -445,7 +453,8 @@ class RobotConnector:
         FollowerConfigCls = getattr(cfg_mod, spec["follower_config_class"])
 
         cameras = self._build_camera_configs() if include_cameras else {}
-        follower_id = f"{spec['robot_id']}_{arm_name}" if arm_name else spec["robot_id"]
+        # lerobot bi-arm calibration CLI stores per-arm files as dual_right/dual_left.
+        follower_id = f"dual_{arm_name}" if multi_arm else spec["robot_id"]
 
         # Instantiate config — only pass known fields
         try:
@@ -463,11 +472,16 @@ class RobotConnector:
     def _build_leaders(self, ports: Dict[str, str]) -> Dict[str, Any]:
         """Build one SOLeader instance per leader arm."""
         leaders: Dict[str, Any] = {}
+        multi_arm = len(ports) > 1
         for arm_name, port in ports.items():
-            leaders[arm_name] = self._build_leader(arm_name=arm_name, port=port)
+            leaders[arm_name] = self._build_leader(
+                arm_name=arm_name,
+                port=port,
+                multi_arm=multi_arm,
+            )
         return leaders
 
-    def _build_leader(self, arm_name: str, port: str):
+    def _build_leader(self, arm_name: str, port: str, multi_arm: bool = False):
         """Build lerobot 0.5.x SOLeader."""
         import importlib
         spec = self._spec
@@ -478,7 +492,8 @@ class RobotConnector:
         cfg_mod = importlib.import_module(spec["leader_config_module"])
         LeaderConfigCls = getattr(cfg_mod, spec["leader_config_class"])
 
-        teleop_id = f"{spec['teleop_id']}_{arm_name}" if arm_name else spec["teleop_id"]
+        # lerobot bi-arm calibration CLI stores per-arm files as dual_right/dual_left.
+        teleop_id = f"dual_{arm_name}" if multi_arm else spec["teleop_id"]
         try:
             cfg = LeaderConfigCls(port=port, id=teleop_id)
         except TypeError:

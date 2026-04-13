@@ -34,8 +34,6 @@ robot:
   fps: 30.0               # 제어 주파수
   robot_config:
     # Follower arm (팔로워) 포트 매핑 (양팔)
-    # NOTE: 현재 RobotConnector 구현은 첫 번째 arm만 사용하므로
-    #       right를 먼저 배치해 우선 포트로 사용합니다.
     follower_arms:
       right:
         port: "/dev/ttyACM3"
@@ -48,15 +46,17 @@ robot:
       left:
         port: "/dev/ttyACM0"
     # 카메라 설정 (OpenCV)
+    # - egoview 카메라 2대: 640x480
+    # - ZED-M은 global view로 sensors.zed_mini에서 사용
     cameras:
-      top:
+      egoview_right:
         camera_index: 0
-        fps: 30
+        fps: 60
         width: 640
         height: 480
-      wrist:
+      egoview_left:
         camera_index: 2
-        fps: 30
+        fps: 60
         width: 640
         height: 480
 
@@ -69,14 +69,14 @@ collection:
 # 센서 설정 (RGB-D 모델용)
 sensors:
   zed_mini:
-    enabled: true
+    enabled: true              # global view camera
     resolution: "VGA"        # HD720 | VGA (VGA=360p, 더 빠름)
     fps: 30
     depth_mode: "PERFORMANCE" # ULTRA | QUALITY | PERFORMANCE
     depth_min_dist: 0.3      # metres
     depth_max_dist: 3.0      # metres
   usb_camera:
-    enabled: true
+    enabled: true             # egoview camera (개별 인덱스는 robot_config.cameras 참고)
     device_index: 0
     fps: 30
     width: 640
