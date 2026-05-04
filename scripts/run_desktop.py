@@ -4,10 +4,11 @@ scripts/run_desktop.py
 =======================
 데스크탑(RTX 3060) 실행 스크립트.
 
-3가지 모드 지원:
+4가지 모드 지원:
   collect   — 텔레오퍼레이션으로 데이터 수집 → 서버에 업로드
   infer     — 서버 모델로 실시간 추론 → 로봇 자율 제어
-  upload    — 이미 수집된 로컬 에피소드를 서버에 업로드
+  pipeline  — VLM 전처리 핸들러 + 액션 모델 파이프라인 실행
+  train     — 서버에 학습 잡 트리거
 
 사용법:
     # 1. 데이터 수집 (10 에피소드)
@@ -16,12 +17,18 @@ scripts/run_desktop.py
         --n-episodes 10 \
         --task "pick up the red block"
 
-    # 2. 실시간 자율 제어
+    # 2. 실시간 자율 제어 (핸들러 없이 액션 모델 직접 호출)
     python scripts/run_desktop.py infer \
         --config module/config/desktop.yaml \
         --model-id run_001
 
-    # 3. 서버에 학습 트리거
+    # 3. VLM 핸들러 + 액션 모델 파이프라인 (AmbRes + Pi0 등)
+    python scripts/run_desktop.py pipeline \
+        --config module/config/desktop.yaml \
+        --pipeline-config module/config/pipelines/ambres_pi0.yaml \
+        --task "pick up the banana"
+
+    # 4. 서버에 학습 트리거
     python scripts/run_desktop.py train \
         --config module/config/desktop.yaml \
         --model-type act \
@@ -168,6 +175,65 @@ def run_infer(args, config: dict) -> None:
 
 
 # ────────────────────────────────────────────────────────────────────────────
+# pipeline mode
+# ────────────────────────────────────────────────────────────────────────────
+
+def run_pipeline(args, config: dict) -> None:
+    """
+    VLM 전처리 핸들러 + 액션 모델 파이프라인 실행.
+
+    파이프라인 설정(--pipeline-config)에 pre_handlers 목록과 action_model_id를
+    정의하면 코드 변경 없이 어떤 핸들러 조합이든 실행할 수 있습니다.
+
+    e.g. AmbRes(모호성 해소) → Pi0(액션 생성) → 로봇 제어
+    """
+    from module.desktop.pipeline import InferencePipeline, load_pipeline_config
+    from module.desktop.robot_connector import RobotConnector
+    from module.utils.logging import setup_logging
+
+    setup_logging(
+        level=config.get("logging", {}).get("level", "INFO"),
+        component="lerobot.pipeline",
+    )
+
+    robot_cfg    = config.get("robot", {})
+    grpc_cfg     = config.get("grpc", {})
+
+    pipeline_cfg = load_pipeline_config(args.pipeline_config)
+
+    # CLI 옵션으로 action_model_id / fps 오버라이드 가능
+    if args.model_id:
+        pipeline_cfg.action_model_id = args.model_id
+    if args.fps:
+        pipeline_cfg.fps = args.fps
+
+    print(f"[pipeline] action_model  : {pipeline_cfg.action_model_id}")
+    print(f"[pipeline] fps           : {pipeline_cfg.fps}")
+    print(f"[pipeline] pre_handlers  : "
+          f"{[s.handler_id for s in pipeline_cfg.pre_handlers]}")
+    print(f"[pipeline] task          : '{args.task}'")
+    if args.n_episodes:
+        print(f"[pipeline] n_episodes    : {args.n_episodes}")
+    else:
+        print("[pipeline] n_episodes    : ∞ (Ctrl+C to stop)")
+
+    connector = RobotConnector.from_config(robot_cfg)
+
+    with InferencePipeline(
+        pipeline_cfg=pipeline_cfg,
+        robot_connector=connector,
+        grpc_host=grpc_cfg.get("host", "localhost"),
+        grpc_port=grpc_cfg.get("port", 50051),
+        use_tls=grpc_cfg.get("use_tls", False),
+        timeout=grpc_cfg.get("timeout_secs", 60.0),
+    ) as pipe:
+        pipe.run(
+            task_text=args.task,
+            n_episodes=args.n_episodes,
+        )
+
+
+# ────────────────────────────────────────────────────────────────────────────
 # train trigger mode
 # ────────────────────────────────────────────────────────────────────────────
 
@@ -260,6 +326,21 @@ def main() -> None:
     p_infer = sub.add_parser("infer", help="Run autonomous inference")
     p_infer.add_argument("--model-id", default=None)
 
+    # pipeline
+    p_pipe = sub.add_parser(
+        "pipeline",
+        help="Run VLM pre-handler(s) + action model pipeline (e.g. AmbRes + Pi0)",
+    )
+    p_pipe.add_argument(
+        "--pipeline-config", required=True,
+        help="Path to pipeline YAML (e.g. module/config/pipelines/ambres_pi0.yaml)",
+    )
+    p_pipe.add_argument("--task",       default="", help="Default task description")
+    p_pipe.add_argument("--model-id",   default=None, help="Override action_model_id")
+    p_pipe.add_argument("--fps",        type=float, default=None, help="Override fps")
+    p_pipe.add_argument("--n-episodes", type=int,   default=None,
+                        help="Number of episodes to run (default: infinite)")
+
     # train
     p_train = sub.add_parser("train", help="Trigger server-side training")
     p_train.add_argument("--model-type",   required=True,
@@ -277,10 +358,11 @@ def main() -> None:
     config = load_config(args.config)
 
     dispatch = {
-        "collect": run_collect,
-        "infer":   run_infer,
-        "train":   run_train,
-        "status":  run_status,
+        "collect":  run_collect,
+        "infer":    run_infer,
+        "pipeline": run_pipeline,
+        "train":    run_train,
+        "status":   run_status,
     }
     dispatch[args.mode](args, config)
 

@@ -1,0 +1,25 @@
+# AmbRes - 로봇 작업 모호성 해소 VLM 핸들러 설정
+# 모델: Molmo-7B-D-0924 (+ 선택적 LoRA 파인튜닝 / SAM2)
+# 연결: GenericInferenceService (handler_id: "ambres")
+
+# ── 모델 타입 ─────────────────────────────────────────────────────────────────
+# "fs_prompt" : Few-shot 프롬프트 기반 (파인튜닝 없음, 즉시 실행 가능)
+# "finetune"  : LoRA 파인튜닝 체크포인트 로드 (adapter_ckpt 필수)
+model_type: fs_prompt
+
+# finetune 시 AmbRes ckpt 이름 (ambres/ckpt/<adapter_ckpt>/ 경로)
+# model_type: finetune 일 때만 사용됨
+# 실환경 체크포인트: 43qazb3XcrZF5rZWnjRPVm
+# 시뮬레이션 체크포인트: TtVVGPRoknCTELVSjH92xX
+adapter_ckpt: ""
+
+# ── 추론 옵션 ─────────────────────────────────────────────────────────────────
+# query/respond 단계에서 Molmo detect를 자동으로 수행할지 여부
+# True: 객체 검출 결과를 대화 기록에 포함 (정확도↑, 속도↓)
+# False: 필요 시 별도로 method="detect" 호출
+use_detection: false
+
+# SAM2 세그멘테이션 모듈 로드 여부
+# True: set_image_sam / query_mask 메서드 활성화
+# False: detect 좌표만 사용하는 경우 불필요 (메모리 절약)
+use_sam: false

@@ -24,3 +24,13 @@ gpu:
   device: "cuda"          # "cuda" | "cpu"
   mixed_precision: true   # AMP 사용 여부
   cudnn_benchmark: true   # 고정 입력 크기일 때 성능 향상
+
+# 서버 시작 시 자동으로 로드할 핸들러 목록
+# 비워두면 클라이언트가 load_handler()로 명시적 로드
+# Molmo 7B 로드에 약 10~20초 소요
+handlers:
+  - handler_id: ambres
+    config:
+      model_type: fs_prompt   # "fs_prompt" | "finetune"
+      use_detection: false
+      use_sam: false

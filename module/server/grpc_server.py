@@ -282,14 +282,16 @@ class LeRobotGRPCServer:
         data_root:   str  = "/data/lerobot",
         ckpt_root:   str  = "/checkpoints",
         train_workers: int = 2,
+        preload_handlers: list = None,
     ) -> None:
-        self._host         = host
-        self._port         = port
-        self._max_workers  = max_workers
-        self._data_root    = data_root
-        self._ckpt_root    = ckpt_root
-        self._train_workers = train_workers
-        self._server       = None
+        self._host             = host
+        self._port             = port
+        self._max_workers      = max_workers
+        self._data_root        = data_root
+        self._ckpt_root        = ckpt_root
+        self._train_workers    = train_workers
+        self._preload_handlers = preload_handlers or []
+        self._server           = None
 
     @classmethod
     def from_config(cls, config: Dict[str, Any]) -> "LeRobotGRPCServer":
@@ -301,6 +303,7 @@ class LeRobotGRPCServer:
             data_root=config.get("data_root", "/data/lerobot"),
             ckpt_root=config.get("checkpoint_root", "/checkpoints"),
             train_workers=srv.get("train_workers", 2),
+            preload_handlers=config.get("handlers", []),
         )
 
     def start(self) -> None:
@@ -336,6 +339,19 @@ class LeRobotGRPCServer:
         pb2_grpc.add_TrainingServiceServicer_to_server(TrainingCls(), self._server)
         pb2_grpc.add_GenericInferenceServiceServicer_to_server(GenericCls(), self._server)
         pb2_grpc.add_HealthServiceServicer_to_server(HealthCls(), self._server)
+
+        # ── 서버 시작 전 핸들러 프리로드 ────────────────────────────────────
+        for h in self._preload_handlers:
+            handler_id = h.get("handler_id", "")
+            h_config   = h.get("config", {})
+            if not handler_id:
+                continue
+            logger.info("Pre-loading handler '%s' ...", handler_id)
+            result = generic_svc.load_handler(handler_id, config=h_config)
+            if result["success"]:
+                logger.info("Handler '%s' loaded: %s", handler_id, result["message"])
+            else:
+                logger.error("Handler '%s' failed to load: %s", handler_id, result["message"])
 
         address = f"{self._host}:{self._port}"
         self._server.add_insecure_port(address)

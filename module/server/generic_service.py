@@ -111,9 +111,23 @@ class GenericServicer:
         """
         단일 요청 처리.
 
+        method="__load__" 는 예약어: 핸들러를 store에 로드/재초기화합니다.
+        payload_json에 핸들러 config dict를 담아 보내면 됩니다.
+
         Returns:
             {"success": bool, "payload_json": str, "error": str, "session_id": str}
         """
+        # ── 핸들러 로드 요청 (__load__ 예약 메서드) ───────────────────────
+        if method == "__load__":
+            config = json.loads(payload_json) if payload_json else {}
+            result = self.load_handler(handler_id, config=config)
+            return {
+                "success":      result["success"],
+                "payload_json": json.dumps(result, ensure_ascii=False),
+                "error":        result.get("message", "") if not result["success"] else "",
+                "session_id":   session_id,
+            }
+
         try:
             handler = self._store.get(handler_id)
             payload = json.loads(payload_json) if payload_json else {}

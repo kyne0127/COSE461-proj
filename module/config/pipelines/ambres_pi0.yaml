@@ -1,0 +1,34 @@
+# AmbRes + Pi0 파이프라인 설정
+#
+# 실행 흐름:
+#   에피소드 시작 시:
+#     1. AmbRes가 카메라 이미지 + task_description을 보고
+#        모호성 여부 판단 + 객체 추출
+#     2. 모호하면 사용자에게 명확화 질문 → 답변으로 재추론
+#     3. 확정된 task_text를 Pi0에 전달
+#   액션 루프 (30 Hz):
+#     4. Pi0가 카메라 + task_text → 로봇 액션 생성
+
+# 서버에 로드된 액션 모델 ID (InferenceClient.load_model 시 지정한 이름)
+action_model_id: pi0_main
+fps: 30.0
+
+pre_handlers:
+  - handler_id: ambres
+    method: query
+    trigger: episode_start    # 에피소드 시작 시 1회 실행
+
+    # context["task_text"] → payload["task_description"] 으로 전달
+    input_map:
+      task_text: task_description
+
+    # result["task_objects"] → context["task_text"] 로 저장
+    # ["banana", "middle drawer"] → "banana middle drawer"
+    output_map:
+      task_objects: task_text
+    output_transform: join_list
+
+    # result["task_ambiguous"] == True 이면 사용자 입력 후 respond 호출
+    clarify_on: task_ambiguous
+    clarify_prompt_key: clarifying_question
+    clarify_method: respond
