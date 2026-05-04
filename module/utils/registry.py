@@ -39,6 +39,7 @@ _BUILTIN_MODELS: Dict[str, str] = {
     "tdmpc2":    "module.models.tdmpc2.model.TDMPC2Model",
     "pi0":       "module.models.pi0.model.Pi0Model",
     "custom":    "module.models.custom.model.CustomModel",
+    "camera_probe": "module.models.camera_probe.model.CameraProbeModel",
     "pcd_grasp": "module.models.pcd_grasp.model.PCDGraspModel",
 }
 

@@ -26,9 +26,37 @@ import subprocess
 import sys
 import time
 from datetime import datetime
+from pathlib import Path
 from typing import Optional
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+DEFAULT_ENV_FILE = ".env.runpod"
+
+
+def load_env_file(env_path: str) -> dict[str, str]:
+    """Load key=value pairs from a simple .env file."""
+    env: dict[str, str] = {}
+    path = Path(env_path)
+    if not path.exists():
+        return env
+    for line in path.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if "=" in line:
+            k, _, v = line.partition("=")
+            env[k.strip()] = v.strip().strip('"').strip("'")
+    return env
+
+
+def resolve_env_file(explicit_env: Optional[str]) -> Optional[str]:
+    if explicit_env:
+        return explicit_env
+    default_env = Path.cwd() / DEFAULT_ENV_FILE
+    if default_env.exists():
+        return str(default_env)
+    return None
 
 
 # ────────────────────────────────────────────────────────────────────────────
@@ -224,6 +252,8 @@ def main() -> None:
     parser.add_argument("--host",     default=None, help="gRPC 서버 호스트")
     parser.add_argument("--port",     type=int, default=None, help="gRPC 포트")
     parser.add_argument("--config",   default="module/config/desktop.yaml")
+    parser.add_argument("--env",      default=None,
+                        help=".env 파일 경로 (기본: .env.runpod 자동 탐색)")
     parser.add_argument("--watch",    action="store_true", help="주기적 모니터링")
     parser.add_argument("--interval", type=float, default=10.0,
                         help="모니터링 주기(초), --watch 시 사용")
@@ -232,6 +262,20 @@ def main() -> None:
     # config에서 host/port 읽기 (인자 우선)
     host = args.host
     port = args.port
+
+    # .env에서 direct endpoint 기본값 로드 (인자 우선)
+    env_path = resolve_env_file(args.env)
+    env: dict[str, str] = {}
+    if env_path:
+        env = load_env_file(env_path)
+        if host is None and env.get("RUNPOD_GRPC_HOST"):
+            host = env["RUNPOD_GRPC_HOST"]
+        if port is None and env.get("RUNPOD_GRPC_PORT"):
+            try:
+                port = int(env["RUNPOD_GRPC_PORT"])
+            except ValueError:
+                pass
+
     if host is None or port is None:
         try:
             import yaml

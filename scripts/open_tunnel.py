@@ -43,10 +43,26 @@ from pathlib import Path
 # ────────────────────────────────────────────────────────────────────────────
 
 RUNPOD_SSH_HOST_FORMAT = "{pod_id}.ssh.runpod.net"
+DEFAULT_ENV_FILE = ".env.runpod"
+
+
+def resolve_default_ssh_key() -> str:
+    """Pick a sensible default key path if the user did not pass --key."""
+    home = Path.home()
+    candidates = [
+        home / ".ssh" / "id_ed25519",
+        home / ".ssh" / "id_rsa",
+    ]
+    for path in candidates:
+        if path.exists():
+            return str(path)
+    # Keep legacy default if no key exists yet.
+    return str(home / ".ssh" / "id_rsa")
 
 
 def build_ssh_command(
     pod_id:        str,
+    ssh_host:      str,
     ssh_port:      int,
     local_port:    int  = 50051,
     remote_port:   int  = 50051,
@@ -57,7 +73,7 @@ def build_ssh_command(
     SSH 포트 포워딩 커맨드 생성.
     -L local_port:localhost:remote_port 형태로 터널 설정.
     """
-    host = RUNPOD_SSH_HOST_FORMAT.format(pod_id=pod_id)
+    host = ssh_host or RUNPOD_SSH_HOST_FORMAT.format(pod_id=pod_id)
 
     cmd = [
         "ssh",
@@ -98,6 +114,16 @@ def load_env_file(env_path: str) -> dict[str, str]:
             k, _, v = line.partition("=")
             env[k.strip()] = v.strip().strip('"').strip("'")
     return env
+
+
+def resolve_env_file(explicit_env: str | None) -> str | None:
+    """Choose explicit env path first; otherwise use .env.runpod if present."""
+    if explicit_env:
+        return explicit_env
+    default_env = Path.cwd() / DEFAULT_ENV_FILE
+    if default_env.exists():
+        return str(default_env)
+    return None
 
 
 # ────────────────────────────────────────────────────────────────────────────
@@ -231,16 +257,18 @@ Examples:
     )
 
     parser.add_argument("--pod-id",       default=os.environ.get("RUNPOD_POD_ID", ""))
+    parser.add_argument("--ssh-host",     default=os.environ.get("RUNPOD_SSH_HOST", ""),
+                        help="직접 SSH 호스트/IP (예: 38.147.83.26)")
     parser.add_argument("--ssh-port",     type=int,
                         default=int(os.environ.get("RUNPOD_SSH_PORT", "22")))
     parser.add_argument("--local-port",   type=int, default=50051,
                         help="로컬 gRPC 포트 (기본: 50051)")
     parser.add_argument("--remote-port",  type=int, default=50051,
                         help="서버 gRPC 포트 (기본: 50051)")
-    parser.add_argument("--key",          default=os.path.expanduser("~/.ssh/id_rsa"),
+    parser.add_argument("--key",          default=os.environ.get("RUNPOD_SSH_KEY", resolve_default_ssh_key()),
                         help="SSH 개인키 경로")
     parser.add_argument("--env",          default=None,
-                        help=".env 파일 경로 (RUNPOD_POD_ID, RUNPOD_SSH_PORT 로드)")
+                        help=".env 파일 경로 (RUNPOD_SSH_HOST/POD_ID/SSH_PORT/SSH_KEY 로드)")
     parser.add_argument("--extra-tunnels", nargs="*", default=[],
                         metavar="LOCAL:REMOTE",
                         help="추가 포트 포워딩 (예: 6006:6006 8888:8888)")
@@ -256,18 +284,23 @@ Examples:
 
     args = parser.parse_args()
 
-    # .env 파일 로드
-    if args.env:
-        env = load_env_file(args.env)
+    # .env 파일 자동 로드 (.env.runpod)
+    env_path = resolve_env_file(args.env)
+    if env_path:
+        env = load_env_file(env_path)
         if not args.pod_id and "RUNPOD_POD_ID" in env:
             args.pod_id = env["RUNPOD_POD_ID"]
+        if not args.ssh_host and "RUNPOD_SSH_HOST" in env:
+            args.ssh_host = env["RUNPOD_SSH_HOST"]
         if args.ssh_port == 22 and "RUNPOD_SSH_PORT" in env:
             args.ssh_port = int(env["RUNPOD_SSH_PORT"])
+        if "RUNPOD_SSH_KEY" in env and args.key == os.environ.get("RUNPOD_SSH_KEY", resolve_default_ssh_key()):
+            args.key = env["RUNPOD_SSH_KEY"]
 
     # 필수값 체크
-    if not args.pod_id:
-        print("[tunnel] ERROR: --pod-id 또는 RUNPOD_POD_ID 환경변수가 필요합니다.")
-        print("[tunnel] RunPod 대시보드 → Pod → Connect → SSH over exposed TCP에서 확인")
+    if not args.pod_id and not args.ssh_host:
+        print("[tunnel] ERROR: --pod-id/RUNPOD_POD_ID 또는 --ssh-host/RUNPOD_SSH_HOST 가 필요합니다.")
+        print("[tunnel] 예: RUNPOD_SSH_HOST=38.147.83.26")
         sys.exit(1)
 
     # 추가 터널 파싱 (LOCAL:REMOTE → (int, int))
@@ -280,7 +313,7 @@ Examples:
             print(f"[tunnel] WARNING: Invalid tunnel format '{t}', skipping")
 
     # 정보 출력
-    host = RUNPOD_SSH_HOST_FORMAT.format(pod_id=args.pod_id)
+    host = args.ssh_host or RUNPOD_SSH_HOST_FORMAT.format(pod_id=args.pod_id)
     print("=" * 60)
     print("  LeRobot RunPod SSH Tunnel")
     print("=" * 60)
@@ -290,10 +323,13 @@ Examples:
     for lp, rp in extra_tunnels:
         print(f"  Extra      : localhost:{lp} → server:{rp}")
     print(f"  Reconnect  : {'ON' if args.auto_reconnect and not args.no_reconnect else 'OFF'}")
+    if env_path:
+        print(f"  Env File   : {env_path}")
     print("=" * 60)
 
     cmd = build_ssh_command(
         pod_id=args.pod_id,
+        ssh_host=args.ssh_host,
         ssh_port=args.ssh_port,
         local_port=args.local_port,
         remote_port=args.remote_port,

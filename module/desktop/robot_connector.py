@@ -149,6 +149,7 @@ class RobotConnector:
     def connect(self, calibrate: bool = True) -> None:
         """Initialize and connect follower + leader arms to hardware."""
         logger.info("Connecting to robot type='%s'", self._robot_type)
+        allow_partial_followers = bool(self._robot_config.get("allow_partial_followers", False))
         follower_ports = self._get_follower_ports()
         leader_ports = self._get_leader_ports()
 
@@ -168,14 +169,22 @@ class RobotConnector:
                 logger.info("Follower arm '%s' connected", arm_name)
             except Exception as e:
                 logger.error("Failed to connect follower '%s': %s", arm_name, e)
-                for n in connected_followers:
-                    try:
-                        self._followers[n].disconnect()
-                    except Exception:
-                        pass
-                self._followers = {}
-                self._leaders = {}
-                raise
+                if not allow_partial_followers:
+                    for n in connected_followers:
+                        try:
+                            self._followers[n].disconnect()
+                        except Exception:
+                            pass
+                    self._followers = {}
+                    self._leaders = {}
+                    raise
+
+        if not connected_followers:
+            raise RuntimeError("No follower arm connected")
+
+        # Keep only connected followers if partial mode is enabled.
+        self._followers = {n: self._followers[n] for n in connected_followers}
+        self._follower_order = connected_followers
 
         for arm_name in self._leader_order:
             leader = self._leaders[arm_name]
@@ -221,8 +230,8 @@ class RobotConnector:
         self._connected = False
 
     @contextmanager
-    def session(self) -> Generator[None, None, None]:
-        self.connect()
+    def session(self, calibrate: bool = True) -> Generator[None, None, None]:
+        self.connect(calibrate=calibrate)
         try:
             yield
         finally:

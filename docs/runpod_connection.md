@@ -99,12 +99,10 @@ export RUNPOD_POD_ID="abc123def456"
 export RUNPOD_SSH_PORT="22042"
 python scripts/open_tunnel.py
 
-# 방법 2 — .env 파일 사용
-cat > .env.runpod << EOF
-RUNPOD_POD_ID=abc123def456
-RUNPOD_SSH_PORT=22042
-EOF
-python scripts/open_tunnel.py --env .env.runpod
+# 방법 2 — .env 파일 사용 (권장)
+cp .env.runpod.example .env.runpod
+# .env.runpod 값 수정 후 실행
+python scripts/open_tunnel.py
 
 # 방법 3 — 직접 인자
 python scripts/open_tunnel.py \
@@ -122,6 +120,18 @@ python scripts/open_tunnel.py \
     --pod-id abc123def456 \
     --ssh-port 22042 \
     --auto-reconnect
+```
+
+`.env.runpod` 주요 변수:
+```bash
+RUNPOD_SSH_HOST=38.147.83.26   # IP/도메인 직접 지정 (권장)
+# RUNPOD_POD_ID=abc123def456   # 또는 Pod ID 방식 사용
+RUNPOD_SSH_PORT=22042
+RUNPOD_SSH_KEY=~/.ssh/id_ed25519
+
+# (선택) RunPod 직접 TCP endpoint 사용 시
+# RUNPOD_GRPC_HOST=abc123def456-50051.proxy.runpod.net
+# RUNPOD_GRPC_PORT=15432
 ```
 
 터널이 성공적으로 열리면:

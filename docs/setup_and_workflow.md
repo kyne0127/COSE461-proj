@@ -249,10 +249,27 @@ python scripts/run_server.py \
 
 SSH 터널 연결 (데스크탑에서):
 ```bash
-python scripts/open_tunnel.py \
-    --pod-id $RUNPOD_POD_ID \
-    --ssh-port $RUNPOD_SSH_PORT
+cp .env.runpod.example .env.runpod
+# .env.runpod 값 수정
+python scripts/open_tunnel.py
 ```
+
+원커맨드 자동 실행 (터널 확인/생성 + 헬스체크 + 데스크탑 실행):
+```bash
+python scripts/run_desktop_with_tunnel.py \
+  infer --model-id run_001
+```
+
+`.env.runpod` 예시:
+```bash
+RUNPOD_SSH_HOST=38.147.83.26
+# RUNPOD_POD_ID=abc123def456  # Pod ID 방식 사용 시
+RUNPOD_SSH_PORT=46442
+```
+
+참고:
+- `run_desktop_with_tunnel.py`는 `localhost:50051`이 이미 열려 있으면 기존 터널을 재사용합니다.
+- 기본 SSH 키는 `~/.ssh/id_ed25519` 우선, 없으면 `~/.ssh/id_rsa`를 사용합니다.
 
 `desktop.yaml`에서 서버 주소 설정:
 ```yaml

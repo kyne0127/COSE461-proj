@@ -61,17 +61,54 @@ class ACTModel(BaseLeRobotModel):
 
         try:
             import torch
-            from lerobot.common.policies.act.modeling_act import ACTPolicy
-            from lerobot.common.policies.act.configuration_act import ACTConfig
+            try:
+                # lerobot >= 0.5.x
+                from lerobot.policies.act.modeling_act import ACTPolicy
+                from lerobot.policies.act.configuration_act import ACTConfig
+            except ImportError:
+                # Backward compatibility for older layouts
+                from lerobot.common.policies.act.modeling_act import ACTPolicy
+                from lerobot.common.policies.act.configuration_act import ACTConfig
+            from lerobot.configs.types import FeatureType, PolicyFeature
+
+            def _to_policy_feature_map(obj):
+                if not isinstance(obj, dict):
+                    return obj
+                out = {}
+                for k, v in obj.items():
+                    if isinstance(v, PolicyFeature):
+                        out[k] = v
+                        continue
+                    if isinstance(v, dict) and "type" in v and "shape" in v:
+                        ftype = v["type"]
+                        if isinstance(ftype, str):
+                            ftype = FeatureType[ftype]
+                        out[k] = PolicyFeature(type=ftype, shape=tuple(v["shape"]))
+                    else:
+                        out[k] = v
+                return out
 
             cfg_path = checkpoint_path / "config.json"
             if cfg_path.exists():
-                act_cfg = ACTConfig.from_pretrained(str(checkpoint_path))
+                import json
+
+                with open(cfg_path) as f:
+                    raw_cfg = json.load(f)
+
+                # Remove metadata keys not accepted by ACTConfig dataclass.
+                valid_keys = set(ACTConfig.__dataclass_fields__.keys())
+                cfg_dict = {k: v for k, v in raw_cfg.items() if k in valid_keys}
+                cfg_dict["input_features"] = _to_policy_feature_map(cfg_dict.get("input_features"))
+                cfg_dict["output_features"] = _to_policy_feature_map(cfg_dict.get("output_features"))
+                act_cfg = ACTConfig(**cfg_dict)
             else:
-                act_cfg = ACTConfig(**{
+                cfg_dict = {
                     k: v for k, v in self.config.items()
                     if k in ACTConfig.__dataclass_fields__
-                })
+                }
+                cfg_dict["input_features"] = _to_policy_feature_map(cfg_dict.get("input_features"))
+                cfg_dict["output_features"] = _to_policy_feature_map(cfg_dict.get("output_features"))
+                act_cfg = ACTConfig(**cfg_dict)
 
             self._policy = ACTPolicy(act_cfg)
             weights_path = checkpoint_path / "model.safetensors"
@@ -79,7 +116,11 @@ class ACTModel(BaseLeRobotModel):
                 weights_path = checkpoint_path / "pytorch_model.bin"
 
             if weights_path.exists():
-                state_dict = torch.load(weights_path, map_location=self._device)
+                if weights_path.suffix == ".safetensors":
+                    from safetensors.torch import load_file
+                    state_dict = load_file(str(weights_path), device=str(self._device))
+                else:
+                    state_dict = torch.load(weights_path, map_location=self._device)
                 self._policy.load_state_dict(state_dict, strict=False)
             else:
                 self.logger.warning(
@@ -115,8 +156,9 @@ class ACTModel(BaseLeRobotModel):
         if self._policy is None:
             raise RuntimeError("Model not loaded. Call load_checkpoint() first.")
 
-        # Re-fill buffer when exhausted
-        if self._action_buf is None or self._buf_idx >= self._chunk_size:
+        # Re-fill buffer when exhausted. Some ACT checkpoints can return
+        # shorter chunks than configured chunk_size.
+        if self._action_buf is None or self._buf_idx >= len(self._action_buf):
             self._action_buf = self._run_policy(observation)
             self._buf_idx    = 0
 
@@ -134,7 +176,10 @@ class ACTModel(BaseLeRobotModel):
             with autocast(enabled=self._use_amp):
                 actions = self._policy.select_action(batch)  # (1, chunk, action_dim)
 
-        return actions.squeeze(0).cpu().numpy().astype(np.float32)
+        arr = actions.squeeze(0).cpu().numpy().astype(np.float32)
+        if arr.ndim == 1:
+            arr = arr[None, :]
+        return arr
 
     def _obs_to_batch(self, obs: Observation) -> Dict[str, Any]:
         """Convert Observation → policy-ready batch dict."""
