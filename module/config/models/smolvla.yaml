@@ -1,0 +1,12 @@
+# SmolVLA compact VLA model configuration
+# Target hardware: desktop GPU (RTX 3060 / 8 GB VRAM)
+
+model_id: "lerobot/smolvla"   # HuggingFace checkpoint
+device: cuda
+precision: bfloat16            # ~2x VRAM savings vs float32
+action_horizon: 1              # single-step execution from each chunk
+use_amp: true
+
+# Fine-tuning params (only used if train_step() is called)
+lr: 1e-4
+weight_decay: 1e-5

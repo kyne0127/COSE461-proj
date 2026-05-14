@@ -90,12 +90,18 @@ class PipelineConfig:
     전체 파이프라인 설정.
 
     Attributes:
-        action_model_id    : 서버에 로드된 액션 모델 ID
-        fps                : 제어 루프 주기
-        max_episode_steps  : 에피소드 당 최대 스텝 수 (0이면 무제한)
-        pre_handlers       : 액션 루프 전에 실행되는 핸들러 단계 목록
+        action_model_id       : 서버에 로드된 액션 모델 ID (서버 모드일 때 사용)
+        local_model_type      : 로컬 모델 타입 키 (e.g. "smolvla"). 설정 시 서버 InferenceClient 미사용.
+        local_model_checkpoint: 로컬 모델 체크포인트 경로 (빈 문자열이면 HF에서 다운로드)
+        local_model_config    : 로컬 모델 설정 dict (ModelRegistry.build에 전달)
+        fps                   : 제어 루프 주기
+        max_episode_steps     : 에피소드 당 최대 스텝 수 (0이면 무제한)
+        pre_handlers          : 액션 루프 전에 실행되는 핸들러 단계 목록
     """
-    action_model_id: str
+    action_model_id: str = ""
+    local_model_type: str = ""
+    local_model_checkpoint: str = ""
+    local_model_config: Dict[str, Any] = field(default_factory=dict)
     fps: float = 30.0
     max_episode_steps: int = 500
     pre_handlers: List[HandlerStepConfig] = field(default_factory=list)
@@ -122,7 +128,10 @@ def load_pipeline_config(path: str) -> PipelineConfig:
         ))
 
     return PipelineConfig(
-        action_model_id=raw["action_model_id"],
+        action_model_id=raw.get("action_model_id", ""),
+        local_model_type=raw.get("local_model_type", ""),
+        local_model_checkpoint=raw.get("local_model_checkpoint", ""),
+        local_model_config=raw.get("local_model_config", {}),
         fps=float(raw.get("fps", 30.0)),
         max_episode_steps=int(raw.get("max_episode_steps", 500)),
         pre_handlers=steps,
@@ -164,8 +173,9 @@ class InferencePipeline:
         self._use_tls   = use_tls
         self._timeout   = timeout
 
-        self._generic   = None   # GenericClient
-        self._infer     = None   # InferenceClient (grpc_client.py)
+        self._generic      = None   # GenericClient
+        self._infer        = None   # InferenceClient (grpc_client.py)
+        self._local_model  = None   # BaseLeRobotModel (local, e.g. SmolVLA)
 
         self._episode_start_steps = [
             s for s in pipeline_cfg.pre_handlers if s.trigger == "episode_start"
@@ -180,7 +190,6 @@ class InferencePipeline:
 
     def connect(self) -> None:
         from module.desktop.generic_client import GenericClient
-        from module.desktop.grpc_client import InferenceClient
 
         self._generic = GenericClient(
             host=self._host, port=self._port,
@@ -188,12 +197,26 @@ class InferencePipeline:
         )
         self._generic.connect()
 
-        self._infer = InferenceClient(
-            host=self._host, port=self._port,
-            use_tls=self._use_tls,
-        )
-        self._infer.connect()
-        logger.info("Pipeline connected to %s:%d", self._host, self._port)
+        if self._cfg.local_model_type:
+            from module.utils.registry import ModelRegistry
+            self._local_model = ModelRegistry.build(
+                self._cfg.local_model_type,
+                self._cfg.local_model_config,
+            )
+            self._local_model.load_checkpoint(self._cfg.local_model_checkpoint or "")
+            logger.info(
+                "Local model '%s' loaded on device=%s",
+                self._cfg.local_model_type,
+                self._cfg.local_model_config.get("device", "cuda"),
+            )
+        else:
+            from module.desktop.grpc_client import InferenceClient
+            self._infer = InferenceClient(
+                host=self._host, port=self._port,
+                use_tls=self._use_tls,
+            )
+            self._infer.connect()
+            logger.info("Pipeline connected to %s:%d (server inference)", self._host, self._port)
 
     def disconnect(self) -> None:
         if self._generic:
@@ -236,7 +259,10 @@ class InferencePipeline:
 
                     logger.info("=== Episode %d  session=%s ===", ep, session_id)
 
-                    # ── episode_start 핸들러 ──────────────────────────────
+                    # ── episode_start: 모델 리셋 + 핸들러 실행 ───────────
+                    if self._local_model is not None:
+                        self._local_model.reset()
+
                     obs = self._robot.get_observation()
                     for step in self._episode_start_steps:
                         self._run_step(step, obs, context, session_id)
@@ -252,15 +278,27 @@ class InferencePipeline:
                         for s in self._every_step_steps:
                             self._run_step(s, obs, context, session_id)
 
-                        # 액션 추론
-                        action = self._infer.get_action(
-                            model_id=self._cfg.action_model_id,
-                            images=obs.images,
-                            state=obs.state,
-                            task_text=context.get("task_text", ""),
-                            episode_id=ep,
-                            step=step_idx,
-                        )
+                        # 액션 추론 (로컬 모델 or 서버 모델)
+                        task_text = context.get("task_text", "")
+                        if self._local_model is not None:
+                            from module.models.base_model import Observation as ModelObs
+                            obs_obj = ModelObs(
+                                images=obs.images,
+                                state=obs.state,
+                                task_text=task_text,
+                                episode_id=ep,
+                                step=step_idx,
+                            )
+                            action = self._local_model.predict_action(obs_obj)
+                        else:
+                            action = self._infer.get_action(
+                                model_id=self._cfg.action_model_id,
+                                images=obs.images,
+                                state=obs.state,
+                                task_text=task_text,
+                                episode_id=ep,
+                                step=step_idx,
+                            )
                         self._robot.send_action(action)
 
                         elapsed = time.perf_counter() - t0

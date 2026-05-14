@@ -34,13 +34,14 @@ logger = logging.getLogger(__name__)
 # Built-in model locations (model_type → dotted import path)
 # ────────────────────────────────────────────────────────────────────────────
 _BUILTIN_MODELS: Dict[str, str] = {
-    "act":       "module.models.act.model.ACTModel",
-    "diffusion": "module.models.diffusion.model.DiffusionPolicyModel",
-    "tdmpc2":    "module.models.tdmpc2.model.TDMPC2Model",
-    "pi0":       "module.models.pi0.model.Pi0Model",
-    "custom":    "module.models.custom.model.CustomModel",
+    "act":        "module.models.act.model.ACTModel",
+    "diffusion":  "module.models.diffusion.model.DiffusionPolicyModel",
+    "tdmpc2":     "module.models.tdmpc2.model.TDMPC2Model",
+    "pi0":        "module.models.pi0.model.Pi0Model",
+    "smolvla":    "module.models.smolvla.model.SmolVLAModel",
+    "custom":     "module.models.custom.model.CustomModel",
     "camera_probe": "module.models.camera_probe.model.CameraProbeModel",
-    "pcd_grasp": "module.models.pcd_grasp.model.PCDGraspModel",
+    "pcd_grasp":  "module.models.pcd_grasp.model.PCDGraspModel",
 }
 
 

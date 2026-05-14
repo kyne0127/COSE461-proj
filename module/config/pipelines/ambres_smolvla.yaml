@@ -1,0 +1,46 @@
+# AmbRes (server) + SmolVLA (local desktop) pipeline
+#
+# Execution flow:
+#   Episode start:
+#     1. AmbRes (Molmo, GPU server) receives image + task_description
+#        → detects task objects + ambiguity flag
+#     2. If task_ambiguous == True: ask user → AmbRes.respond() → updated task_text
+#     3. Finalized task_text passed to SmolVLA
+#   Action loop (30 Hz, desktop):
+#     4. SmolVLA runs locally: image + state + task_text → robot action
+#
+# SmolVLA runs locally to keep the action loop low-latency.
+# Network latency only affects the one-shot ambiguity resolution at episode start.
+
+# Local action model (runs on desktop GPU, not via gRPC)
+local_model_type: smolvla
+local_model_checkpoint: ""        # empty = download from HF (lerobot/smolvla)
+local_model_config:
+  model_id: "lerobot/smolvla"
+  device: cuda
+  precision: bfloat16
+  action_horizon: 1
+  use_amp: true
+
+fps: 30.0
+max_episode_steps: 500            # 30 Hz × 500 ≈ 16 s
+
+pre_handlers:
+  - handler_id: ambres
+    method: query
+    trigger: episode_start        # runs once at episode start
+
+    # context["task_text"] → payload["task_description"]
+    input_map:
+      task_text: task_description
+
+    # result["task_objects"] → context["task_text"]
+    # e.g. ["banana", "middle drawer"] → "banana middle drawer"
+    output_map:
+      task_objects: task_text
+    output_transform: join_list
+
+    # if result["task_ambiguous"] == True → ask user → call respond()
+    clarify_on: task_ambiguous
+    clarify_prompt_key: clarifying_question
+    clarify_method: respond

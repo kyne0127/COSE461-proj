@@ -207,7 +207,11 @@ def run_pipeline(args, config: dict) -> None:
     if args.fps:
         pipeline_cfg.fps = args.fps
 
-    print(f"[pipeline] action_model  : {pipeline_cfg.action_model_id}")
+    if pipeline_cfg.local_model_type:
+        print(f"[pipeline] action_model  : {pipeline_cfg.local_model_type} (local)")
+        print(f"[pipeline] checkpoint    : {pipeline_cfg.local_model_checkpoint or '(HuggingFace)'}")
+    else:
+        print(f"[pipeline] action_model  : {pipeline_cfg.action_model_id} (server)")
     print(f"[pipeline] fps           : {pipeline_cfg.fps}")
     print(f"[pipeline] pre_handlers  : "
           f"{[s.handler_id for s in pipeline_cfg.pre_handlers]}")
@@ -344,7 +348,7 @@ def main() -> None:
     # train
     p_train = sub.add_parser("train", help="Trigger server-side training")
     p_train.add_argument("--model-type",   required=True,
-                         choices=["act", "diffusion", "tdmpc2", "pi0", "custom"])
+                         choices=["act", "diffusion", "tdmpc2", "pi0", "smolvla", "custom"])
     p_train.add_argument("--model-config", default=None)
     p_train.add_argument("--dataset-id",   default=None)
     p_train.add_argument("--follow",       action="store_true",
