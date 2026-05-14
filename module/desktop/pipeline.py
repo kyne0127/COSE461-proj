@@ -90,12 +90,14 @@ class PipelineConfig:
     전체 파이프라인 설정.
 
     Attributes:
-        action_model_id : 서버에 로드된 액션 모델 ID
-        fps             : 제어 루프 주기
-        pre_handlers    : 액션 루프 전에 실행되는 핸들러 단계 목록
+        action_model_id    : 서버에 로드된 액션 모델 ID
+        fps                : 제어 루프 주기
+        max_episode_steps  : 에피소드 당 최대 스텝 수 (0이면 무제한)
+        pre_handlers       : 액션 루프 전에 실행되는 핸들러 단계 목록
     """
     action_model_id: str
     fps: float = 30.0
+    max_episode_steps: int = 500
     pre_handlers: List[HandlerStepConfig] = field(default_factory=list)
 
 
@@ -122,6 +124,7 @@ def load_pipeline_config(path: str) -> PipelineConfig:
     return PipelineConfig(
         action_model_id=raw["action_model_id"],
         fps=float(raw.get("fps", 30.0)),
+        max_episode_steps=int(raw.get("max_episode_steps", 500)),
         pre_handlers=steps,
     )
 
@@ -213,13 +216,16 @@ class InferencePipeline:
         self,
         task_text: str = "",
         n_episodes: Optional[int] = None,
+        max_episode_steps: Optional[int] = None,
     ) -> None:
         """
         Args:
-            task_text  : 기본 작업 설명 (episode_start 핸들러가 덮어쓸 수 있음)
-            n_episodes : 실행할 에피소드 수 (None이면 Ctrl+C까지 무한 반복)
+            task_text         : 기본 작업 설명 (episode_start 핸들러가 덮어쓸 수 있음)
+            n_episodes        : 실행할 에피소드 수 (None이면 Ctrl+C까지 무한 반복)
+            max_episode_steps : 에피소드 당 최대 스텝 수 (None이면 config 값 사용)
         """
         dt = 1.0 / self._cfg.fps
+        max_steps = max_episode_steps if max_episode_steps is not None else self._cfg.max_episode_steps
         ep = 0
 
         with self._robot.session():
@@ -238,8 +244,7 @@ class InferencePipeline:
                     logger.info("Episode %d  task_text='%s'", ep, context.get("task_text", ""))
 
                     # ── 액션 루프 ─────────────────────────────────────────
-                    step_idx = 0
-                    while True:
+                    for step_idx in range(max_steps):
                         t0  = time.perf_counter()
                         obs = self._robot.get_observation()
 
@@ -257,16 +262,15 @@ class InferencePipeline:
                             step=step_idx,
                         )
                         self._robot.send_action(action)
-                        step_idx += 1
 
                         elapsed = time.perf_counter() - t0
                         if dt - elapsed > 0:
                             time.sleep(dt - elapsed)
 
+                    ep += 1
+
             except KeyboardInterrupt:
                 print(f"\n[pipeline] Stopped at episode {ep}")
-
-        ep += 1
 
     # ------------------------------------------------------------------ #
     # 핸들러 단계 실행

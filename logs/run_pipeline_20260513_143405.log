@@ -1,0 +1,18 @@
+2026-05-13 14:34:05,826  INFO      run_pipeline_local — [mock] 패치 완료 (scenario=ambiguous-c1)
+2026-05-13 14:34:05,875  INFO      run_pipeline_local — [mock 모드] scenario=ambiguous-c1
+2026-05-13 14:34:08,972  INFO      run_pipeline_local — 파이프라인 시작: task='move the mouse to the top of the coffee'
+2026-05-13 14:34:08,981  INFO      run_pipeline_local —   t₀=assets/test/test-01/01.png  C1=assets/test/test-01/02.png  C2=assets/test/test-01/03.png
+2026-05-13 14:34:09,866  ERROR     run_pipeline_local — 파이프라인 실행 중 오류: EOF when reading a line
+Traceback (most recent call last):
+  File "/workspace/COSE461-proj/scripts/run_pipeline_local.py", line 357, in interactive_loop
+    run_once(handler, t0, c1, c2, task, threshold, mock)
+  File "/workspace/COSE461-proj/scripts/run_pipeline_local.py", line 264, in run_once
+    result = run_pipeline(
+             ^^^^^^^^^^^^^
+  File "/workspace/COSE461-proj/src/pipeline.py", line 253, in run_pipeline
+    c1_user_response = user_response_fn(question, g0_current)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/COSE461-proj/scripts/run_pipeline_local.py", line 210, in fn
+    ans = input("  [사용자 답변] (Enter = 건너뜀): ").strip()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+EOFError: EOF when reading a line

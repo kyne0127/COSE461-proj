@@ -1,0 +1,4 @@
+2026-05-13 14:34:59,482  INFO      run_pipeline_local — [mock] 패치 완료 (scenario=ambiguous-c1)
+2026-05-13 14:34:59,487  INFO      run_pipeline_local — [mock 모드] scenario=ambiguous-c1
+2026-05-13 14:35:00,997  INFO      run_pipeline_local — 파이프라인 시작: task='move the mouse to the top of the coffee'
+2026-05-13 14:35:01,005  INFO      run_pipeline_local —   t₀=assets/test/test-01/01.png  C1=assets/test/test-01/02.png  C2=assets/test/test-01/03.png

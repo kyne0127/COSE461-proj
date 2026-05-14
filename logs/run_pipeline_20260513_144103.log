@@ -1,0 +1,84 @@
+2026-05-13 14:41:04,481  INFO      run_pipeline_local — 핸들러 초기화 중... {'model_type': 'finetune', 'adapter_ckpt': '43qazb3XcrZF5rZWnjRPVm', 'use_detection': False, 'use_sam': False}
+2026-05-13 14:41:04,483  INFO      module.models.ambres.handler — AmbResHandler.setup: model_type=finetune  use_detection=False  use_sam=False
+2026-05-13 14:41:24,670  INFO      module.models.ambres.handler — AmbResHandler: ready (model_type=finetune)
+2026-05-13 14:41:24,675  INFO      run_pipeline_local — 핸들러 초기화 완료
+2026-05-13 14:41:24,875  INFO      run_pipeline_local — 파이프라인 시작: task='move the mouse onto the coffee'
+2026-05-13 14:41:24,876  INFO      run_pipeline_local —   t₀=assets/test/test-01/01.png  C1=assets/test/test-01/02.png  C2=assets/test/test-01/03.png
+2026-05-13 14:41:44,165  INFO      run_pipeline_local — 파이프라인 완료: status=complete
+2026-05-13 14:41:44,185  INFO      run_pipeline_local — pipeline result:
+{
+  "status": "complete",
+  "g0_initial": {
+    "target": {
+      "label": "coffee",
+      "coord": [
+        1524,
+        2009
+      ]
+    },
+    "destination": {
+      "label": "coffee",
+      "coord": [
+        1524,
+        2009
+      ]
+    },
+    "image_shape": [
+      2390,
+      1792
+    ]
+  },
+  "c1": {
+    "checkpoint": "C1",
+    "state": "CLEAR",
+    "decision": "CONTINUE",
+    "user_response": "",
+    "g0_after": {
+      "target": {
+        "label": "coffee",
+        "coord": [
+          1524,
+          2009
+        ]
+      },
+      "destination": {
+        "label": "coffee",
+        "coord": [
+          1524,
+          2009
+        ]
+      },
+      "image_shape": [
+        2390,
+        1792
+      ]
+    }
+  },
+  "c2": {
+    "checkpoint": "C2",
+    "state": "CLEAR",
+    "decision": "CONTINUE",
+    "user_response": "",
+    "g0_after": {
+      "target": {
+        "label": "coffee",
+        "coord": [
+          1524,
+          2009
+        ]
+      },
+      "destination": {
+        "label": "coffee",
+        "coord": [
+          1524,
+          2009
+        ]
+      },
+      "image_shape": [
+        2390,
+        1792
+      ]
+    }
+  },
+  "stop_reason": ""
+}

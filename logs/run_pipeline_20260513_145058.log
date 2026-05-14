@@ -1,0 +1,59 @@
+2026-05-13 14:50:59,956  INFO      run_pipeline_local — 핸들러 초기화 중... {'model_type': 'finetune', 'adapter_ckpt': '43qazb3XcrZF5rZWnjRPVm', 'use_detection': False, 'use_sam': False}
+2026-05-13 14:50:59,959  INFO      module.models.ambres.handler — AmbResHandler.setup: model_type=finetune  use_detection=False  use_sam=False
+2026-05-13 14:51:17,609  INFO      module.models.ambres.handler — AmbResHandler: ready (model_type=finetune)
+2026-05-13 14:51:17,641  INFO      run_pipeline_local — 핸들러 초기화 완료
+2026-05-13 14:51:17,970  INFO      run_pipeline_local — 파이프라인 시작: task='place the red mug next to the wine bottle'
+2026-05-13 14:51:17,974  INFO      run_pipeline_local —   t₀=assets/test/test-02/G0-init.jpeg  C1=assets/test/test-02/Gc1.png  C2=assets/test/test-02/Gc2.png
+2026-05-13 14:51:37,018  INFO      run_pipeline_local — 파이프라인 완료: status=stopped
+2026-05-13 14:51:37,055  INFO      run_pipeline_local — pipeline result:
+{
+  "status": "stopped",
+  "g0_initial": {
+    "target": {
+      "label": "red mug",
+      "coord": [
+        1380,
+        1060
+      ]
+    },
+    "destination": {
+      "label": "wine bottle",
+      "coord": [
+        2708,
+        835
+      ]
+    },
+    "image_shape": [
+      2252,
+      4000
+    ]
+  },
+  "c1": {
+    "checkpoint": "C1",
+    "state": "INVALID_TARGET",
+    "decision": "STOP",
+    "user_response": "",
+    "g0_after": {
+      "target": {
+        "label": "red mug",
+        "coord": [
+          1380,
+          1060
+        ]
+      },
+      "destination": {
+        "label": "wine bottle",
+        "coord": [
+          2708,
+          835
+        ]
+      },
+      "image_shape": [
+        2252,
+        4000
+      ]
+    }
+  },
+  "c2": null,
+  "stop_reason": "C1 INVALID_TARGET → STOP"
+}

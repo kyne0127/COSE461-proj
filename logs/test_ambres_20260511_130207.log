@@ -1,0 +1,76 @@
+2026-05-11 13:02:07,743  INFO      test_ambres_local — 핸들러 초기화 중... config={'model_type': 'fs_prompt', 'adapter_ckpt': '', 'use_detection': False, 'use_sam': False}
+2026-05-11 13:02:07,743  INFO      module.models.ambres.handler — AmbResHandler.setup: model_type=fs_prompt  use_detection=False  use_sam=False
+Using a slow image processor as `use_fast` is unset and a slow processor was saved with this model. `use_fast=True` will be the default behavior in v4.52, even if the model was saved with a slow processor. This will result in minor differences in outputs. You'll still be able to use a slow processor with `use_fast=False`.
+`torch_dtype` is deprecated! Use `dtype` instead!
+Loading checkpoint shards:   0%|          | 0/7 [00:00<?, ?it/s]Loading checkpoint shards:  14%|█▍        | 1/7 [00:00<00:05,  1.08it/s]Loading checkpoint shards:  29%|██▊       | 2/7 [00:01<00:04,  1.08it/s]Loading checkpoint shards:  43%|████▎     | 3/7 [00:02<00:03,  1.08it/s]Loading checkpoint shards:  57%|█████▋    | 4/7 [00:03<00:02,  1.10it/s]Loading checkpoint shards:  71%|███████▏  | 5/7 [00:04<00:01,  1.13it/s]Loading checkpoint shards:  86%|████████▌ | 6/7 [00:05<00:00,  1.19it/s]Loading checkpoint shards: 100%|██████████| 7/7 [00:06<00:00,  1.10it/s]Loading checkpoint shards: 100%|██████████| 7/7 [00:06<00:00,  1.11it/s]
+2026-05-11 13:02:23,460  INFO      module.models.ambres.handler — AmbResHandler: ready (model_type=fs_prompt)
+2026-05-11 13:02:23,461  INFO      test_ambres_local — 핸들러 초기화 완료
+2026-05-11 13:02:23,490  INFO      test_ambres_local — 테스트 이미지: shape=(120, 160, 3)  dtype=float32  source=/workspace/AmbRes/assets/images/real_0.png
+2026-05-11 13:02:23,490  INFO      test_ambres_local — 
+─── [1] reset ───
+2026-05-11 13:02:23,490  INFO      test_ambres_local — ✓ reset
+{
+  "success": true,
+  "message": "session reset"
+}
+2026-05-11 13:02:23,490  INFO      test_ambres_local — 
+─── [2] query ───
+2026-05-11 13:02:28,757  INFO      test_ambres_local — ✓ query
+{
+  "success": true,
+  "task_objects": [
+    "cup",
+    "drawer"
+  ],
+  "task_ambiguous": true,
+  "clarifying_question": "Which drawer do you mean?"
+}
+2026-05-11 13:02:28,758  INFO      test_ambres_local — task_objects     : ['cup', 'drawer']
+2026-05-11 13:02:28,758  INFO      test_ambres_local — task_ambiguous   : True
+2026-05-11 13:02:28,758  INFO      test_ambres_local — clarifying_question: Which drawer do you mean?
+2026-05-11 13:02:28,758  INFO      test_ambres_local — 
+─── [3] respond (모호성 감지됨 → 사용자 답변 시뮬레이션) ───
+2026-05-11 13:02:30,333  INFO      test_ambres_local — ✓ respond
+{
+  "success": true,
+  "task_objects": [
+    "cup",
+    "middle drawer"
+  ]
+}
+2026-05-11 13:02:30,334  INFO      test_ambres_local — 최종 task_objects: ['cup', 'middle drawer']
+2026-05-11 13:02:30,334  INFO      test_ambres_local — 
+─── [4] detect ───
+2026-05-11 13:02:34,079  INFO      test_ambres_local — ✓ detect
+{
+  "success": true,
+  "detections": {
+    "cup": [
+      [
+        121.0,
+        97.0
+      ]
+    ],
+    "drawer": [
+      [
+        48.0,
+        67.0
+      ]
+    ]
+  }
+}
+2026-05-11 13:02:34,079  INFO      test_ambres_local — detections: {'cup': [[121.0, 97.0]], 'drawer': [[48.0, 67.0]]}
+2026-05-11 13:02:34,079  INFO      test_ambres_local — 
+─── [5] 미지원 메서드 에러 처리 ───
+2026-05-11 13:02:34,079  INFO      test_ambres_local — ✗ nonexistent_method
+{
+  "success": false,
+  "error": "알 수 없는 method: 'nonexistent_method'. 지원 목록: ['reset', 'query', 'respond', 'detect', 'set_image_sam', 'query_mask']"
+}
+2026-05-11 13:02:34,080  INFO      test_ambres_local — 
+─── [6] reset → 세션 제거 검증 ───
+2026-05-11 13:02:34,080  INFO      test_ambres_local — ✓ 세션 정상 삭제
+2026-05-11 13:02:34,080  INFO      test_ambres_local — 
+══════════════════════════════
+2026-05-11 13:02:34,080  INFO      test_ambres_local — ✓  모든 테스트 통과
+2026-05-11 13:02:34,080  INFO      test_ambres_local — ══════════════════════════════

@@ -1,0 +1,85 @@
+2026-05-13 14:35:57,494  INFO      run_pipeline_local — 핸들러 초기화 중... {'model_type': 'finetune', 'adapter_ckpt': '43qazb3XcrZF5rZWnjRPVm', 'use_detection': False, 'use_sam': False}
+2026-05-13 14:35:57,496  INFO      module.models.ambres.handler — AmbResHandler.setup: model_type=finetune  use_detection=False  use_sam=False
+2026-05-13 14:36:15,409  INFO      module.models.ambres.handler — AmbResHandler: ready (model_type=finetune)
+2026-05-13 14:36:15,434  INFO      run_pipeline_local — 핸들러 초기화 완료
+2026-05-13 14:36:15,578  INFO      run_pipeline_local — 파이프라인 시작: task='move the mouse to the top of the coffee'
+2026-05-13 14:36:15,580  INFO      run_pipeline_local —   t₀=assets/test/test-01/01.png  C1=assets/test/test-01/02.png  C2=assets/test/test-01/03.png
+2026-05-13 14:36:39,172  INFO      run_pipeline_local — [user_response] question="[C2 AMBIGUOUS_DESTINATION] 어떤 'top mouse'에 놓아야 하나요?"  answer=''
+2026-05-13 14:36:39,176  INFO      run_pipeline_local — 파이프라인 완료: status=complete
+2026-05-13 14:36:39,179  INFO      run_pipeline_local — pipeline result:
+{
+  "status": "complete",
+  "g0_initial": {
+    "target": {
+      "label": "coffee",
+      "coord": [
+        1524,
+        2009
+      ]
+    },
+    "destination": {
+      "label": "top mouse",
+      "coord": [
+        1603,
+        1125
+      ]
+    },
+    "image_shape": [
+      2390,
+      1792
+    ]
+  },
+  "c1": {
+    "checkpoint": "C1",
+    "state": "CLEAR",
+    "decision": "CONTINUE",
+    "user_response": "",
+    "g0_after": {
+      "target": {
+        "label": "coffee",
+        "coord": [
+          1524,
+          2009
+        ]
+      },
+      "destination": {
+        "label": "top mouse",
+        "coord": [
+          1603,
+          1125
+        ]
+      },
+      "image_shape": [
+        2390,
+        1792
+      ]
+    }
+  },
+  "c2": {
+    "checkpoint": "C2",
+    "state": "AMBIGUOUS_DESTINATION",
+    "decision": "ASK",
+    "user_response": "",
+    "g0_after": {
+      "target": {
+        "label": "coffee",
+        "coord": [
+          1524,
+          2009
+        ]
+      },
+      "destination": {
+        "label": "top mouse",
+        "coord": [
+          1603,
+          1125
+        ]
+      },
+      "image_shape": [
+        2390,
+        1792
+      ]
+    }
+  },
+  "stop_reason": ""
+}

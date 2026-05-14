@@ -1,0 +1,910 @@
+=== Unit Tests  2026-05-13 13:59:53 ===
+============================= test session starts ==============================
+platform linux -- Python 3.11.10, pytest-9.0.3, pluggy-1.6.0 -- /usr/bin/python
+cachedir: .pytest_cache
+rootdir: /workspace/COSE461-proj
+configfile: pytest.ini
+plugins: anyio-4.6.0
+collecting ... collected 184 items / 19 deselected / 165 selected
+
+tests/test_consistency_monitor.py::TestC1TargetChecks::test_clear_when_target_at_same_position PASSED [  0%]
+tests/test_consistency_monitor.py::TestC1TargetChecks::test_clear_within_threshold PASSED [  1%]
+tests/test_consistency_monitor.py::TestC1TargetChecks::test_invalid_target_when_label_missing PASSED [  1%]
+tests/test_consistency_monitor.py::TestC1TargetChecks::test_invalid_target_when_empty_detections PASSED [  2%]
+tests/test_consistency_monitor.py::TestC1TargetChecks::test_ambiguous_target_when_multiple_instances PASSED [  3%]
+tests/test_consistency_monitor.py::TestC1TargetChecks::test_ambiguous_target_when_displaced_beyond_threshold PASSED [  3%]
+tests/test_consistency_monitor.py::TestC1TargetChecks::test_boundary_exactly_at_threshold_is_clear PASSED [  4%]
+tests/test_consistency_monitor.py::TestC1TargetChecks::test_boundary_just_over_threshold_is_ambiguous PASSED [  4%]
+tests/test_consistency_monitor.py::TestC2DestinationChecks::test_clear_when_destination_at_same_position PASSED [  5%]
+tests/test_consistency_monitor.py::TestC2DestinationChecks::test_clear_within_threshold PASSED [  6%]
+tests/test_consistency_monitor.py::TestC2DestinationChecks::test_invalid_destination_when_label_missing PASSED [  6%]
+tests/test_consistency_monitor.py::TestC2DestinationChecks::test_invalid_destination_when_empty_detections PASSED [  7%]
+tests/test_consistency_monitor.py::TestC2DestinationChecks::test_ambiguous_destination_when_multiple_instances PASSED [  7%]
+tests/test_consistency_monitor.py::TestC2DestinationChecks::test_ambiguous_destination_when_displaced PASSED [  8%]
+tests/test_consistency_monitor.py::TestC2DestinationChecks::test_boundary_exactly_at_threshold_is_clear PASSED [  9%]
+tests/test_consistency_monitor.py::TestC2DestinationChecks::test_boundary_just_over_threshold_is_ambiguous PASSED [  9%]
+tests/test_consistency_monitor.py::TestDecisionPolicy::test_clear_yields_continue PASSED [ 10%]
+tests/test_consistency_monitor.py::TestDecisionPolicy::test_ambiguous_target_yields_ask PASSED [ 10%]
+tests/test_consistency_monitor.py::TestDecisionPolicy::test_invalid_target_yields_stop PASSED [ 11%]
+tests/test_consistency_monitor.py::TestDecisionPolicy::test_ambiguous_destination_yields_ask PASSED [ 12%]
+tests/test_consistency_monitor.py::TestDecisionPolicy::test_invalid_destination_yields_ask PASSED [ 12%]
+tests/test_consistency_monitor.py::TestReturnTypes::test_returns_tuple_of_two PASSED [ 13%]
+tests/test_consistency_monitor.py::TestReturnTypes::test_first_element_is_grounding_state PASSED [ 13%]
+tests/test_consistency_monitor.py::TestReturnTypes::test_second_element_is_decision PASSED [ 14%]
+tests/test_consistency_monitor.py::TestReturnTypes::test_state_value_is_string PASSED [ 15%]
+tests/test_consistency_monitor.py::TestInvalidCheckpoint::test_invalid_checkpoint_raises_value_error PASSED [ 15%]
+tests/test_consistency_monitor.py::TestInvalidCheckpoint::test_lowercase_checkpoint_raises_value_error PASSED [ 16%]
+tests/test_consistency_monitor.py::TestInvalidCheckpoint::test_empty_checkpoint_raises_value_error PASSED [ 16%]
+tests/test_consistency_monitor.py::TestEdgeCases::test_same_label_for_target_and_destination PASSED [ 17%]
+tests/test_consistency_monitor.py::TestEdgeCases::test_c1_does_not_check_destination PASSED [ 18%]
+tests/test_consistency_monitor.py::TestEdgeCases::test_c2_does_not_check_target PASSED [ 18%]
+tests/test_consistency_monitor.py::TestEdgeCases::test_extra_labels_in_detections_are_ignored PASSED [ 19%]
+tests/test_consistency_monitor.py::TestEdgeCases::test_threshold_zero_always_fails_unless_exact PASSED [ 20%]
+tests/test_consistency_monitor.py::TestEdgeCases::test_threshold_zero_exact_match_is_clear PASSED [ 20%]
+tests/test_consistency_monitor.py::TestEdgeCases::test_large_threshold_always_clear_when_single_instance PASSED [ 21%]
+tests/test_consistency_monitor.py::TestEdgeCases::test_coord_list_with_none_values_treated_as_missing PASSED [ 21%]
+tests/test_consistency_monitor.py::TestScenarioAlignment::test_scenario1_clear_continuation PASSED [ 22%]
+tests/test_consistency_monitor.py::TestScenarioAlignment::test_scenario2_same_category_target_added PASSED [ 23%]
+tests/test_consistency_monitor.py::TestScenarioAlignment::test_scenario3_target_disappeared PASSED [ 23%]
+tests/test_consistency_monitor.py::TestScenarioAlignment::test_scenario4_new_destination_candidate PASSED [ 24%]
+tests/test_consistency_monitor.py::TestScenarioAlignment::test_scenario5_distractor_added PASSED [ 24%]
+tests/test_consistency_monitor.py::TestGetCheckpointDetections::test_calls_reset_then_detect PASSED [ 25%]
+tests/test_consistency_monitor.py::TestGetCheckpointDetections::test_detect_called_with_g0_labels PASSED [ 26%]
+tests/test_consistency_monitor.py::TestGetCheckpointDetections::test_deduplicates_labels_when_target_eq_destination PASSED [ 26%]
+tests/test_consistency_monitor.py::TestGetCheckpointDetections::test_reset_failure_raises_runtime_error PASSED [ 27%]
+tests/test_consistency_monitor.py::TestGetCheckpointDetections::test_detect_failure_raises_runtime_error PASSED [ 27%]
+tests/test_g0_extractor.py::TestHappyPath::test_returns_correct_g0_structure FAILED [ 28%]
+tests/test_g0_extractor.py::TestHappyPath::test_image_shape_is_list_of_two_ints FAILED [ 29%]
+tests/test_g0_extractor.py::TestHappyPath::test_coord_values_are_python_ints FAILED [ 29%]
+tests/test_g0_extractor.py::TestHappyPath::test_exactly_four_handle_calls FAILED [ 30%]
+tests/test_g0_extractor.py::TestCallSequence::test_reset_is_first_call FAILED [ 30%]
+tests/test_g0_extractor.py::TestCallSequence::test_query_is_second_call_with_task_description FAILED [ 31%]
+tests/test_g0_extractor.py::TestCallSequence::test_respond_always_called_with_empty_string_even_when_non_ambiguous FAILED [ 32%]
+tests/test_g0_extractor.py::TestCallSequence::test_detect_is_fourth_call_with_role_labels FAILED [ 32%]
+tests/test_g0_extractor.py::TestAmbiguityPaths::test_ambiguous_raises_runtime_error_by_default FAILED [ 33%]
+tests/test_g0_extractor.py::TestAmbiguityPaths::test_ambiguous_error_contains_clarifying_question FAILED [ 33%]
+tests/test_g0_extractor.py::TestAmbiguityPaths::test_ambiguous_stops_before_respond_and_detect FAILED [ 34%]
+tests/test_g0_extractor.py::TestAmbiguityPaths::test_allow_ambiguous_runs_all_four_steps FAILED [ 35%]
+tests/test_g0_extractor.py::TestErrorPaths::test_reset_failure_raises_runtime_error FAILED [ 35%]
+tests/test_g0_extractor.py::TestErrorPaths::test_query_failure_raises_runtime_error FAILED [ 36%]
+tests/test_g0_extractor.py::TestErrorPaths::test_missing_detection_label_raises_value_error FAILED [ 36%]
+tests/test_g0_extractor.py::TestKeyNameVariants::test_ambiguity_and_object_list_key_names FAILED [ 37%]
+tests/test_g0_extractor.py::TestKeyNameVariants::test_step2_empty_object_list_falls_back_to_step1 FAILED [ 38%]
+tests/test_g0_extractor.py::TestMakeHandlerArgs::test_make_handler_called_with_defaults FAILED [ 38%]
+tests/test_g0_extractor.py::TestMakeHandlerArgs::test_make_handler_called_with_custom_args FAILED [ 39%]
+tests/test_g0_extractor.py::TestRealImage::test_real_image_shape FAILED  [ 40%]
+tests/test_pilot_threshold.py::TestCentroid::test_single_coord PASSED    [ 40%]
+tests/test_pilot_threshold.py::TestCentroid::test_two_coords PASSED      [ 41%]
+tests/test_pilot_threshold.py::TestCentroid::test_symmetric_coords PASSED [ 41%]
+tests/test_pilot_threshold.py::TestCentroid::test_empty_raises PASSED    [ 42%]
+tests/test_pilot_threshold.py::TestEuclidean::test_same_point_is_zero PASSED [ 43%]
+tests/test_pilot_threshold.py::TestEuclidean::test_horizontal_distance PASSED [ 43%]
+tests/test_pilot_threshold.py::TestEuclidean::test_vertical_distance PASSED [ 44%]
+tests/test_pilot_threshold.py::TestEuclidean::test_diagonal_345 PASSED   [ 44%]
+tests/test_pilot_threshold.py::TestEuclidean::test_symmetric PASSED      [ 45%]
+tests/test_pilot_threshold.py::TestPercentile::test_50th_of_sorted_list PASSED [ 46%]
+tests/test_pilot_threshold.py::TestPercentile::test_100th_is_max PASSED  [ 46%]
+tests/test_pilot_threshold.py::TestPercentile::test_single_element PASSED [ 47%]
+tests/test_pilot_threshold.py::TestPercentile::test_empty_raises PASSED  [ 47%]
+tests/test_pilot_threshold.py::TestPercentile::test_95th_with_known_data PASSED [ 48%]
+tests/test_pilot_threshold.py::TestPercentile::test_order_independent PASSED [ 49%]
+tests/test_pilot_threshold.py::TestComputeIntraStats::test_single_object_single_coord PASSED [ 49%]
+tests/test_pilot_threshold.py::TestComputeIntraStats::test_no_variation_gives_zero_spread PASSED [ 50%]
+tests/test_pilot_threshold.py::TestComputeIntraStats::test_known_variation PASSED [ 50%]
+tests/test_pilot_threshold.py::TestComputeIntraStats::test_multiple_labels PASSED [ 51%]
+tests/test_pilot_threshold.py::TestComputeIntraStats::test_empty_coords_skipped PASSED [ 52%]
+tests/test_pilot_threshold.py::TestComputeIntraStats::test_custom_percentile PASSED [ 52%]
+tests/test_pilot_threshold.py::TestComputeInterInstanceDistances::test_single_instance_returns_none PASSED [ 53%]
+tests/test_pilot_threshold.py::TestComputeInterInstanceDistances::test_two_instances PASSED [ 53%]
+tests/test_pilot_threshold.py::TestComputeInterInstanceDistances::test_three_instances_min_distance PASSED [ 54%]
+tests/test_pilot_threshold.py::TestComputeInterInstanceDistances::test_empty_coords PASSED [ 55%]
+tests/test_pilot_threshold.py::TestComputeInterInstanceDistances::test_multiple_labels PASSED [ 55%]
+tests/test_pilot_threshold.py::TestRecommendThreshold::test_single_label PASSED [ 56%]
+tests/test_pilot_threshold.py::TestRecommendThreshold::test_takes_max_across_labels PASSED [ 56%]
+tests/test_pilot_threshold.py::TestRecommendThreshold::test_rounds_to_integer PASSED [ 57%]
+tests/test_pilot_threshold.py::TestRecommendThreshold::test_empty_stats_raises PASSED [ 58%]
+tests/test_pilot_threshold.py::TestRecommendThreshold::test_missing_p_key_raises PASSED [ 58%]
+tests/test_pilot_threshold.py::TestRecommendThreshold::test_zero_noise_gives_zero_threshold PASSED [ 59%]
+tests/test_pilot_threshold.py::TestRecommendThreshold::test_custom_safety_factor PASSED [ 60%]
+tests/test_pilot_threshold.py::TestBuildReport::test_output_keys PASSED  [ 60%]
+tests/test_pilot_threshold.py::TestBuildReport::test_threshold_is_int PASSED [ 61%]
+tests/test_pilot_threshold.py::TestBuildReport::test_note_contains_threshold PASSED [ 61%]
+tests/test_pilot_threshold.py::TestBuildReport::test_custom_safety_factor PASSED [ 62%]
+tests/test_pilot_threshold.py::TestCollectDetectionsMock::test_returns_coords_for_each_object PASSED [ 63%]
+tests/test_pilot_threshold.py::TestCollectDetectionsMock::test_n_trials_determines_count PASSED [ 63%]
+tests/test_pilot_threshold.py::TestCollectDetectionsMock::test_coords_are_two_element_lists PASSED [ 64%]
+tests/test_pilot_threshold.py::TestCollectDetectionsMock::test_seed_reproducibility PASSED [ 64%]
+tests/test_pilot_threshold.py::TestCollectDetectionsMock::test_different_seeds_differ PASSED [ 65%]
+tests/test_pilot_threshold.py::TestCollectDetectionsMock::test_noise_zero_gives_same_coord_each_trial PASSED [ 66%]
+tests/test_pilot_threshold.py::TestCollectDetectionsMock::test_larger_noise_gives_larger_spread PASSED [ 66%]
+tests/test_pilot_threshold.py::TestCollectDetectionsReal::test_single_image_repeated_n_trials PASSED [ 67%]
+tests/test_pilot_threshold.py::TestCollectDetectionsReal::test_multiple_images_detected_once_each PASSED [ 67%]
+tests/test_pilot_threshold.py::TestCollectDetectionsReal::test_reset_called_before_each_detect PASSED [ 68%]
+tests/test_pilot_threshold.py::TestCollectDetectionsReal::test_missing_detection_skipped PASSED [ 69%]
+tests/test_pilot_threshold.py::TestEndToEndMock::test_mock_pipeline_produces_valid_report PASSED [ 69%]
+tests/test_pilot_threshold.py::TestEndToEndMock::test_report_json_serialisable PASSED [ 70%]
+tests/test_pilot_threshold.py::TestEndToEndMock::test_low_noise_gives_low_threshold PASSED [ 70%]
+tests/test_pilot_threshold.py::TestEndToEndMock::test_high_noise_gives_higher_threshold PASSED [ 71%]
+tests/test_role_parser.py::TestBasicVerbPreposition::test_place_on PASSED [ 72%]
+tests/test_role_parser.py::TestBasicVerbPreposition::test_put_into PASSED [ 72%]
+tests/test_role_parser.py::TestBasicVerbPreposition::test_move_to PASSED [ 73%]
+tests/test_role_parser.py::TestBasicVerbPreposition::test_pick_in PASSED [ 73%]
+tests/test_role_parser.py::TestBasicVerbPreposition::test_grab_onto PASSED [ 74%]
+tests/test_role_parser.py::TestBasicVerbPreposition::test_take_inside PASSED [ 75%]
+tests/test_role_parser.py::TestBasicVerbPreposition::test_drop_on PASSED [ 75%]
+tests/test_role_parser.py::TestBasicVerbPreposition::test_insert_into PASSED [ 76%]
+tests/test_role_parser.py::TestArticleSkipping::test_the_before_target PASSED [ 76%]
+tests/test_role_parser.py::TestArticleSkipping::test_a_before_target PASSED [ 77%]
+tests/test_role_parser.py::TestArticleSkipping::test_an_before_target PASSED [ 78%]
+tests/test_role_parser.py::TestArticleSkipping::test_multiple_articles PASSED [ 78%]
+tests/test_role_parser.py::TestMultiWordObjects::test_two_word_target PASSED [ 79%]
+tests/test_role_parser.py::TestMultiWordObjects::test_two_word_destination PASSED [ 80%]
+tests/test_role_parser.py::TestMultiWordObjects::test_both_multi_word PASSED [ 80%]
+tests/test_role_parser.py::TestMultiWordObjects::test_three_word_object PASSED [ 81%]
+tests/test_role_parser.py::TestMultiWordObjects::test_longer_label_preferred_over_substring PASSED [ 81%]
+tests/test_role_parser.py::TestAllVerbs::test_each_verb_identifies_target[place] PASSED [ 82%]
+tests/test_role_parser.py::TestAllVerbs::test_each_verb_identifies_target[put] PASSED [ 83%]
+tests/test_role_parser.py::TestAllVerbs::test_each_verb_identifies_target[move] PASSED [ 83%]
+tests/test_role_parser.py::TestAllVerbs::test_each_verb_identifies_target[pick] PASSED [ 84%]
+tests/test_role_parser.py::TestAllVerbs::test_each_verb_identifies_target[grab] PASSED [ 84%]
+tests/test_role_parser.py::TestAllVerbs::test_each_verb_identifies_target[take] PASSED [ 85%]
+tests/test_role_parser.py::TestAllVerbs::test_each_verb_identifies_target[drop] PASSED [ 86%]
+tests/test_role_parser.py::TestAllVerbs::test_each_verb_identifies_target[insert] PASSED [ 86%]
+tests/test_role_parser.py::TestAllPrepositions::test_each_preposition_identifies_destination[in] PASSED [ 87%]
+tests/test_role_parser.py::TestAllPrepositions::test_each_preposition_identifies_destination[into] PASSED [ 87%]
+tests/test_role_parser.py::TestAllPrepositions::test_each_preposition_identifies_destination[on] PASSED [ 88%]
+tests/test_role_parser.py::TestAllPrepositions::test_each_preposition_identifies_destination[onto] PASSED [ 89%]
+tests/test_role_parser.py::TestAllPrepositions::test_each_preposition_identifies_destination[to] PASSED [ 89%]
+tests/test_role_parser.py::TestAllPrepositions::test_each_preposition_identifies_destination[inside] PASSED [ 90%]
+tests/test_role_parser.py::TestFallbacks::test_no_verb_falls_back_to_text_search_for_target PASSED [ 90%]
+tests/test_role_parser.py::TestFallbacks::test_no_preposition_falls_back_to_remaining_object PASSED [ 91%]
+tests/test_role_parser.py::TestFallbacks::test_neither_verb_nor_preposition_uses_index_fallback PASSED [ 92%]
+tests/test_role_parser.py::TestFallbacks::test_single_object_destination_equals_target PASSED [ 92%]
+tests/test_role_parser.py::TestFallbacks::test_verb_not_matched_but_object_in_text PASSED [ 93%]
+tests/test_role_parser.py::TestCaseAndPunctuation::test_uppercase_task PASSED [ 93%]
+tests/test_role_parser.py::TestCaseAndPunctuation::test_mixed_case_object_list PASSED [ 94%]
+tests/test_role_parser.py::TestCaseAndPunctuation::test_punctuation_in_task PASSED [ 95%]
+tests/test_role_parser.py::TestOutputSchema::test_returns_dict_with_target_and_destination PASSED [ 95%]
+tests/test_role_parser.py::TestOutputSchema::test_values_are_strings PASSED [ 96%]
+tests/test_role_parser.py::TestOutputSchema::test_values_come_from_object_list PASSED [ 96%]
+tests/test_role_parser.py::TestEdgeCases::test_empty_object_list_raises_value_error PASSED [ 97%]
+tests/test_role_parser.py::TestEdgeCases::test_object_not_in_task_description PASSED [ 98%]
+tests/test_role_parser.py::TestEdgeCases::test_target_and_destination_differ_when_two_objects PASSED [ 98%]
+tests/test_role_parser.py::TestEdgeCases::test_real_task_marker_sprite PASSED [ 99%]
+tests/test_role_parser.py::TestEdgeCases::test_real_task_block_tray PASSED [100%]
+
+=================================== FAILURES ===================================
+_______________ TestHappyPath.test_returns_correct_g0_structure ________________
+
+self = <test_g0_extractor.TestHappyPath object at 0x78150ce75310>
+image_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_returns_correct_g0_struct0/test.png')
+mock_handler = <MagicMock id='132031710293392'>
+
+    def test_returns_correct_g0_structure(self, image_path, mock_handler):
+        _four_calls(mock_handler)
+>       with patch("ambres_g0_extractor._make_handler", return_value=mock_handler):
+
+tests/test_g0_extractor.py:81: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.11/unittest/mock.py:1430: in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+/usr/lib/python3.11/pkgutil.py:700: in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1204: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'ambres_g0_extractor', import_ = <function _gcd_import at 0x781526dcbd80>
+
+>   ???
+E   ModuleNotFoundError: No module named 'ambres_g0_extractor'
+
+<frozen importlib._bootstrap>:1140: ModuleNotFoundError
+______________ TestHappyPath.test_image_shape_is_list_of_two_ints ______________
+
+self = <test_g0_extractor.TestHappyPath object at 0x78150ce76a90>
+image_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_image_shape_is_list_of_tw0/test.png')
+mock_handler = <MagicMock id='132031710942224'>
+
+    def test_image_shape_is_list_of_two_ints(self, image_path, mock_handler):
+        _four_calls(mock_handler)
+>       with patch("ambres_g0_extractor._make_handler", return_value=mock_handler):
+
+tests/test_g0_extractor.py:89: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.11/unittest/mock.py:1430: in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+/usr/lib/python3.11/pkgutil.py:700: in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1204: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'ambres_g0_extractor', import_ = <function _gcd_import at 0x781526dcbd80>
+
+>   ???
+E   ModuleNotFoundError: No module named 'ambres_g0_extractor'
+
+<frozen importlib._bootstrap>:1140: ModuleNotFoundError
+_______________ TestHappyPath.test_coord_values_are_python_ints ________________
+
+self = <test_g0_extractor.TestHappyPath object at 0x78150ce75a50>
+image_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_coord_values_are_python_i0/test.png')
+mock_handler = <MagicMock id='132031758699792'>
+
+    def test_coord_values_are_python_ints(self, image_path, mock_handler):
+        _four_calls(mock_handler)
+>       with patch("ambres_g0_extractor._make_handler", return_value=mock_handler):
+
+tests/test_g0_extractor.py:96: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.11/unittest/mock.py:1430: in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+/usr/lib/python3.11/pkgutil.py:700: in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1204: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'ambres_g0_extractor', import_ = <function _gcd_import at 0x781526dcbd80>
+
+>   ???
+E   ModuleNotFoundError: No module named 'ambres_g0_extractor'
+
+<frozen importlib._bootstrap>:1140: ModuleNotFoundError
+_________________ TestHappyPath.test_exactly_four_handle_calls _________________
+
+self = <test_g0_extractor.TestHappyPath object at 0x78150a11a790>
+image_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_exactly_four_handle_calls0/test.png')
+mock_handler = <MagicMock id='132031710182736'>
+
+    def test_exactly_four_handle_calls(self, image_path, mock_handler):
+        _four_calls(mock_handler)
+>       with patch("ambres_g0_extractor._make_handler", return_value=mock_handler):
+
+tests/test_g0_extractor.py:104: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.11/unittest/mock.py:1430: in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+/usr/lib/python3.11/pkgutil.py:700: in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1204: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'ambres_g0_extractor', import_ = <function _gcd_import at 0x781526dcbd80>
+
+>   ???
+E   ModuleNotFoundError: No module named 'ambres_g0_extractor'
+
+<frozen importlib._bootstrap>:1140: ModuleNotFoundError
+__________________ TestCallSequence.test_reset_is_first_call ___________________
+
+self = <test_g0_extractor.TestCallSequence object at 0x78150a11ab10>
+image_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_reset_is_first_call0/test.png')
+mock_handler = <MagicMock id='132031710050000'>
+
+    def test_reset_is_first_call(self, image_path, mock_handler):
+>       calls = self._run(image_path, mock_handler)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_g0_extractor.py:121: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_g0_extractor.py:116: in _run
+    with patch("ambres_g0_extractor._make_handler", return_value=mock_handler):
+/usr/lib/python3.11/unittest/mock.py:1430: in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+/usr/lib/python3.11/pkgutil.py:700: in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1204: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'ambres_g0_extractor', import_ = <function _gcd_import at 0x781526dcbd80>
+
+>   ???
+E   ModuleNotFoundError: No module named 'ambres_g0_extractor'
+
+<frozen importlib._bootstrap>:1140: ModuleNotFoundError
+_______ TestCallSequence.test_query_is_second_call_with_task_description _______
+
+self = <test_g0_extractor.TestCallSequence object at 0x78150a11af90>
+image_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_query_is_second_call_with0/test.png')
+mock_handler = <MagicMock id='132031806972240'>
+
+    def test_query_is_second_call_with_task_description(self, image_path, mock_handler):
+>       calls = self._run(image_path, mock_handler)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_g0_extractor.py:129: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_g0_extractor.py:116: in _run
+    with patch("ambres_g0_extractor._make_handler", return_value=mock_handler):
+/usr/lib/python3.11/unittest/mock.py:1430: in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+/usr/lib/python3.11/pkgutil.py:700: in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1204: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'ambres_g0_extractor', import_ = <function _gcd_import at 0x781526dcbd80>
+
+>   ???
+E   ModuleNotFoundError: No module named 'ambres_g0_extractor'
+
+<frozen importlib._bootstrap>:1140: ModuleNotFoundError
+_ TestCallSequence.test_respond_always_called_with_empty_string_even_when_non_ambiguous _
+
+self = <test_g0_extractor.TestCallSequence object at 0x78150a11b390>
+image_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_respond_always_called_wit0/test.png')
+mock_handler = <MagicMock id='132031758884496'>
+
+    def test_respond_always_called_with_empty_string_even_when_non_ambiguous(
+        self, image_path, mock_handler
+    ):
+        """핵심: ambiguity=False여도 respond는 반드시 빈 문자열로 호출돼야 함."""
+>       calls = self._run(image_path, mock_handler)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_g0_extractor.py:140: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_g0_extractor.py:116: in _run
+    with patch("ambres_g0_extractor._make_handler", return_value=mock_handler):
+/usr/lib/python3.11/unittest/mock.py:1430: in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+/usr/lib/python3.11/pkgutil.py:700: in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1204: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'ambres_g0_extractor', import_ = <function _gcd_import at 0x781526dcbd80>
+
+>   ???
+E   ModuleNotFoundError: No module named 'ambres_g0_extractor'
+
+<frozen importlib._bootstrap>:1140: ModuleNotFoundError
+_________ TestCallSequence.test_detect_is_fourth_call_with_role_labels _________
+
+self = <test_g0_extractor.TestCallSequence object at 0x78150a11bd50>
+image_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_detect_is_fourth_call_wit0/test.png')
+mock_handler = <MagicMock id='132031759255632'>
+
+    def test_detect_is_fourth_call_with_role_labels(self, image_path, mock_handler):
+>       calls = self._run(image_path, mock_handler)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_g0_extractor.py:148: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_g0_extractor.py:116: in _run
+    with patch("ambres_g0_extractor._make_handler", return_value=mock_handler):
+/usr/lib/python3.11/unittest/mock.py:1430: in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+/usr/lib/python3.11/pkgutil.py:700: in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1204: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'ambres_g0_extractor', import_ = <function _gcd_import at 0x781526dcbd80>
+
+>   ???
+E   ModuleNotFoundError: No module named 'ambres_g0_extractor'
+
+<frozen importlib._bootstrap>:1140: ModuleNotFoundError
+______ TestAmbiguityPaths.test_ambiguous_raises_runtime_error_by_default _______
+
+self = <test_g0_extractor.TestAmbiguityPaths object at 0x78150a118290>
+image_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_ambiguous_raises_runtime_0/test.png')
+mock_handler = <MagicMock id='132031806571408'>
+
+    def test_ambiguous_raises_runtime_error_by_default(self, image_path, mock_handler):
+        mock_handler.handle.side_effect = [
+            _reset(),
+            _query(ambiguous=True, question="Which cup?"),
+        ]
+>       with patch("ambres_g0_extractor._make_handler", return_value=mock_handler):
+
+tests/test_g0_extractor.py:166: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.11/unittest/mock.py:1430: in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+/usr/lib/python3.11/pkgutil.py:700: in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1204: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'ambres_g0_extractor', import_ = <function _gcd_import at 0x781526dcbd80>
+
+>   ???
+E   ModuleNotFoundError: No module named 'ambres_g0_extractor'
+
+<frozen importlib._bootstrap>:1140: ModuleNotFoundError
+_____ TestAmbiguityPaths.test_ambiguous_error_contains_clarifying_question _____
+
+self = <test_g0_extractor.TestAmbiguityPaths object at 0x78150a118e10>
+image_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_ambiguous_error_contains_0/test.png')
+mock_handler = <MagicMock id='132031759126992'>
+
+    def test_ambiguous_error_contains_clarifying_question(self, image_path, mock_handler):
+        question = "Which cup did you mean?"
+        mock_handler.handle.side_effect = [
+            _reset(),
+            _query(ambiguous=True, question=question),
+        ]
+>       with patch("ambres_g0_extractor._make_handler", return_value=mock_handler):
+
+tests/test_g0_extractor.py:176: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.11/unittest/mock.py:1430: in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+/usr/lib/python3.11/pkgutil.py:700: in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1204: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'ambres_g0_extractor', import_ = <function _gcd_import at 0x781526dcbd80>
+
+>   ???
+E   ModuleNotFoundError: No module named 'ambres_g0_extractor'
+
+<frozen importlib._bootstrap>:1140: ModuleNotFoundError
+______ TestAmbiguityPaths.test_ambiguous_stops_before_respond_and_detect _______
+
+self = <test_g0_extractor.TestAmbiguityPaths object at 0x78150a119990>
+image_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_ambiguous_stops_before_re0/test.png')
+mock_handler = <MagicMock id='132031806631248'>
+
+    def test_ambiguous_stops_before_respond_and_detect(self, image_path, mock_handler):
+        mock_handler.handle.side_effect = [
+            _reset(),
+            _query(ambiguous=True, question="Which box?"),
+        ]
+>       with patch("ambres_g0_extractor._make_handler", return_value=mock_handler):
+
+tests/test_g0_extractor.py:185: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.11/unittest/mock.py:1430: in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+/usr/lib/python3.11/pkgutil.py:700: in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1204: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'ambres_g0_extractor', import_ = <function _gcd_import at 0x781526dcbd80>
+
+>   ???
+E   ModuleNotFoundError: No module named 'ambres_g0_extractor'
+
+<frozen importlib._bootstrap>:1140: ModuleNotFoundError
+_________ TestAmbiguityPaths.test_allow_ambiguous_runs_all_four_steps __________
+
+self = <test_g0_extractor.TestAmbiguityPaths object at 0x78150a10abd0>
+image_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_allow_ambiguous_runs_all_0/test.png')
+mock_handler = <MagicMock id='132031759260432'>
+
+    def test_allow_ambiguous_runs_all_four_steps(self, image_path, mock_handler):
+        mock_handler.handle.side_effect = [
+            _reset(),
+            _query(ambiguous=True, question="Which box?"),
+            _respond(),
+            _detect(),
+        ]
+>       with patch("ambres_g0_extractor._make_handler", return_value=mock_handler):
+
+tests/test_g0_extractor.py:200: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.11/unittest/mock.py:1430: in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+/usr/lib/python3.11/pkgutil.py:700: in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1204: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'ambres_g0_extractor', import_ = <function _gcd_import at 0x781526dcbd80>
+
+>   ???
+E   ModuleNotFoundError: No module named 'ambres_g0_extractor'
+
+<frozen importlib._bootstrap>:1140: ModuleNotFoundError
+____________ TestErrorPaths.test_reset_failure_raises_runtime_error ____________
+
+self = <test_g0_extractor.TestErrorPaths object at 0x78150a11a990>
+image_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_reset_failure_raises_runt1/test.png')
+mock_handler = <MagicMock id='132031710685648'>
+
+    def test_reset_failure_raises_runtime_error(self, image_path, mock_handler):
+        mock_handler.handle.side_effect = [
+            {"success": False, "error": "Reset error"},
+        ]
+>       with patch("ambres_g0_extractor._make_handler", return_value=mock_handler):
+
+tests/test_g0_extractor.py:216: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.11/unittest/mock.py:1430: in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+/usr/lib/python3.11/pkgutil.py:700: in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1204: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'ambres_g0_extractor', import_ = <function _gcd_import at 0x781526dcbd80>
+
+>   ???
+E   ModuleNotFoundError: No module named 'ambres_g0_extractor'
+
+<frozen importlib._bootstrap>:1140: ModuleNotFoundError
+____________ TestErrorPaths.test_query_failure_raises_runtime_error ____________
+
+self = <test_g0_extractor.TestErrorPaths object at 0x78150a109b90>
+image_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_query_failure_raises_runt0/test.png')
+mock_handler = <MagicMock id='132031759125968'>
+
+    def test_query_failure_raises_runtime_error(self, image_path, mock_handler):
+        mock_handler.handle.side_effect = [
+            _reset(),
+            {"success": False, "error": "Inference failed"},
+        ]
+>       with patch("ambres_g0_extractor._make_handler", return_value=mock_handler):
+
+tests/test_g0_extractor.py:225: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.11/unittest/mock.py:1430: in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+/usr/lib/python3.11/pkgutil.py:700: in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1204: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'ambres_g0_extractor', import_ = <function _gcd_import at 0x781526dcbd80>
+
+>   ???
+E   ModuleNotFoundError: No module named 'ambres_g0_extractor'
+
+<frozen importlib._bootstrap>:1140: ModuleNotFoundError
+________ TestErrorPaths.test_missing_detection_label_raises_value_error ________
+
+self = <test_g0_extractor.TestErrorPaths object at 0x78150a109990>
+image_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_missing_detection_label_r0/test.png')
+mock_handler = <MagicMock id='132031661926032'>
+
+    def test_missing_detection_label_raises_value_error(self, image_path, mock_handler):
+        mock_handler.handle.side_effect = [
+            _reset(),
+            _query(),
+            _respond(),
+            _detect({"box": [[100, 150]]}),  # "cup" 누락
+        ]
+>       with patch("ambres_g0_extractor._make_handler", return_value=mock_handler):
+
+tests/test_g0_extractor.py:236: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.11/unittest/mock.py:1430: in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+/usr/lib/python3.11/pkgutil.py:700: in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1204: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'ambres_g0_extractor', import_ = <function _gcd_import at 0x781526dcbd80>
+
+>   ???
+E   ModuleNotFoundError: No module named 'ambres_g0_extractor'
+
+<frozen importlib._bootstrap>:1140: ModuleNotFoundError
+_________ TestKeyNameVariants.test_ambiguity_and_object_list_key_names _________
+
+self = <test_g0_extractor.TestKeyNameVariants object at 0x78150a10a110>
+image_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_ambiguity_and_object_list0/test.png')
+mock_handler = <MagicMock id='132031758472656'>
+
+    def test_ambiguity_and_object_list_key_names(self, image_path, mock_handler):
+        """handler가 'ambiguity'/'object_list' 키를 반환하는 경우도 처리."""
+        mock_handler.handle.side_effect = [
+            {"success": True},
+            {
+                "success": True,
+                "ambiguity": False,
+                "object_list": ["mug", "tray"],
+                "clarifying_question": "",
+            },
+            {"success": True, "object_list": ["mug", "tray"]},
+            {"success": True, "detections": {"mug": [[200, 300]], "tray": [[400, 100]]}},
+        ]
+>       with patch("ambres_g0_extractor._make_handler", return_value=mock_handler):
+
+tests/test_g0_extractor.py:259: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.11/unittest/mock.py:1430: in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+/usr/lib/python3.11/pkgutil.py:700: in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1204: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'ambres_g0_extractor', import_ = <function _gcd_import at 0x781526dcbd80>
+
+>   ???
+E   ModuleNotFoundError: No module named 'ambres_g0_extractor'
+
+<frozen importlib._bootstrap>:1140: ModuleNotFoundError
+_____ TestKeyNameVariants.test_step2_empty_object_list_falls_back_to_step1 _____
+
+self = <test_g0_extractor.TestKeyNameVariants object at 0x78150a10a590>
+image_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_step2_empty_object_list_f0/test.png')
+mock_handler = <MagicMock id='132031758750352'>
+
+    def test_step2_empty_object_list_falls_back_to_step1(self, image_path, mock_handler):
+        """respond가 빈 목록 반환 시 step1의 object_list로 fallback."""
+        mock_handler.handle.side_effect = [
+            _reset(),
+            _query(objects=["cup", "box"]),
+            {"success": True, "task_objects": []},  # 빈 리스트 → step1 fallback
+            _detect(),
+        ]
+>       with patch("ambres_g0_extractor._make_handler", return_value=mock_handler):
+
+tests/test_g0_extractor.py:272: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.11/unittest/mock.py:1430: in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+/usr/lib/python3.11/pkgutil.py:700: in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1204: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'ambres_g0_extractor', import_ = <function _gcd_import at 0x781526dcbd80>
+
+>   ???
+E   ModuleNotFoundError: No module named 'ambres_g0_extractor'
+
+<frozen importlib._bootstrap>:1140: ModuleNotFoundError
+__________ TestMakeHandlerArgs.test_make_handler_called_with_defaults __________
+
+self = <test_g0_extractor.TestMakeHandlerArgs object at 0x78150a10aa90>
+image_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_make_handler_called_with_0/test.png')
+mock_handler = <MagicMock id='132031710167888'>
+
+    def test_make_handler_called_with_defaults(self, image_path, mock_handler):
+        _four_calls(mock_handler)
+>       with patch("ambres_g0_extractor._make_handler", return_value=mock_handler) as mk:
+
+tests/test_g0_extractor.py:285: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.11/unittest/mock.py:1430: in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+/usr/lib/python3.11/pkgutil.py:700: in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1204: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'ambres_g0_extractor', import_ = <function _gcd_import at 0x781526dcbd80>
+
+>   ???
+E   ModuleNotFoundError: No module named 'ambres_g0_extractor'
+
+<frozen importlib._bootstrap>:1140: ModuleNotFoundError
+________ TestMakeHandlerArgs.test_make_handler_called_with_custom_args _________
+
+self = <test_g0_extractor.TestMakeHandlerArgs object at 0x78150a10b5d0>
+image_path = PosixPath('/tmp/pytest-of-root/pytest-8/test_make_handler_called_with_1/test.png')
+mock_handler = <MagicMock id='132031710364624'>
+
+    def test_make_handler_called_with_custom_args(self, image_path, mock_handler):
+        _four_calls(mock_handler)
+>       with patch("ambres_g0_extractor._make_handler", return_value=mock_handler) as mk:
+
+tests/test_g0_extractor.py:291: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.11/unittest/mock.py:1430: in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+/usr/lib/python3.11/pkgutil.py:700: in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1204: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'ambres_g0_extractor', import_ = <function _gcd_import at 0x781526dcbd80>
+
+>   ???
+E   ModuleNotFoundError: No module named 'ambres_g0_extractor'
+
+<frozen importlib._bootstrap>:1140: ModuleNotFoundError
+_____________________ TestRealImage.test_real_image_shape ______________________
+
+self = <test_g0_extractor.TestRealImage object at 0x78150a108290>
+mock_handler = <MagicMock id='132031458696336'>
+
+    def test_real_image_shape(self, mock_handler):
+        _four_calls(mock_handler)
+>       with patch("ambres_g0_extractor._make_handler", return_value=mock_handler):
+
+tests/test_g0_extractor.py:312: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/usr/lib/python3.11/unittest/mock.py:1430: in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+/usr/lib/python3.11/pkgutil.py:700: in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1204: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1176: in _find_and_load
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+name = 'ambres_g0_extractor', import_ = <function _gcd_import at 0x781526dcbd80>
+
+>   ???
+E   ModuleNotFoundError: No module named 'ambres_g0_extractor'
+
+<frozen importlib._bootstrap>:1140: ModuleNotFoundError
+=========================== short test summary info ============================
+FAILED tests/test_g0_extractor.py::TestHappyPath::test_returns_correct_g0_structure
+FAILED tests/test_g0_extractor.py::TestHappyPath::test_image_shape_is_list_of_two_ints
+FAILED tests/test_g0_extractor.py::TestHappyPath::test_coord_values_are_python_ints
+FAILED tests/test_g0_extractor.py::TestHappyPath::test_exactly_four_handle_calls
+FAILED tests/test_g0_extractor.py::TestCallSequence::test_reset_is_first_call
+FAILED tests/test_g0_extractor.py::TestCallSequence::test_query_is_second_call_with_task_description
+FAILED tests/test_g0_extractor.py::TestCallSequence::test_respond_always_called_with_empty_string_even_when_non_ambiguous
+FAILED tests/test_g0_extractor.py::TestCallSequence::test_detect_is_fourth_call_with_role_labels
+FAILED tests/test_g0_extractor.py::TestAmbiguityPaths::test_ambiguous_raises_runtime_error_by_default
+FAILED tests/test_g0_extractor.py::TestAmbiguityPaths::test_ambiguous_error_contains_clarifying_question
+FAILED tests/test_g0_extractor.py::TestAmbiguityPaths::test_ambiguous_stops_before_respond_and_detect
+FAILED tests/test_g0_extractor.py::TestAmbiguityPaths::test_allow_ambiguous_runs_all_four_steps
+FAILED tests/test_g0_extractor.py::TestErrorPaths::test_reset_failure_raises_runtime_error
+FAILED tests/test_g0_extractor.py::TestErrorPaths::test_query_failure_raises_runtime_error
+FAILED tests/test_g0_extractor.py::TestErrorPaths::test_missing_detection_label_raises_value_error
+FAILED tests/test_g0_extractor.py::TestKeyNameVariants::test_ambiguity_and_object_list_key_names
+FAILED tests/test_g0_extractor.py::TestKeyNameVariants::test_step2_empty_object_list_falls_back_to_step1
+FAILED tests/test_g0_extractor.py::TestMakeHandlerArgs::test_make_handler_called_with_defaults
+FAILED tests/test_g0_extractor.py::TestMakeHandlerArgs::test_make_handler_called_with_custom_args
+FAILED tests/test_g0_extractor.py::TestRealImage::test_real_image_shape - Mod...
+================ 20 failed, 145 passed, 19 deselected in 5.23s =================

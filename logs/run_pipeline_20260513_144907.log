@@ -1,0 +1,26 @@
+2026-05-13 14:49:09,260  INFO      run_pipeline_local — 핸들러 초기화 중... {'model_type': 'finetune', 'adapter_ckpt': '43qazb3XcrZF5rZWnjRPVm', 'use_detection': False, 'use_sam': False}
+2026-05-13 14:49:09,264  INFO      module.models.ambres.handler — AmbResHandler.setup: model_type=finetune  use_detection=False  use_sam=False
+2026-05-13 14:49:30,394  INFO      module.models.ambres.handler — AmbResHandler: ready (model_type=finetune)
+2026-05-13 14:49:30,403  INFO      run_pipeline_local — 핸들러 초기화 완료
+2026-05-13 14:49:34,045  INFO      run_pipeline_local — 파이프라인 시작: task='place the red mug next to the wine bottle'
+2026-05-13 14:49:34,054  INFO      run_pipeline_local —   t₀=assets/test/test-02/G0-init.jpeg  C1=assets/test/test-02/Gc1.png  C2=assets/test/test-02/Gc2.png
+2026-05-13 14:49:56,473  ERROR     run_pipeline_local — 파이프라인 실행 중 오류: list index out of range
+Traceback (most recent call last):
+  File "/workspace/COSE461-proj/scripts/run_pipeline_local.py", line 366, in interactive_loop
+    run_once(handler, t0, c1, c2, task, threshold, mock)
+  File "/workspace/COSE461-proj/scripts/run_pipeline_local.py", line 273, in run_once
+    result = run_pipeline(
+             ^^^^^^^^^^^^^
+  File "/workspace/COSE461-proj/src/pipeline.py", line 236, in run_pipeline
+    c1_state, c1_decision = check_grounding(g0_current, c1_det, "C1", threshold)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/COSE461-proj/src/monitoring/consistency_monitor.py", line 130, in check_grounding
+    state = _check_target(g0, detections_t, threshold)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/COSE461-proj/src/monitoring/consistency_monitor.py", line 69, in _check_target
+    if _euclidean(g0_coord, coords[0]) > threshold:
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/COSE461-proj/src/monitoring/consistency_monitor.py", line 49, in _euclidean
+    return math.sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2)
+                             ~^^^
+IndexError: list index out of range

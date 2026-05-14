@@ -12,6 +12,7 @@
 # 서버에 로드된 액션 모델 ID (InferenceClient.load_model 시 지정한 이름)
 action_model_id: pi0_main
 fps: 30.0
+max_episode_steps: 500   # 에피소드 당 최대 스텝 (30 Hz × 500 ≈ 16초)
 
 pre_handlers:
   - handler_id: ambres

@@ -1,0 +1,83 @@
+2026-05-13 14:26:32,682  INFO      run_pipeline_local — [mock] 패치 완료 (scenario=ambiguous-c1)
+2026-05-13 14:26:32,684  INFO      run_pipeline_local — [mock 모드] scenario=ambiguous-c1
+2026-05-13 14:26:33,193  INFO      run_pipeline_local — 파이프라인 시작: task='move the marker next to the sprite bottle'
+2026-05-13 14:26:33,195  INFO      run_pipeline_local —   t₀=/workspace/AmbRes/assets/images/5rhU25AdQW4jADxhp8EYuq.jpeg  C1=/workspace/AmbRes/assets/images/real_0.png  C2=/workspace/AmbRes/assets/images/5rhU25AdQW4jADxhp8EYuq.jpeg
+2026-05-13 14:26:33,568  INFO      run_pipeline_local — [user_response] question="[C1 AMBIGUOUS_TARGET] 어떤 'mock target'을(를) 집어야 하나요?"  answer='n'
+2026-05-13 14:26:33,796  INFO      run_pipeline_local — 파이프라인 완료: status=complete
+2026-05-13 14:26:33,798  INFO      run_pipeline_local — pipeline result:
+{
+  "status": "complete",
+  "g0_initial": {
+    "target": {
+      "label": "mock target",
+      "coord": [
+        200,
+        300
+      ]
+    },
+    "destination": {
+      "label": "mock destination",
+      "coord": [
+        400,
+        300
+      ]
+    },
+    "image_shape": [
+      2252,
+      4000
+    ]
+  },
+  "c1": {
+    "checkpoint": "C1",
+    "state": "AMBIGUOUS_TARGET",
+    "decision": "ASK",
+    "user_response": "n",
+    "g0_after": {
+      "target": {
+        "label": "n",
+        "coord": [
+          300,
+          300
+        ]
+      },
+      "destination": {
+        "label": "mock destination",
+        "coord": [
+          400,
+          300
+        ]
+      },
+      "image_shape": [
+        480,
+        640
+      ]
+    }
+  },
+  "c2": {
+    "checkpoint": "C2",
+    "state": "CLEAR",
+    "decision": "CONTINUE",
+    "user_response": "",
+    "g0_after": {
+      "target": {
+        "label": "n",
+        "coord": [
+          300,
+          300
+        ]
+      },
+      "destination": {
+        "label": "mock destination",
+        "coord": [
+          400,
+          300
+        ]
+      },
+      "image_shape": [
+        480,
+        640
+      ]
+    }
+  },
+  "stop_reason": ""
+}

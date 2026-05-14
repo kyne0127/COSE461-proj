@@ -1,0 +1,86 @@
+2026-05-13 15:11:15,875  INFO      run_pipeline_local — 핸들러 초기화 중... {'model_type': 'finetune', 'adapter_ckpt': '43qazb3XcrZF5rZWnjRPVm', 'use_detection': False, 'use_sam': False}
+2026-05-13 15:11:15,880  INFO      module.models.ambres.handler — AmbResHandler.setup: model_type=finetune  use_detection=False  use_sam=False
+2026-05-13 15:11:38,924  INFO      module.models.ambres.handler — AmbResHandler: ready (model_type=finetune)
+2026-05-13 15:11:38,948  INFO      run_pipeline_local — 핸들러 초기화 완료
+2026-05-13 15:11:41,214  INFO      run_pipeline_local — 파이프라인 시작: task='place the red mug next to the wine bottle'
+2026-05-13 15:11:41,237  INFO      run_pipeline_local —   t₀=assets/test/test-02/G0-init.jpeg  C1=assets/test/test-02/Gc3.png  C2=assets/test/test-02/Gc3.png
+2026-05-13 15:12:02,682  INFO      run_pipeline_local — [user_response] question="[C1 AMBIGUOUS_TARGET] 어떤 'wine bottle'을(를) 집어야 하나요?"  answer=''
+2026-05-13 15:12:05,666  INFO      run_pipeline_local — [user_response] question="[C2 AMBIGUOUS_DESTINATION] 어떤 'wine bottle'에 놓아야 하나요?"  answer=''
+2026-05-13 15:12:05,669  INFO      run_pipeline_local — 파이프라인 완료: status=complete
+2026-05-13 15:12:05,672  INFO      run_pipeline_local — pipeline result:
+{
+  "status": "complete",
+  "g0_initial": {
+    "target": {
+      "label": "wine bottle",
+      "coord": [
+        2708,
+        835
+      ]
+    },
+    "destination": {
+      "label": "wine bottle",
+      "coord": [
+        2708,
+        835
+      ]
+    },
+    "image_shape": [
+      2252,
+      4000
+    ]
+  },
+  "c1": {
+    "checkpoint": "C1",
+    "state": "AMBIGUOUS_TARGET",
+    "decision": "ASK",
+    "user_response": "",
+    "g0_after": {
+      "target": {
+        "label": "wine bottle",
+        "coord": [
+          2708,
+          835
+        ]
+      },
+      "destination": {
+        "label": "wine bottle",
+        "coord": [
+          2708,
+          835
+        ]
+      },
+      "image_shape": [
+        2252,
+        4000
+      ]
+    }
+  },
+  "c2": {
+    "checkpoint": "C2",
+    "state": "AMBIGUOUS_DESTINATION",
+    "decision": "ASK",
+    "user_response": "",
+    "g0_after": {
+      "target": {
+        "label": "wine bottle",
+        "coord": [
+          2708,
+          835
+        ]
+      },
+      "destination": {
+        "label": "wine bottle",
+        "coord": [
+          2708,
+          835
+        ]
+      },
+      "image_shape": [
+        2252,
+        4000
+      ]
+    }
+  },
+  "stop_reason": ""
+}

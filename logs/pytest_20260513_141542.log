@@ -1,0 +1,2 @@
+2026-05-13 14:15:46  INFO      module.models.ambres.handler — AmbResHandler.setup: model_type=finetune  use_detection=False  use_sam=False
+2026-05-13 14:16:03  INFO      module.models.ambres.handler — AmbResHandler: ready (model_type=finetune)
