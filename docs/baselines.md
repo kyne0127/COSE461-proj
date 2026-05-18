@@ -106,13 +106,14 @@ G₀ = {
 
 ### 개요 비교표
 
-| 방법                       | Checkpoint | G₀ memory | Coord | Taxonomy | 논문 근거                   |
-| -------------------------- | ---------- | --------- | ----- | -------- | --------------------------- |
-| B1 Initial-only            | ✗          | ✗         | ✗     | ✗        | AmbResVLM 실제 사용 방식    |
-| B2 No memory               | ✓          | ✗         | ✗     | ✗        | INVIGORATE w/o history      |
-| B3 Attribute-aware Count   | ✓          | ✗         | ✗     | ✗        | BT Scene Clear? (강화 버전) |
-| B4 Binary Anomaly Detector | ✓          | ✓         | ✓     | ✗        | PAL No Watchdog ablation    |
-| **Ours**                   | ✓          | ✓         | ✓     | ✓        | PAL + BT + AmbResVLM        |
+| 방법                              | Checkpoint | G₀ memory | Coord | Taxonomy | 논문 근거 / 방어 질문                         |
+| --------------------------------- | ---------- | --------- | ----- | -------- | --------------------------------------------- |
+| B1 Initial-only                   | ✗          | ✗         | ✗     | ✗        | AmbResVLM 실제 사용 방식                      |
+| B2 No memory                      | ✓          | ✗         | ✗     | ✗        | INVIGORATE w/o history                        |
+| B3 Attribute-aware Count          | ✓          | ✗         | ✗     | ✗        | BT Scene Clear? (강화 버전)                   |
+| B4 Binary Anomaly Detector        | ✓          | ✓         | ✓     | ✗        | PAL No Watchdog ablation                      |
+| B5 Re-query + LLM Consistency Judge | ✓        | ✗         | ✗     | ✗        | "그냥 GPT-4V에게 물어보면 되지 않나?" 방어 |
+| **Ours**                          | ✓          | ✓         | ✓     | ✓        | PAL + BT + AmbResVLM                          |
 
 ### 비교 체인
 
@@ -122,14 +123,16 @@ B1 → B2 → B4 → Ours
            +taxonomy
 
 + B3: attribute-aware rule cross-check
++ B5: general VLM consistency judge cross-check
 ```
 
-| 비교       | 추가 component                        | 검증 대상                                                       |
-| ---------- | ------------------------------------- | --------------------------------------------------------------- |
-| B1 → B2    | checkpoint 추가                       | 재호출 자체의 기여                                              |
-| B2 → B4    | G₀ + coord 추가                       | G₀ memory의 기여                                                |
-| B4 → Ours  | 8-state taxonomy                      | state 세분화의 기여 (anomaly detection vs state classification) |
-| B3 vs Ours | attribute-aware rule vs G₀ comparison | G₀ coord memory의 추가 기여                                     |
+| 비교       | 추가 component                         | 검증 대상                                                       |
+| ---------- | -------------------------------------- | --------------------------------------------------------------- |
+| B1 → B2    | checkpoint 추가                        | 재호출 자체의 기여                                              |
+| B2 → B4    | G₀ + coord 추가                        | G₀ memory의 기여                                                |
+| B4 → Ours  | 8-state taxonomy                       | state 세분화의 기여 (anomaly detection vs state classification) |
+| B3 vs Ours | attribute-aware rule vs G₀ comparison  | G₀ coord memory의 추가 기여                                     |
+| B5 vs Ours | general VLM 직접 비교 vs structured G₀ | reviewer 질문 방어: "LLM에게 두 이미지를 비교시키면 충분한가?" |
 
 ---
 
@@ -281,6 +284,74 @@ taxonomy가 있어야 이 구분이 가능하다.
 
 ---
 
+### B5 — Re-query + LLM Consistency Judge
+
+**개념**: AmbResVLM의 structured output을 사용하지 않고, initial image와 checkpoint image를 일반 multimodal LLM(GPT-4V 계열)에 동시에 보여준 뒤
+"초기 grounding이 여전히 유효한가?"를 직접 판단하게 한다.
+
+이 baseline이 방어하는 reviewer 질문:
+
+> **"AmbResVLM + G₀ monitor 대신 그냥 GPT-4V에게 두 이미지를 비교해달라고 하면 되지 않나?"**
+
+추가 가치: **높음**. 이 baseline을 포함하면 Ours가 단순히 "더 큰 VLM에게 물어본 결과"가 아니라,
+structured memory와 coordinate-based monitor를 사용하기 때문에 더 일관적이고 downstream update가 가능하다는 점을 분리해서 보일 수 있다.
+
+```python
+def b5(initial_img, checkpoint_img, task, checkpoint):
+    """
+    Re-query + LLM Consistency Judge.
+    checkpoint: "C1" or "C2"; prompt에 pre-pick/pre-place 맥락을 함께 제공한다.
+    """
+    prompt = f"""
+    Task: {task}
+    Checkpoint: {checkpoint}
+
+    You are given two images:
+    1. Initial scene before the robot started.
+    2. Current checkpoint scene during execution.
+
+    Is the original grounding still valid?
+    - Is the target still identifiable and unambiguous?
+    - Is the destination still available and unambiguous?
+    - If the target is missing before pick, answer STOP.
+    - If the target or destination is ambiguous, answer ASK.
+    - If the original grounding is still valid, answer CONTINUE.
+
+    Answer only in this JSON format:
+    {{
+      "decision": "CONTINUE" | "ASK" | "STOP",
+      "reason": "short explanation"
+    }}
+    """
+    output = GPT4V(
+        prompt=prompt,
+        images=[initial_img, checkpoint_img],
+    )
+    return parse_decision(output)
+```
+
+**B5 vs Ours — 왜 약한가?**
+
+| 항목 | B5 Re-query + LLM Judge | Ours |
+| ---- | ----------------------- | ---- |
+| Memory | structured G₀ 없이 두 이미지를 매번 비교 | G₀(label+coord)를 명시적으로 저장 |
+| Consistency | LLM 판단에 의존해 run-to-run variation 가능 | deterministic coord threshold + taxonomy |
+| Grounding update | LLM reason text만 남아 downstream update 어려움 | role/label/coord 기반 rolling G₀ update 가능 |
+| Latency/cost | GPT-4V-class API 호출, 무겁고 비쌈 | AmbRes structured output + local monitor |
+| Robot suitability | 실시간 로봇 loop에 부적합 | checkpoint gating에 맞춰 lightweight monitor 가능 |
+
+**예상 실패 / 약점**:
+
+- S2/S4: 같은 category 후보가 생겼을 때 prompt wording에 따라 CONTINUE/ASK가 흔들릴 수 있음
+- S5: distractor가 시각적으로 두드러지면 false ASK 가능
+- S6: "동일 label 1개"처럼 보이는 경우 원래 instance와 새 instance를 안정적으로 구분하기 어려움
+- API 비용과 latency가 높아 실제 30 Hz 로봇 시스템의 online monitor로 쓰기 어려움
+
+**구현 난이도:** 낮음. API 호출 wrapper + JSON parser + retry/fallback 정도면 충분하다.
+다만 논문 실험에서는 모델명, temperature, prompt, parsing failure policy를 고정해야 한다.
+
+---
+
 ### Ours — Execution-Aware AmbResVLM (Full System)
 
 **개념**: G₀(label+coord) + checkpoint 재호출 + 8-state taxonomy + C1/C2 분리 감지 + state별 decision.
@@ -399,14 +470,14 @@ def ours_pipeline(initial_img, task):
 
 ### 시나리오 × Baseline 예상 결과
 
-| 시나리오                | Gold Decision | B1  | B2  | B3          | B4          | Ours    |
-| ----------------------- | ------------- | --- | --- | ----------- | ----------- | ------- |
-| S1 Clear                | CONTINUE      | ✓   | ✓   | ✓           | ✓           | ✓       |
-| S2 Target 추가          | ASK           | ✗   | △   | ✓           | ✓           | ✓       |
-| S3 Target disappeared ★ | STOP          | ✗   | △   | ✓(STOP)     | ✗(ASK≠STOP) | ✓(STOP) |
-| S4 Dest 후보 추가       | ASK           | ✗   | △   | ✓           | ✓           | ✓       |
-| S5 Distractor ★         | CONTINUE      | △   | ✗   | ✗(same cat) | ✓           | ✓       |
-| S6 위치 변경 ★          | ASK           | ✗   | ✗   | ✗           | ✓           | ✓       |
+| 시나리오                | Gold Decision | B1  | B2  | B3          | B4          | B5          | Ours    |
+| ----------------------- | ------------- | --- | --- | ----------- | ----------- | ----------- | ------- |
+| S1 Clear                | CONTINUE      | ✓   | ✓   | ✓           | ✓           | ✓           | ✓       |
+| S2 Target 추가          | ASK           | ✗   | △   | ✓           | ✓           | △           | ✓       |
+| S3 Target disappeared ★ | STOP          | ✗   | △   | ✓(STOP)     | ✗(ASK≠STOP) | △           | ✓(STOP) |
+| S4 Dest 후보 추가       | ASK           | ✗   | △   | ✓           | ✓           | △           | ✓       |
+| S5 Distractor ★         | CONTINUE      | △   | ✗   | ✗(same cat) | ✓           | △           | ✓       |
+| S6 위치 변경 ★          | ASK           | ✗   | ✗   | ✗           | ✓           | △           | ✓       |
 
 > ✓ = 정확 / ✗ = 오답 / △ = 불확실 (model-dependent)
 
@@ -416,6 +487,10 @@ def ours_pipeline(initial_img, task):
 
 **B4 vs Ours 주목 (S3)**: B4는 anomaly 감지 후 ASK, Ours는 INVALID_TARGET → STOP.
 taxonomy 없이는 "사라진 것"과 "모호한 것"을 구분할 수 없다.
+
+**B5 vs Ours 주목**: B5는 두 이미지를 직접 비교하는 strong general-VLM baseline이다.
+하지만 structured G₀/coord가 없으므로 S6처럼 identity 유지 여부가 핵심인 장면에서 판단이 흔들릴 수 있고,
+ASK 이후 새 grounding을 안정적으로 업데이트하기 어렵다.
 
 ---
 
@@ -441,6 +516,7 @@ taxonomy 없이는 "사라진 것"과 "모호한 것"을 구분할 수 없다.
 | **ASK Answerability**             | ASK 질문이 단일 응답으로 grounding 업데이트 가능한가 (binary) | Ours만 / human eval |
 | **Grounding Update 성공률**       | ASK 후 G₀ 업데이트가 실제로 task를 해결했는가                 | 실제 로봇 연동 시   |
 | **AmbResVLM 호출 횟수**           | latency proxy (t₀+C1+C2 = 최대 3회)                           | 이미지 기반         |
+| **External VLM API Cost/Latency** | B5 GPT-4V-class 호출 비용 및 응답 시간                         | B5만                |
 | **Decision-to-execution latency** | checkpoint 진입 ~ decision 출력 시간                          | 실제 로봇 연동 시   |
 
 > ✕ 제외: Task Success Rate — 로봇 execution 노이즈(grasp 정밀도, 물리 충돌)가 개입해 파이프라인 비교와 무관
@@ -452,7 +528,7 @@ taxonomy 없이는 "사라진 것"과 "모호한 것"을 구분할 수 없다.
 ### 실험 반복 설계
 
 - **N = 10회** per scenario per method (PAL 기준)
-- 6개 시나리오 × 5개 방법(B1~B4+Ours) × 10회 = 300회
+- 6개 시나리오 × 6개 방법(B1~B5+Ours) × 10회 = 360회
 - 이미지 기반: 시나리오당 10장의 서로 다른 장면 세팅
 
 ### Inter-annotator Agreement
@@ -482,7 +558,7 @@ taxonomy 없이는 "사라진 것"과 "모호한 것"을 구분할 수 없다.
 | 3    | Consistency Monitor: G₀ vs Gₜ → 8-state                        | `consistency_monitor.py` |
 | 4    | Threshold pilot: coord 변화량 측정                             | `pilot_threshold.py`     |
 | 5    | 전체 파이프라인 통합 + 단위 테스트                             | `pipeline.py` + `tests/` |
-| 6    | Baseline 구현: B1, B2, B3(attribute-aware), B4(binary anomaly) | `baselines/`             |
+| 6    | Baseline 구현: B1, B2, B3(attribute-aware), B4(binary anomaly), B5(LLM judge) | `baselines/`             |
 | 7    | 실험 실행 + metrics 계산                                       | `evaluate.py`            |
 | 8    | Ablation 실험                                                  | `ablation.py`            |
 

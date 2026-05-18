@@ -2,7 +2,7 @@
 
 > 이 파일은 proposal.md 기반 실행 계획과 진행 상태를 하나의 문서로 관리한다.  
 > 작업이 완료될 때마다 이 파일의 상태를 업데이트한다.
-> Last updated: 2026-05-18 — SmolVLA + 실제 로봇 팔 연동 구조 반영
+> Last updated: 2026-05-18 — B1~B5 baseline 코드 구현 완료 및 실제 환경 검증 필요 사항 반영
 
 ---
 
@@ -123,7 +123,10 @@ if len(all_coords) > 1:
 | B2 | AmbResVLM repeated | 없음 | 매 checkpoint 재호출, G₀ 비교 없음 |
 | B3 | Candidate count rule | 없음 | 후보 개수 > 1이면 ASK (BT 방식) |
 | B4 | Ours w/o taxonomy | 있음 | G₀ 비교는 하지만 binary (valid/invalid)만 |
+| B5 | Re-query + LLM Consistency Judge | 없음 | initial/checkpoint 두 이미지를 GPT-4V-class LLM에 직접 비교시켜 CONTINUE/ASK/STOP 판단 |
 | **Ours** | Execution-Aware AmbResVLM | **있음** | G₀ + coord + taxonomy + decision policy |
+
+> B5는 reviewer가 제기할 수 있는 "AmbResVLM + G₀ monitor 대신 일반 GPT-4V에게 두 이미지를 비교시키면 충분하지 않은가?"라는 질문을 방어하기 위한 strong general-VLM baseline이다. Ours 대비 structured G₀/coord memory가 없고, downstream grounding update가 어렵고, API cost/latency가 커서 실제 로봇 checkpoint monitor로는 부적합하다는 점을 검증한다.
 
 ---
 
@@ -137,7 +140,7 @@ if len(all_coords) > 1:
 
 ---
 
-### Phase 1: 코드 구현 — 🔄 진행 중 (5/6 완료)
+### Phase 1: 코드 구현 — ✅ 완료 (6/6 완료)
 
 #### Step 1 — `ambres_g0_extractor.py` ✅ 완료
 
@@ -352,15 +355,58 @@ python pilot_threshold.py \
 
 ---
 
-#### Step 6 — `baselines/` ⬜ 미착수
+#### Step 6 — `src/baselines/` ✅ 완료
 
-**목표:** B1, B2, B3, B4 구현
+**목표:** B1, B2, B3, B4, B5 구현
 
-**구현 예정:**
-- `baselines/b1_single_shot.py` — G₀ 메모리 없이 현재 장면만 판단
-- `baselines/b2_repeated.py` — 매 checkpoint 재호출, 비교 없음
-- `baselines/b3_count_rule.py` — 후보 개수 > 1이면 ASK
-- `baselines/b4_binary.py` — G₀ 비교하되 binary valid/invalid만
+**공통 구조:**
+- `src/baselines/common.py`
+  - `BaselineDecision = Decision` alias
+  - `BaselineResult(method, decision, reason, question, raw_output, metadata)` dataclass
+  - `to_dict()` JSON 직렬화 지원
+- `src/baselines/__init__.py`
+  - `run_b1_initial_only`, `run_b2_no_memory`, `run_b3_count_rule`, `run_b4_binary_anomaly`, `run_b5_llm_judge` export
+
+**구현 완료:**
+- `src/baselines/b1_initial_only.py` — t₀ `reset → query`만 수행, ambiguity면 ASK, clear면 CONTINUE
+- `src/baselines/b2_no_memory.py` — checkpoint 이미지에서 `reset → query`, G₀ 없이 현재 장면만 보고 ASK/CONTINUE
+- `src/baselines/b3_count_rule.py` — AmbRes `object_list/task_objects`의 full-label exact count rule
+  - target 0개 → STOP
+  - target 2개 이상 → ASK
+  - destination 0개 또는 2개 이상 → ASK
+  - target/destination 각각 1개 → CONTINUE
+  - AmbRes 자체 ambiguity flag는 의도적으로 무시
+- `src/baselines/b4_binary_anomaly.py` — G₀ label+coord와 checkpoint detections 비교, anomaly면 taxonomy 없이 항상 ASK
+  - missing target도 Ours처럼 STOP하지 않고 ASK로 접음
+  - programmatic API는 handler+image 사용
+  - CLI는 `g0.json + detections.json` 입력으로 handler 없이 실행 가능
+- `src/baselines/b5_llm_judge.py` — initial/checkpoint 이미지를 GPT-4V-class LLM에게 함께 제시해 CONTINUE/ASK/STOP 직접 판단
+  - `llm_client` 주입 가능 (테스트/다른 provider용)
+  - 기본 path는 OpenAI Responses API optional client
+  - JSON string/dict/code-fence output parsing 지원
+
+**B5 설계 요약:**
+- 입력: `initial_img`, `checkpoint_img`, `task`, `checkpoint`
+- 출력: `{"decision": "CONTINUE|ASK|STOP", "reason": "..."}`
+- 고정 prompt로 target/destination이 여전히 identifiable/unambiguous한지 직접 판정
+- parsing failure policy, model name, temperature 고정
+- Ours 대비 약점: structured G₀ 없음, coord 기반 identity 추적 없음, rolling G₀ update 어려움, API 비용/latency 큼
+
+**테스트:**
+- `tests/test_baseline_b1.py` — 10개 통과
+- `tests/test_baseline_b2.py` — 9개 통과
+- `tests/test_baseline_b3.py` — 15개 통과
+- `tests/test_baseline_b4.py` — 13개 통과
+- `tests/test_baseline_b5.py` — 13개 통과
+- Baseline 전용: `pytest tests/test_baseline_b*.py` → **60개 통과**
+- 전체 unit suite: `pytest tests/ -m "not integration"` → **260개 통과, 1개 skipped, 40개 deselected**
+
+**실제 환경에서 추가 검증 필요:**
+- B1~B4: 실제 AmbRes/Molmo handler + 실제 checkpoint 이미지에서 query/detect output shape 검증 필요
+- B4: 실제 Molmo `detect`가 반환하는 coord scale, 중복 detection, `[[]]` empty detection edge case 재확인 필요
+- B5: OpenAI API key, `openai` package, 실제 GPT-4V-class model에서 prompt adherence / JSON parsing failure rate / latency / cost 측정 필요
+- B5: 논문 실험 전 model name, temperature, retry policy, parsing failure policy를 frozen config로 기록 필요
+- 모든 baseline: 실제 dataset 6개 시나리오에서 B1~B5+Ours decision table 산출 필요
 
 ---
 
@@ -441,13 +487,13 @@ python scripts/run_desktop.py \
 
 | Step | 내용 | 비고 |
 |---|---|---|
-| 7 | 실제 이미지 촬영 | 5 시나리오 × 2 checkpoint × 5회 = 약 50장; SO-ARM camera snapshot 포함 |
+| 7 | 실제 이미지 촬영 | 6 시나리오 × 2 checkpoint × 5회 = 약 60장; SO-ARM camera snapshot 포함 |
 | 8 | Annotation + inter-annotator check (Cohen's kappa) | `dataset/annotator.py` |
-| 9 | B1~Ours 전체 실험 + metrics 계산 | `evaluate.py` |
+| 9 | B1~B5+Ours 전체 실험 + metrics 계산 | `evaluate.py` |
 | 10 | Ablation (C1-only, C2-only, label-only G₀) | `ablation.py` |
 | 11 | SmolVLA + 실제 로봇 팔 smoke test | `ambres_smolvla.yaml`, SO-ARM101, 30 Hz loop |
 
-**5개 시나리오:**
+**6개 시나리오:**
 
 | # | 시나리오 | Gold State | Gold Decision |
 |---|---|---|---|
@@ -456,8 +502,9 @@ python scripts/run_desktop.py \
 | ③ | Target disappeared | INVALID_TARGET | STOP |
 | ④ | New destination candidate | AMBIGUOUS_DESTINATION | ASK |
 | ⑤ | Distractor added (무관한 물체) | CLEAR | CONTINUE |
+| ⑥ | Target 위치 변경 / 동일 label 다른 instance | AMBIGUOUS_TARGET | ASK |
 
-> ★ 시나리오 ②와 ⑤가 제안 방법의 차별점을 가장 잘 드러냄
+> ★ 시나리오 ②, ⑤, ⑥이 제안 방법의 차별점을 가장 잘 드러냄. 특히 ⑥은 B3(count 유지)와 B5(general VLM 비교)의 한계를 동시에 보여주는 coord memory 핵심 시나리오.
 
 ---
 
@@ -505,11 +552,14 @@ COSE461-proj/
 │   │   ├── models/smolvla.yaml   ✅ 완료
 │   │   └── pipelines/ambres_smolvla.yaml ✅ 완료
 │   └── server/                   ✅ 완료 (GenericInferenceService)
-├── baselines/
-│   ├── b1_single_shot.py        ⬜ 예정
-│   ├── b2_repeated.py           ⬜ 예정
-│   ├── b3_count_rule.py         ⬜ 예정
-│   └── b4_binary.py             ⬜ 예정
+├── src/baselines/                ✅ baseline 패키지
+│   ├── __init__.py               ✅ 완료
+│   ├── common.py                 ✅ 완료 (BaselineResult)
+│   ├── b1_initial_only.py        ✅ 완료
+│   ├── b2_no_memory.py           ✅ 완료
+│   ├── b3_count_rule.py          ✅ 완료
+│   ├── b4_binary_anomaly.py      ✅ 완료
+│   └── b5_llm_judge.py           ✅ 완료
 ├── logs/                         ✅ 자동 로깅
 │   ├── test_ambres_*.log         (기존 AmbRes 핸들러 로그)
 │   ├── pytest_latest.log         (최신 pytest 실행 — 항상 덮어씀)
@@ -517,6 +567,11 @@ COSE461-proj/
 ├── tests/
 │   ├── conftest.py               ✅ 완료 (tf stub, real_handler, 로그 훅)
 │   ├── test_g0_extractor.py      ✅ 완료 (20 tests passed)
+│   ├── test_baseline_b1.py       ✅ 완료 (10 tests passed)
+│   ├── test_baseline_b2.py       ✅ 완료 (9 tests passed)
+│   ├── test_baseline_b3.py       ✅ 완료 (15 tests passed)
+│   ├── test_baseline_b4.py       ✅ 완료 (13 tests passed)
+│   ├── test_baseline_b5.py       ✅ 완료 (13 tests passed)
 │   ├── test_role_parser.py       ✅ 완료 (47 tests passed)
 │   ├── test_consistency_monitor.py ✅ 완료 (46 tests passed)
 │   ├── test_pilot_threshold.py   ✅ 완료 (52 tests passed)
@@ -541,6 +596,7 @@ COSE461-proj/
 | ambiguity=true 처리 | RuntimeError raise → 상위 pipeline에서 ASK 처리 | extractor는 G₀ 추출 책임만 |
 | STOP 범위 | Conservative (INVALID만 STOP) | 나머지는 ASK → 사용자 판단 위임 |
 | Disambiguation 순서 | destination 먼저, target 나중 | BT 논문 명시 |
+| B5 baseline 포함 | GPT-4V-class LLM에 initial/checkpoint 직접 비교 | reviewer 질문 "그냥 GPT-4V면 되지 않나?" 방어 |
 | Molmo/SmolVLA 배치 | Molmo는 server, SmolVLA는 desktop local | Molmo VRAM 부담과 30 Hz action latency 분리 |
 | SmolVLA precision | `bfloat16` 기본 | RTX 3060 8 GB VRAM 목표 |
 | SmolVLA checkpoint | `lerobot/smolvla` | `local_model_checkpoint`로 local path override 가능 |
@@ -559,3 +615,4 @@ COSE461-proj/
 | Miss Rate | ASK/STOP 상황에서 CONTINUE 출력한 비율 |
 | C1 vs C2 contribution | C1-only / C2-only / both ablation |
 | Coord vs label-only | B4 vs Ours accuracy 차이 |
+| External VLM API Cost/Latency | B5 GPT-4V-class 호출 비용 및 응답 시간 |
