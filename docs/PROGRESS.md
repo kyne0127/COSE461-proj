@@ -2,7 +2,7 @@
 
 > 이 파일은 proposal.md 기반 실행 계획과 진행 상태를 하나의 문서로 관리한다.  
 > 작업이 완료될 때마다 이 파일의 상태를 업데이트한다.
-> Last updated: 2026-05-18 — B1~B5 baseline 코드 구현 완료 및 실제 환경 검증 필요 사항 반영
+> Last updated: 2026-05-18 — dataset manifest template 및 validate-only evaluator 경로 추가
 
 ---
 
@@ -489,7 +489,7 @@ python scripts/run_desktop.py \
 |---|---|---|
 | 7 | 실제 이미지 촬영 | 6 시나리오 × 2 checkpoint × 5회 = 약 60장; SO-ARM camera snapshot 포함 |
 | 8 | Annotation + inter-annotator check (Cohen's kappa) | `dataset/annotator.py` |
-| 9 | B1~B5+Ours 전체 실험 + metrics 계산 | `evaluate.py` |
+| 9 | B1~B5+Ours 전체 실험 + metrics 계산 | `src/evaluate.py` 골격 완료, 실제 dataset 실행 대기 |
 | 10 | Ablation (C1-only, C2-only, label-only G₀) | `ablation.py` |
 | 11 | SmolVLA + 실제 로봇 팔 smoke test | `ambres_smolvla.yaml`, SO-ARM101, 30 Hz loop |
 
@@ -505,6 +505,25 @@ python scripts/run_desktop.py \
 | ⑥ | Target 위치 변경 / 동일 label 다른 instance | AMBIGUOUS_TARGET | ASK |
 
 > ★ 시나리오 ②, ⑤, ⑥이 제안 방법의 차별점을 가장 잘 드러냄. 특히 ⑥은 B3(count 유지)와 B5(general VLM 비교)의 한계를 동시에 보여주는 coord memory 핵심 시나리오.
+
+**Evaluator 구현 상태:**
+- `src/evaluate.py` ✅ 완료
+  - manifest loader: `.jsonl`, JSON list, `{"samples": [...]}` 지원
+  - sample schema: `id`, `scenario`, `task`, `initial_img`, `c1_img`, `c2_img`, `checkpoint`, `gold_state`, `gold_decision`, `target_label`, `destination_label`
+  - `--validate-only`: 모델 없이 manifest schema와 scenario/checkpoint/decision 분포 검증
+  - B1~B5+Ours method runner 연결
+  - `Decision Accuracy`, `Miss Rate`, `False Alarm Rate`, `State Accuracy` 계산
+  - predictions CSV / metrics JSON 저장 지원
+- `dataset/README.md` ✅ 완료
+  - 이미지 디렉터리 구조, manifest field, validate/evaluate 명령 정리
+- `dataset/manifest.example.jsonl` ✅ 완료
+  - S1~S6 1개씩 예시 row 포함
+- `tests/test_evaluate.py` ✅ 완료 (13 tests passed)
+- 모델 없는 검증: `python src/evaluate.py dataset/manifest.example.jsonl --validate-only` 통과
+- 현재 한계:
+  - 실제 이미지 manifest가 아직 없음
+  - B1~B4/Ours는 실제 AmbRes/Molmo handler 환경에서 실행 검증 필요
+  - B5는 실제 OpenAI API key/model에서 latency, cost, JSON parsing 안정성 검증 필요
 
 ---
 
@@ -530,6 +549,11 @@ COSE461-proj/
 │   └── utils/                    분석 도구
 │       └── pilot_threshold.py      ✅ 완료
 ├── src/pipeline.py               ✅ 완료
+├── src/evaluate.py               ✅ 완료 (manifest loader + B1~B5/Ours metrics)
+├── dataset/
+│   ├── README.md                  ✅ 완료 (manifest 작성/검증 가이드)
+│   ├── manifest.example.jsonl     ✅ 완료 (S1~S6 예시)
+│   └── images/.gitkeep            ✅ 완료
 ├── pytest.ini                    ✅ 완료 (integration 마커, pythonpath=src, log 설정)
 ├── run_tests.sh                  ✅ 완료 (단위 테스트 + 타임스탬프 로그)
 ├── run_integration.sh            ✅ 완료 (통합 테스트 + 타임스탬프 로그)
@@ -572,6 +596,7 @@ COSE461-proj/
 │   ├── test_baseline_b3.py       ✅ 완료 (15 tests passed)
 │   ├── test_baseline_b4.py       ✅ 완료 (13 tests passed)
 │   ├── test_baseline_b5.py       ✅ 완료 (13 tests passed)
+│   ├── test_evaluate.py          ✅ 완료 (13 tests passed)
 │   ├── test_role_parser.py       ✅ 완료 (47 tests passed)
 │   ├── test_consistency_monitor.py ✅ 완료 (46 tests passed)
 │   ├── test_pilot_threshold.py   ✅ 완료 (52 tests passed)
@@ -616,3 +641,5 @@ COSE461-proj/
 | C1 vs C2 contribution | C1-only / C2-only / both ablation |
 | Coord vs label-only | B4 vs Ours accuracy 차이 |
 | External VLM API Cost/Latency | B5 GPT-4V-class 호출 비용 및 응답 시간 |
+
+**최신 로컬 unit test:** `pytest tests/ -m "not integration"` → **273 passed, 1 skipped, 40 deselected**
