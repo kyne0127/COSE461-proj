@@ -2,6 +2,7 @@
 
 > 이 파일은 proposal.md 기반 실행 계획과 진행 상태를 하나의 문서로 관리한다.  
 > 작업이 완료될 때마다 이 파일의 상태를 업데이트한다.
+> Last updated: 2026-05-18 — SmolVLA + 실제 로봇 팔 연동 구조 반영
 
 ---
 
@@ -42,6 +43,36 @@ C2 (pre-place checkpoint)
            ↓ (CONTINUE일 때)
   PLACE 실행 → 완료
 ```
+
+### 2.1.1 실제 로봇 실행 아키텍처 (Molmo server + SmolVLA desktop)
+
+현재 `module/` 구현은 연구용 C1/C2 checkpoint monitor와 별개로, 실제 로봇 팔을 움직이기 위한 online 실행 경로를 제공한다.
+
+```
+Desktop (RTX 3060 / 8 GB VRAM)          GPU Server / RunPod
+────────────────────────────────         ───────────────────────────
+RobotConnector                           GenericInferenceService
+  ├─ SO-ARM100/101 follower arm            └─ AmbResHandler (Molmo 7B)
+  ├─ optional SO leader arm                    query / respond
+  └─ egoview cameras
+        │
+        ▼
+InferencePipeline
+  ├─ episode_start:
+  │    GenericClient ─── gRPC ───► AmbRes query/respond
+  │    ambiguity가 있으면 terminal input으로 clarify
+  │
+  └─ action_loop @ 30 Hz:
+       SmolVLAModel.predict_action()
+       image + joint state + task_text → action
+       RobotConnector.send_action(action)
+```
+
+핵심 분리:
+- Molmo/AmbRes는 GPU server에서 실행한다. 네트워크 latency는 episode_start의 ambiguity resolution에만 영향을 준다.
+- SmolVLA는 desktop GPU에서 local로 실행한다. 30 Hz action loop는 gRPC를 거치지 않는다.
+- SO-ARM100/101 follower arm 제어와 leader arm teleoperation/data collection은 `RobotConnector`가 담당한다.
+- 현재 live pipeline은 t₀ ambiguity resolution + SmolVLA 실행까지 구현되어 있다. 연구용 C1/C2 G₀ consistency monitor는 아직 `module/desktop/pipeline.py`의 실시간 action loop에 직접 통합되지 않았다.
 
 ### 2.2 G₀ 표현 형식
 
@@ -333,14 +364,88 @@ python pilot_threshold.py \
 
 ---
 
+### Phase 1.5: SmolVLA + 실제 로봇 팔 연동 — ✅ 구현 완료 / ⚠️ 실기 검증 필요
+
+**목표:** AmbRes/Molmo는 server에서 ambiguity resolution을 담당하고, SmolVLA는 desktop에서 low-latency action model로 실행하여 SO-ARM100/101 실제 로봇 팔을 제어한다.
+
+**구현 완료 범위:**
+- `module/models/smolvla/model.py`
+  - `SmolVLAModel(BaseLeRobotModel)` 추가, `@ModelRegistry.register("smolvla")` 등록
+  - HuggingFace `lerobot/smolvla` checkpoint 로드
+  - `bfloat16` / `float16` / `float32` precision 옵션
+  - `Observation.images`, `Observation.state`, `Observation.task_text`를 SmolVLA policy batch로 변환
+  - action chunk buffer (`action_horizon`) 및 `reset()` 구현
+- `module/config/models/smolvla.yaml`
+  - 기본 config: `model_id: lerobot/smolvla`, `device: cuda`, `precision: bfloat16`
+- `module/config/pipelines/ambres_smolvla.yaml`
+  - `local_model_type: smolvla` 설정으로 action model을 desktop local 경로로 실행
+  - episode_start에서 AmbRes `query` 호출
+  - `task_ambiguous == true`이면 terminal clarification 후 AmbRes `respond` 호출
+  - `task_objects`를 `join_list`로 변환해 SmolVLA의 `task_text`로 전달
+- `module/desktop/pipeline.py`
+  - `PipelineConfig`에 `local_model_type`, `local_model_checkpoint`, `local_model_config` 추가
+  - local model이 설정되면 server-side `InferenceClient`를 건너뛰고 `ModelRegistry.build("smolvla", ...)` 실행
+  - action loop에서 `SmolVLAModel.predict_action()` → `RobotConnector.send_action()` 경로 구현
+- `module/desktop/robot_connector.py`
+  - LeRobot 0.5.x 기준 SO-ARM100/101 follower/leader arm 연결
+  - single-arm 및 dual-arm follower port mapping 지원
+  - egoview OpenCV camera config 생성
+  - `get_observation()`에서 images + joint state 추출
+  - `send_action()`에서 SmolVLA action vector를 follower arm joint action dict로 변환
+  - leader arm 기반 teleoperation (`teleop_step`) 지원
+- `module/desktop/data_collector.py`
+  - leader-follower teleoperation demonstration 수집
+  - frame별 image/state/action 저장용 `EpisodeBuffer` 연동
+- `module/config/desktop.yaml`
+  - 실제 SO-ARM101 dual-arm 포트 설정 (`right`, `left`)
+  - egoview camera 2대 설정
+  - RunPod/gRPC 접속 설정
+- `scripts/run_desktop.py`
+  - `pipeline` subcommand로 AmbRes + SmolVLA + RobotConnector 실행 가능
+  - train choice에 `smolvla` 포함
+
+**실행 명령:**
+```bash
+# 1. RunPod / GPU server 터널 열기
+python scripts/open_tunnel.py --env .env.runpod --auto-reconnect
+
+# 2. 서버 연결 확인
+python scripts/check_connection.py
+
+# 3. 실제 로봇 팔에서 AmbRes + SmolVLA pipeline 실행
+python scripts/run_desktop.py \
+  pipeline \
+  --config module/config/desktop.yaml \
+  --pipeline-config module/config/pipelines/ambres_smolvla.yaml \
+  --task "pick up the banana" \
+  --n-episodes 1
+```
+
+**현재 한계 / 다음 작업:**
+- 실제 SO-ARM101 hardware에서 SmolVLA end-to-end smoke test 필요
+  - observation camera key가 SmolVLA checkpoint가 기대하는 key와 맞는지 확인
+  - action dimension과 `state_keys` 길이가 일치하는지 확인
+  - joint unit/range가 LeRobot policy 출력과 follower arm 입력 사이에서 맞는지 확인
+- live robot loop에 Execution-Aware C1/C2 monitor 통합 필요
+  - 현재 `module/desktop/pipeline.py`는 episode_start ambiguity resolution만 수행
+  - C1(pre-pick), C2(pre-place) checkpoint 타이밍을 action policy 또는 high-level controller에서 받아야 함
+  - checkpoint에서 `get_checkpoint_detections()` → `check_grounding()` → CONTINUE/ASK/STOP gating 추가 예정
+- safety guard 필요
+  - action clipping / joint limit validation
+  - emergency stop hook
+  - ASK/STOP 발생 시 robot hold pose 또는 neutral action 정책
+
+---
+
 ### Phase 2: Dataset 구축 및 실험 ⬜ 미착수
 
 | Step | 내용 | 비고 |
 |---|---|---|
-| 7 | 실제 이미지 촬영 | 5 시나리오 × 2 checkpoint × 5회 = 약 50장 |
+| 7 | 실제 이미지 촬영 | 5 시나리오 × 2 checkpoint × 5회 = 약 50장; SO-ARM camera snapshot 포함 |
 | 8 | Annotation + inter-annotator check (Cohen's kappa) | `dataset/annotator.py` |
 | 9 | B1~Ours 전체 실험 + metrics 계산 | `evaluate.py` |
 | 10 | Ablation (C1-only, C2-only, label-only G₀) | `ablation.py` |
+| 11 | SmolVLA + 실제 로봇 팔 smoke test | `ambres_smolvla.yaml`, SO-ARM101, 30 Hz loop |
 
 **5개 시나리오:**
 
@@ -382,6 +487,24 @@ COSE461-proj/
 ├── run_tests.sh                  ✅ 완료 (단위 테스트 + 타임스탬프 로그)
 ├── run_integration.sh            ✅ 완료 (통합 테스트 + 타임스탬프 로그)
 ├── scripts/run_pipeline_local.py ✅ 완료 (파이프라인 인터랙티브 터미널 테스트)
+├── scripts/run_desktop.py        ✅ 완료 (실제 로봇 / data collection / pipeline entrypoint)
+├── scripts/run_server.py         ✅ 완료 (gRPC server entrypoint)
+├── scripts/open_tunnel.py        ✅ 완료 (RunPod SSH tunnel)
+├── scripts/check_connection.py   ✅ 완료 (desktop ↔ server 연결 확인)
+├── module/                       ✅ 실제 로봇/서버 분리 실행 패키지
+│   ├── desktop/
+│   │   ├── pipeline.py           ✅ 완료 (AmbRes pre-handler + local SmolVLA action loop)
+│   │   ├── robot_connector.py    ✅ 완료 (SO-ARM100/101 follower/leader 연결)
+│   │   ├── data_collector.py     ✅ 완료 (teleop demonstration 수집)
+│   │   └── generic_client.py     ✅ 완료 (AmbRes generic gRPC client)
+│   ├── models/
+│   │   ├── ambres/handler.py     ✅ 완료 (Molmo/AmbRes server handler)
+│   │   └── smolvla/model.py      ✅ 완료 (local SmolVLA wrapper)
+│   ├── config/
+│   │   ├── desktop.yaml          ✅ 완료 (SO-ARM101 dual-arm + cameras + gRPC)
+│   │   ├── models/smolvla.yaml   ✅ 완료
+│   │   └── pipelines/ambres_smolvla.yaml ✅ 완료
+│   └── server/                   ✅ 완료 (GenericInferenceService)
 ├── baselines/
 │   ├── b1_single_shot.py        ⬜ 예정
 │   ├── b2_repeated.py           ⬜ 예정
@@ -418,6 +541,11 @@ COSE461-proj/
 | ambiguity=true 처리 | RuntimeError raise → 상위 pipeline에서 ASK 처리 | extractor는 G₀ 추출 책임만 |
 | STOP 범위 | Conservative (INVALID만 STOP) | 나머지는 ASK → 사용자 판단 위임 |
 | Disambiguation 순서 | destination 먼저, target 나중 | BT 논문 명시 |
+| Molmo/SmolVLA 배치 | Molmo는 server, SmolVLA는 desktop local | Molmo VRAM 부담과 30 Hz action latency 분리 |
+| SmolVLA precision | `bfloat16` 기본 | RTX 3060 8 GB VRAM 목표 |
+| SmolVLA checkpoint | `lerobot/smolvla` | `local_model_checkpoint`로 local path override 가능 |
+| 실제 로봇 connector | LeRobot 0.5.x SOFollower/SOLeader 기준 | SO-ARM100/101 hardware API와 맞춤 |
+| live checkpoint monitor | 아직 미통합 | 현재 live loop는 episode_start AmbRes + SmolVLA action loop만 수행 |
 
 ---
 
