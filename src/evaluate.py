@@ -183,6 +183,27 @@ def manifest_summary(samples: list[EvalSample]) -> dict[str, Any]:
     }
 
 
+def image_path_summary(samples: list[EvalSample]) -> dict[str, Any]:
+    """Return existence checks for all unique image paths referenced by samples."""
+    paths = sorted({
+        sample.initial_img
+        for sample in samples
+    } | {
+        sample.c1_img
+        for sample in samples
+    } | {
+        sample.c2_img
+        for sample in samples
+    })
+    missing = [path for path in paths if not Path(path).is_file()]
+    return {
+        "n_unique_images": len(paths),
+        "n_existing_images": len(paths) - len(missing),
+        "n_missing_images": len(missing),
+        "missing_images": missing,
+    }
+
+
 def _prediction_from_baseline(sample: EvalSample, result: BaselineResult) -> EvalPrediction:
     return EvalPrediction(
         sample_id=sample.sample_id,
@@ -395,11 +416,28 @@ def main() -> None:
         action="store_true",
         help="Only load and validate manifest schema; do not load models or run methods.",
     )
+    parser.add_argument(
+        "--check-images",
+        action="store_true",
+        help="Also verify that all image paths referenced by the manifest exist.",
+    )
     args = parser.parse_args()
 
     samples = load_manifest(args.manifest)
+    if args.check_images:
+        paths = image_path_summary(samples)
+        if paths["n_missing_images"]:
+            print(json.dumps({
+                **manifest_summary(samples),
+                "image_paths": paths,
+            }, ensure_ascii=False, indent=2))
+            raise SystemExit(1)
+
     if args.validate_only:
-        print(json.dumps(manifest_summary(samples), ensure_ascii=False, indent=2))
+        summary = manifest_summary(samples)
+        if args.check_images:
+            summary["image_paths"] = image_path_summary(samples)
+        print(json.dumps(summary, ensure_ascii=False, indent=2))
         return
 
     if args.model_type == "finetune" and not args.adapter_ckpt:

@@ -13,6 +13,7 @@ if str(SRC_ROOT) not in sys.path:
 from evaluate import (
     EvalPrediction,
     compute_metrics,
+    image_path_summary,
     load_manifest,
     manifest_summary,
     write_metrics_json,
@@ -121,6 +122,18 @@ class TestManifestLoading:
         assert summary["scenarios"] == {"S1": 1, "S2": 1}
         assert summary["checkpoints"] == {"C1": 1, "C2": 1}
         assert summary["gold_decisions"] == {"CONTINUE": 1, "ASK": 1}
+
+    def test_image_path_summary_reports_existing_and_missing_paths(self, tmp_path):
+        sample = _sample_dict(tmp_path, c2_img="missing.png")
+        manifest = tmp_path / "manifest.json"
+        manifest.write_text(json.dumps([sample]))
+
+        summary = image_path_summary(load_manifest(manifest))
+
+        assert summary["n_unique_images"] == 3
+        assert summary["n_existing_images"] == 2
+        assert summary["n_missing_images"] == 1
+        assert summary["missing_images"][0].endswith("missing.png")
 
 
 class TestMetrics:

@@ -2,7 +2,7 @@
 
 > 이 파일은 proposal.md 기반 실행 계획과 진행 상태를 하나의 문서로 관리한다.  
 > 작업이 완료될 때마다 이 파일의 상태를 업데이트한다.
-> Last updated: 2026-05-18 — dataset manifest template 및 validate-only evaluator 경로 추가
+> Last updated: 2026-05-18 — PROGRESS 상태 정합성 점검 및 baseline/evaluator 최신 상태 반영
 
 ---
 
@@ -69,6 +69,7 @@ InferencePipeline
 ```
 
 핵심 분리:
+
 - Molmo/AmbRes는 GPU server에서 실행한다. 네트워크 latency는 episode_start의 ambiguity resolution에만 영향을 준다.
 - SmolVLA는 desktop GPU에서 local로 실행한다. 30 Hz action loop는 gRPC를 거치지 않는다.
 - SO-ARM100/101 follower arm 제어와 leader arm teleoperation/data collection은 `RobotConnector`가 담당한다.
@@ -78,8 +79,8 @@ InferencePipeline
 
 ```json
 {
-  "target":      { "label": "red block", "coord": [142, 318] },
-  "destination": { "label": "tray",      "coord": [401, 289] },
+  "target": { "label": "red block", "coord": [142, 318] },
+  "destination": { "label": "tray", "coord": [401, 289] },
   "image_shape": [480, 640]
 }
 ```
@@ -88,16 +89,16 @@ InferencePipeline
 
 ### 2.3 Grounding State Taxonomy
 
-| State | 트리거 조건 | Decision | Checkpoint |
-|---|---|---|---|
-| CLEAR | Gₜ에 target₀, dest₀ 모두 유효 | CONTINUE | C1, C2 |
-| CLEAR (distractor) | 새 object가 task와 무관 | CONTINUE | C1, C2 |
-| AMBIGUOUS_TARGET | 같은 label의 coord가 여러 개 | ASK | C1 only |
-| INVALID_TARGET | target₀가 Gₜ에 없음 | STOP | C1 only |
-| AMBIGUOUS_DESTINATION | dest 후보가 여러 개 | ASK | C2 only |
-| OCCUPIED_DESTINATION | dest₀는 있지만 occupied 상태 | ASK | C2 only |
-| INVALID_DESTINATION | dest₀가 Gₜ에 없음 | ASK/STOP | C2 only |
-| UNSAFE_OR_BLOCKED | safety 위협 감지 | STOP | C1, C2 |
+| State                 | 트리거 조건                   | Decision | Checkpoint |
+| --------------------- | ----------------------------- | -------- | ---------- |
+| CLEAR                 | Gₜ에 target₀, dest₀ 모두 유효 | CONTINUE | C1, C2     |
+| CLEAR (distractor)    | 새 object가 task와 무관       | CONTINUE | C1, C2     |
+| AMBIGUOUS_TARGET      | 같은 label의 coord가 여러 개  | ASK      | C1 only    |
+| INVALID_TARGET        | target₀가 Gₜ에 없음           | STOP     | C1 only    |
+| AMBIGUOUS_DESTINATION | dest 후보가 여러 개           | ASK      | C2 only    |
+| OCCUPIED_DESTINATION  | dest₀는 있지만 occupied 상태  | ASK      | C2 only    |
+| INVALID_DESTINATION   | dest₀가 Gₜ에 없음             | ASK/STOP | C2 only    |
+| UNSAFE_OR_BLOCKED     | safety 위협 감지              | STOP     | C1, C2     |
 
 > ⚠️ OCCUPIED_DESTINATION은 현재 scope 외 (이후 단계)
 
@@ -117,14 +118,14 @@ if len(all_coords) > 1:
 
 ### 2.5 Baseline
 
-| | 방법 | G₀ 메모리 | 설명 |
-|---|---|---|---|
-| B1 | AmbResVLM single-shot | 없음 | checkpoint에서 현재 장면만 판단 |
-| B2 | AmbResVLM repeated | 없음 | 매 checkpoint 재호출, G₀ 비교 없음 |
-| B3 | Candidate count rule | 없음 | 후보 개수 > 1이면 ASK (BT 방식) |
-| B4 | Ours w/o taxonomy | 있음 | G₀ 비교는 하지만 binary (valid/invalid)만 |
-| B5 | Re-query + LLM Consistency Judge | 없음 | initial/checkpoint 두 이미지를 GPT-4V-class LLM에 직접 비교시켜 CONTINUE/ASK/STOP 판단 |
-| **Ours** | Execution-Aware AmbResVLM | **있음** | G₀ + coord + taxonomy + decision policy |
+|          | 방법                             | G₀ 메모리 | 설명                                                                                      |
+| -------- | -------------------------------- | --------- | ----------------------------------------------------------------------------------------- |
+| B1       | AmbResVLM single-shot            | 없음      | t₀에서 1회 query만 수행, checkpoint/G₀ 비교 없음                                          |
+| B2       | AmbResVLM repeated               | 없음      | 매 checkpoint 재호출, G₀ 비교 없음                                                        |
+| B3       | Candidate count rule             | 없음      | full-label exact count; target 0개 STOP, 중복 target/destination 또는 destination 0개 ASK |
+| B4       | Ours w/o taxonomy                | 있음      | G₀ label+coord 비교는 하지만 anomaly면 taxonomy 없이 항상 ASK                             |
+| B5       | Re-query + LLM Consistency Judge | 없음      | initial/checkpoint 두 이미지를 GPT-4V-class LLM에 직접 비교시켜 CONTINUE/ASK/STOP 판단    |
+| **Ours** | Execution-Aware AmbResVLM        | **있음**  | G₀ + coord + taxonomy + decision policy                                                   |
 
 > B5는 reviewer가 제기할 수 있는 "AmbResVLM + G₀ monitor 대신 일반 GPT-4V에게 두 이미지를 비교시키면 충분하지 않은가?"라는 질문을 방어하기 위한 strong general-VLM baseline이다. Ours 대비 structured G₀/coord memory가 없고, downstream grounding update가 어렵고, API cost/latency가 커서 실제 로봇 checkpoint monitor로는 부적합하다는 점을 검증한다.
 
@@ -142,11 +143,14 @@ if len(all_coords) > 1:
 
 ### Phase 1: 코드 구현 — ✅ 완료 (6/6 완료)
 
+> Step별 전체 test suite 숫자는 해당 시점의 누적 기록이다. 최신 로컬 unit test 결과는 문서 하단의 "최신 로컬 unit test"를 기준으로 한다.
+
 #### Step 1 — `ambres_g0_extractor.py` ✅ 완료
 
 **목표:** t₀에서 AmbResVLM Step1+Step2 호출 → G₀ 추출
 
 **구현 내용:**
+
 - `extract_g0(image_path, task_description, ...)` — 메인 함수
 - `_make_handler()` — AmbResHandler 생성 (model_type: fs_prompt / finetune)
 - `_load_image()` — PIL → numpy float32 [0,1]
@@ -159,19 +163,21 @@ if len(all_coords) > 1:
 - CLI (`python ambres_g0_extractor.py <image> <task> [--model-type] [--adapter-ckpt] [--allow-ambiguous]`)
 
 **테스트:**
-- `tests/test_g0_extractor.py` — 20개 단위 테스트 (mock 기반), 전부 통과
+
+- `tests/test_g0_extractor.py` — 20개 테스트 total (mock 기반 19개 통과, optional real image 테스트 1개는 로컬 이미지 없으면 skip)
 - 실제 모델 실행 확인 (finetune + CKPT.REAL = `43qazb3XcrZF5rZWnjRPVm`)
 
 ```json
 // 실제 실행 결과 예시 (5rhU25AdQW4jADxhp8EYuq.jpeg, "move the marker next to the sprite bottle")
 {
-  "target":      { "label": "marker",        "coord": [1660, 1375] },
-  "destination": { "label": "sprite bottle", "coord": [708,  1150] },
+  "target": { "label": "marker", "coord": [1660, 1375] },
+  "destination": { "label": "sprite bottle", "coord": [708, 1150] },
   "image_shape": [2252, 4000]
 }
 ```
 
 **환경 이슈 (실제 모델 실행 시):**
+
 - `transformers < 5.0` 필요 (`torch 2.4.1`과 충돌 → `pip install "transformers>=4.48,<5.0"`)
 - Molmo processor가 `tensorflow`를 조건부 import → 아래 stub 필요:
 
@@ -192,12 +198,14 @@ sys.modules['tensorflow'] = tf
 **목표:** `object_list` + `task_description` → `{target, destination}` 역할 분류
 
 **구현 내용:**
+
 - 동사 패턴 (place, put, move, pick, grab, take, drop, insert) → 뒤 명사 = target
 - 전치사 패턴 (in, into, on, onto, to, inside) → 뒤 명사 = destination
 - `parse_roles(object_list, task_description) → {"target": str, "destination": str}`
 - CLI (`python role_parser.py <task_description> <object1> <object2> ...`)
 
 **테스트:**
+
 - `tests/test_role_parser.py` — 47개 전용 단위 테스트, 전부 통과
   - `TestBasicVerbPreposition` (8개): 동사+전치사 기본 케이스 (place/put/move/pick/grab/take/drop/insert)
   - `TestArticleSkipping` (4개): the/a/an 관사 무시
@@ -217,6 +225,7 @@ sys.modules['tensorflow'] = tf
 **목표:** G₀ vs Gₜ 비교 → Grounding State Taxonomy 분류
 
 **구현 내용:**
+
 - `GroundingState` enum: CLEAR / AMBIGUOUS_TARGET / INVALID_TARGET / AMBIGUOUS_DESTINATION / INVALID_DESTINATION / UNSAFE_OR_BLOCKED
 - `Decision` enum: CONTINUE / ASK / STOP
 - `check_grounding(g0, detections_t, checkpoint, threshold=50.0) → (GroundingState, Decision)`
@@ -228,11 +237,13 @@ sys.modules['tensorflow'] = tf
 - Decision 정책: INVALID_TARGET → STOP, INVALID_DESTINATION → ASK (회복 가능), 나머지 INVALID/AMBIGUOUS → ASK, CLEAR → CONTINUE
 
 **설계 결정:**
+
 - `detections_t` 형식: `{"label": [[x,y], [x,y], ...]}` — ALL coords (extract_g0의 first-only와 다름)
 - Threshold 기본값 50px: 임시값, pilot_threshold.py 결과로 교체 예정
 - INVALID_DESTINATION → ASK: proposal §4.4에서 "ASK/STOP" → ASK 선택 (destination 소실은 사용자 입력으로 회복 가능)
 
 **테스트:**
+
 - `tests/test_consistency_monitor.py` — 46개 단위 테스트, 전부 통과
   - `TestC1TargetChecks` (8개): target 관련 state, 경계값 포함
   - `TestC2DestinationChecks` (8개): destination 관련 state, 경계값 포함
@@ -240,7 +251,7 @@ sys.modules['tensorflow'] = tf
   - `TestReturnTypes` (4개): 반환 타입
   - `TestInvalidCheckpoint` (3개): 잘못된 checkpoint 인자
   - `TestEdgeCases` (8개): 동일 label, distractor, threshold 극값 등
-  - `TestScenarioAlignment` (5개): **proposal §5.1 시나리오 ①~⑤ 직접 매핑**
+  - `TestScenarioAlignment` (5개): **proposal §5.1 초기 시나리오 ①~⑤ 직접 매핑** (S6는 baseline/evaluator 단계에서 추가)
   - `TestGetCheckpointDetections` (5개): mock 기반 헬퍼 검증
 - 전체 test suite: 113개 통과 (20 + 47 + 46)
 
@@ -251,6 +262,7 @@ sys.modules['tensorflow'] = tf
 **목표:** 이미지 5~10장에서 coord 변화량 측정 → THRESHOLD 결정
 
 **구현 내용:**
+
 - 순수 통계 함수 (AmbRes 의존 없음, 완전 테스트 가능):
   - `centroid(coords)` — 좌표 평균
   - `euclidean(a, b)` — 유클리드 거리
@@ -266,6 +278,7 @@ sys.modules['tensorflow'] = tf
 - 출력: JSON 리포트 (`recommended_threshold_px`, `intra_scene`, `inter_instance_min_dist`, `note`)
 
 **실제 실험 절차 (Phase 2 이미지 촬영 후):**
+
 ```bash
 python pilot_threshold.py \
   --images scene_a.png scene_b.png scene_c.png scene_d.png scene_e.png \
@@ -276,6 +289,7 @@ python pilot_threshold.py \
 ```
 
 **테스트:**
+
 - `tests/test_pilot_threshold.py` — 52개 단위 테스트, 전부 통과
   - `TestCentroid` (4개), `TestEuclidean` (5개), `TestPercentile` (6개)
   - `TestComputeIntraStats` (6개), `TestComputeInterInstanceDistances` (5개)
@@ -288,6 +302,7 @@ python pilot_threshold.py \
   - `pytest tests/test_integration.py -m integration` → 실제 GPU 모델 검증
 
 **실제 모델 실행 중 발견된 사실 (integration 테스트로 확인):**
+
 - Molmo `detect`는 동일 이미지에서 같은 레이블을 **여러 개** 반환할 수 있음 (marker 3개 감지됨)
   - → `check_grounding`이 `AMBIGUOUS_TARGET`을 올바르게 반환하는 것 확인
 - `_collect_detections_real`의 coord는 **float** (detect 원시 출력), `_first_coord()`만 int 변환
@@ -301,6 +316,7 @@ python pilot_threshold.py \
 **목표:** t₀ → C1 → C2 end-to-end 통합
 
 **구현 내용:**
+
 - `CheckpointOutcome` dataclass: checkpoint, state, decision, detections, g0_before, g0_after, user_response
 - `PipelineResult` dataclass: status, g0_initial, c1, c2, stop_reason + `to_dict()`
 - `run_pipeline(image_t0, image_c1, image_c2, task_description, *, handler, threshold, user_response_fn, ...)` — 메인 함수
@@ -316,11 +332,13 @@ python pilot_threshold.py \
 - CLI: `python pipeline.py <t0> <c1> <c2> <task> [--model-type] [--threshold]`
 
 **주요 설계:**
+
 - `handler=None` → `_make_handler()` 내부 생성, 외부 주입 시 재사용 (OOM 방지)
 - `user_response_fn` 반환값이 `""` → rolling update 건너뜀 (G₀ 그대로 유지)
 - status: `"complete"` / `"stopped"` / `"initial_ambiguous"` 세 가지
 
 **테스트:**
+
 - `tests/test_pipeline.py` — 36개 단위 테스트, 전부 통과
   - `TestHappyPath` (7개): t0→C1(CLEAR)→C2(CLEAR)→complete
   - `TestInitialAmbiguous` (4개): t0 ambiguity=true 처리
@@ -329,26 +347,31 @@ python pilot_threshold.py \
   - `TestC1Ask` (5개): AMBIGUOUS_TARGET → ASK → rolling update → C2 반영
   - `TestOutputSchema` (4개): 반환 타입·직렬화 검증
   - `TestHandlerInjection` (2개): handler 주입/생성 분기
-  - `TestHelpers` (4개): _noop_response, _clarifying_question, _update_g0
-  - `TestProposalScenarios` (5개): proposal §5.1 시나리오 ①~⑤ 직접 검증
+  - `TestHelpers` (4개): \_noop_response, \_clarifying_question, \_update_g0
+  - `TestProposalScenarios` (5개): proposal §5.1 초기 시나리오 ①~⑤ 직접 검증 (S6는 baseline/evaluator 단계에서 추가)
 - 전체 test suite: **201개 통과** (20+47+46+52+36)
 - **pipeline integration test**: `TestPipelineIntegration` — 21개, 실제 모델로 전부 통과
 
 **실제 모델 pipeline 실행 결과 (marker 이미지, 동일 장면 t0=C1=C2):**
+
 ```json
 {
   "status": "complete",
-  "g0_initial": {"target": {"label": "marker", "coord": [1660, 1375]},
-                 "destination": {"label": "sprite bottle", "coord": [708, 1150]}},
-  "c1": {"state": "AMBIGUOUS_TARGET", "decision": "ASK"},
-  "c2": {"state": "CLEAR",           "decision": "CONTINUE"}
+  "g0_initial": {
+    "target": { "label": "marker", "coord": [1660, 1375] },
+    "destination": { "label": "sprite bottle", "coord": [708, 1150] }
+  },
+  "c1": { "state": "AMBIGUOUS_TARGET", "decision": "ASK" },
+  "c2": { "state": "CLEAR", "decision": "CONTINUE" }
 }
 ```
+
 - C1이 AMBIGUOUS_TARGET인 이유: Molmo가 동일 이미지에서 "marker"를 3개 감지
 - user_response_fn이 noop(빈 문자열) → rolling update 없이 C2로 진행
 - C2는 CLEAR → status="complete"
 
 **실제 이미지 시나리오 ③ 검증 (test-02, "place the red mug next to the wine bottle"):**
+
 - t₀: red mug @ [1380, 1060], wine bottle @ [2708, 835] 정상 추출
 - C1 (Gc1.png, red mug 제거): INVALID_TARGET → STOP ✓
 - 버그 수정: Molmo 객체 미감지 시 `[[]]` 반환 → IndexError → `consistency_monitor.py`에 유효 좌표 필터 추가
@@ -360,6 +383,7 @@ python pilot_threshold.py \
 **목표:** B1, B2, B3, B4, B5 구현
 
 **공통 구조:**
+
 - `src/baselines/common.py`
   - `BaselineDecision = Decision` alias
   - `BaselineResult(method, decision, reason, question, raw_output, metadata)` dataclass
@@ -368,6 +392,7 @@ python pilot_threshold.py \
   - `run_b1_initial_only`, `run_b2_no_memory`, `run_b3_count_rule`, `run_b4_binary_anomaly`, `run_b5_llm_judge` export
 
 **구현 완료:**
+
 - `src/baselines/b1_initial_only.py` — t₀ `reset → query`만 수행, ambiguity면 ASK, clear면 CONTINUE
 - `src/baselines/b2_no_memory.py` — checkpoint 이미지에서 `reset → query`, G₀ 없이 현재 장면만 보고 ASK/CONTINUE
 - `src/baselines/b3_count_rule.py` — AmbRes `object_list/task_objects`의 full-label exact count rule
@@ -386,6 +411,7 @@ python pilot_threshold.py \
   - JSON string/dict/code-fence output parsing 지원
 
 **B5 설계 요약:**
+
 - 입력: `initial_img`, `checkpoint_img`, `task`, `checkpoint`
 - 출력: `{"decision": "CONTINUE|ASK|STOP", "reason": "..."}`
 - 고정 prompt로 target/destination이 여전히 identifiable/unambiguous한지 직접 판정
@@ -393,15 +419,17 @@ python pilot_threshold.py \
 - Ours 대비 약점: structured G₀ 없음, coord 기반 identity 추적 없음, rolling G₀ update 어려움, API 비용/latency 큼
 
 **테스트:**
+
 - `tests/test_baseline_b1.py` — 10개 통과
 - `tests/test_baseline_b2.py` — 9개 통과
 - `tests/test_baseline_b3.py` — 15개 통과
 - `tests/test_baseline_b4.py` — 13개 통과
 - `tests/test_baseline_b5.py` — 13개 통과
 - Baseline 전용: `pytest tests/test_baseline_b*.py` → **60개 통과**
-- 전체 unit suite: `pytest tests/ -m "not integration"` → **260개 통과, 1개 skipped, 40개 deselected**
+- 전체 unit suite: `pytest tests/ -m "not integration"` → **274개 통과, 1개 skipped, 40개 deselected**
 
 **실제 환경에서 추가 검증 필요:**
+
 - B1~B4: 실제 AmbRes/Molmo handler + 실제 checkpoint 이미지에서 query/detect output shape 검증 필요
 - B4: 실제 Molmo `detect`가 반환하는 coord scale, 중복 detection, `[[]]` empty detection edge case 재확인 필요
 - B5: OpenAI API key, `openai` package, 실제 GPT-4V-class model에서 prompt adherence / JSON parsing failure rate / latency / cost 측정 필요
@@ -414,7 +442,10 @@ python pilot_threshold.py \
 
 **목표:** AmbRes/Molmo는 server에서 ambiguity resolution을 담당하고, SmolVLA는 desktop에서 low-latency action model로 실행하여 SO-ARM100/101 실제 로봇 팔을 제어한다.
 
+> 현재 연구 진행 순서는 Phase 2 이미지 기반 baseline/evaluator 실험을 먼저 완료한 뒤, 실제 SO-ARM101 환경에서 Phase 1.5 smoke test와 C1/C2 monitor 통합을 검증하는 방향으로 정리한다.
+
 **구현 완료 범위:**
+
 - `module/models/smolvla/model.py`
   - `SmolVLAModel(BaseLeRobotModel)` 추가, `@ModelRegistry.register("smolvla")` 등록
   - HuggingFace `lerobot/smolvla` checkpoint 로드
@@ -451,6 +482,7 @@ python pilot_threshold.py \
   - train choice에 `smolvla` 포함
 
 **실행 명령:**
+
 ```bash
 # 1. RunPod / GPU server 터널 열기
 python scripts/open_tunnel.py --env .env.runpod --auto-reconnect
@@ -468,6 +500,7 @@ python scripts/run_desktop.py \
 ```
 
 **현재 한계 / 다음 작업:**
+
 - 실제 SO-ARM101 hardware에서 SmolVLA end-to-end smoke test 필요
   - observation camera key가 SmolVLA checkpoint가 기대하는 key와 맞는지 확인
   - action dimension과 `state_keys` 길이가 일치하는지 확인
@@ -483,45 +516,53 @@ python scripts/run_desktop.py \
 
 ---
 
-### Phase 2: Dataset 구축 및 실험 ⬜ 미착수
+### Phase 2: Dataset 구축 및 실험 🔄 진행 중 (평가 골격 완료 / 실제 이미지 수집 대기)
 
-| Step | 내용 | 비고 |
-|---|---|---|
-| 7 | 실제 이미지 촬영 | 6 시나리오 × 2 checkpoint × 5회 = 약 60장; SO-ARM camera snapshot 포함 |
-| 8 | Annotation + inter-annotator check (Cohen's kappa) | `dataset/annotator.py` |
-| 9 | B1~B5+Ours 전체 실험 + metrics 계산 | `src/evaluate.py` 골격 완료, 실제 dataset 실행 대기 |
-| 10 | Ablation (C1-only, C2-only, label-only G₀) | `ablation.py` |
-| 11 | SmolVLA + 실제 로봇 팔 smoke test | `ambres_smolvla.yaml`, SO-ARM101, 30 Hz loop |
+| Step | 내용                                               | 비고                                                                   |
+| ---- | -------------------------------------------------- | ---------------------------------------------------------------------- |
+| 7    | 실제 이미지 촬영                                   | 6 시나리오 × 2 checkpoint × 5회 = 약 60장; SO-ARM camera snapshot 포함 |
+| 8    | Annotation + inter-annotator check (Cohen's kappa) | `dataset/annotator.py`                                                 |
+| 9    | B1~B5+Ours 전체 실험 + metrics 계산                | `src/evaluate.py` 구현 완료, 실제 dataset 실행 대기                    |
+| 10   | Ablation (C1-only, C2-only, label-only G₀)         | `ablation.py`                                                          |
+| 11   | SmolVLA + 실제 로봇 팔 smoke test                  | `ambres_smolvla.yaml`, SO-ARM101, 30 Hz loop                           |
 
 **6개 시나리오:**
 
-| # | 시나리오 | Gold State | Gold Decision |
-|---|---|---|---|
-| ① | Clear continuation | CLEAR | CONTINUE |
-| ② | Same-category target 추가 | AMBIGUOUS_TARGET | ASK |
-| ③ | Target disappeared | INVALID_TARGET | STOP |
-| ④ | New destination candidate | AMBIGUOUS_DESTINATION | ASK |
-| ⑤ | Distractor added (무관한 물체) | CLEAR | CONTINUE |
-| ⑥ | Target 위치 변경 / 동일 label 다른 instance | AMBIGUOUS_TARGET | ASK |
+| #   | 시나리오                                    | Gold State            | Gold Decision |
+| --- | ------------------------------------------- | --------------------- | ------------- |
+| ①   | Clear continuation                          | CLEAR                 | CONTINUE      |
+| ②   | Same-category target 추가                   | AMBIGUOUS_TARGET      | ASK           |
+| ③   | Target disappeared                          | INVALID_TARGET        | STOP          |
+| ④   | New destination candidate                   | AMBIGUOUS_DESTINATION | ASK           |
+| ⑤   | Distractor added (무관한 물체)              | CLEAR                 | CONTINUE      |
+| ⑥   | Target 위치 변경 / 동일 label 다른 instance | AMBIGUOUS_TARGET      | ASK           |
 
 > ★ 시나리오 ②, ⑤, ⑥이 제안 방법의 차별점을 가장 잘 드러냄. 특히 ⑥은 B3(count 유지)와 B5(general VLM 비교)의 한계를 동시에 보여주는 coord memory 핵심 시나리오.
 
 **Evaluator 구현 상태:**
+
 - `src/evaluate.py` ✅ 완료
   - manifest loader: `.jsonl`, JSON list, `{"samples": [...]}` 지원
   - sample schema: `id`, `scenario`, `task`, `initial_img`, `c1_img`, `c2_img`, `checkpoint`, `gold_state`, `gold_decision`, `target_label`, `destination_label`
   - `--validate-only`: 모델 없이 manifest schema와 scenario/checkpoint/decision 분포 검증
+  - `--check-images`: 모델 없이 manifest가 참조하는 실제 이미지 파일 존재 여부 검증
   - B1~B5+Ours method runner 연결
   - `Decision Accuracy`, `Miss Rate`, `False Alarm Rate`, `State Accuracy` 계산
   - predictions CSV / metrics JSON 저장 지원
 - `dataset/README.md` ✅ 완료
-  - 이미지 디렉터리 구조, manifest field, validate/evaluate 명령 정리
+  - 이미지 디렉터리 구조, manifest field, validate/check-images/evaluate 명령 정리
 - `dataset/manifest.example.jsonl` ✅ 완료
   - S1~S6 1개씩 예시 row 포함
-- `tests/test_evaluate.py` ✅ 완료 (13 tests passed)
+- `dataset/manifest.jsonl` ✅ 1차 작성
+  - 실제 촬영 이미지 기반 red mug / sprite bottle scene
+  - 현재 포함: S1(clear continuation), S2(same-label target 추가), S3(target disappeared), S5(distractor 추가), S6(target 위치 변경)
+  - S1은 static sanity pass용으로 t₀ 복사본을 C1/C2 clear checkpoint로 사용; 최종 실험에서는 실제 robot snapshot 권장
+  - `red_mug_sprite_001_c2_red_mug_sprite_bottle_gone.png`는 C2-style 실제 frame으로 보관하되, baselines.md의 표준 S4(destination 후보 추가)와 다르므로 manifest row에서는 보류
+- `tests/test_evaluate.py` ✅ 완료 (14 tests passed)
 - 모델 없는 검증: `python src/evaluate.py dataset/manifest.example.jsonl --validate-only` 통과
+- 실제 이미지 manifest 검증: `python src/evaluate.py dataset/manifest.jsonl --validate-only --check-images` 통과 (5 samples, missing images 0)
 - 현재 한계:
-  - 실제 이미지 manifest가 아직 없음
+  - 실제 이미지 manifest는 S1/S2/S3/S5/S6 1차분 완료; S4(destination 후보 추가) 촬영 필요
   - B1~B4/Ours는 실제 AmbRes/Molmo handler 환경에서 실행 검증 필요
   - B5는 실제 OpenAI API key/model에서 latency, cost, JSON parsing 안정성 검증 필요
 
@@ -549,10 +590,11 @@ COSE461-proj/
 │   └── utils/                    분석 도구
 │       └── pilot_threshold.py      ✅ 완료
 ├── src/pipeline.py               ✅ 완료
-├── src/evaluate.py               ✅ 완료 (manifest loader + B1~B5/Ours metrics)
+├── src/evaluate.py               ✅ 완료 (manifest loader + image path check + B1~B5/Ours metrics)
 ├── dataset/
 │   ├── README.md                  ✅ 완료 (manifest 작성/검증 가이드)
 │   ├── manifest.example.jsonl     ✅ 완료 (S1~S6 예시)
+│   ├── manifest.jsonl             ✅ 1차 완료 (실제 이미지 S1/S2/S3/S5/S6)
 │   └── images/.gitkeep            ✅ 완료
 ├── pytest.ini                    ✅ 완료 (integration 마커, pythonpath=src, log 설정)
 ├── run_tests.sh                  ✅ 완료 (단위 테스트 + 타임스탬프 로그)
@@ -590,19 +632,18 @@ COSE461-proj/
 │   └── pytest_YYYYMMDD_HHMMSS.log (타임스탬프별 보관)
 ├── tests/
 │   ├── conftest.py               ✅ 완료 (tf stub, real_handler, 로그 훅)
-│   ├── test_g0_extractor.py      ✅ 완료 (20 tests passed)
+│   ├── test_g0_extractor.py      ✅ 완료 (20 tests total; local latest 19 passed + 1 skipped)
 │   ├── test_baseline_b1.py       ✅ 완료 (10 tests passed)
 │   ├── test_baseline_b2.py       ✅ 완료 (9 tests passed)
 │   ├── test_baseline_b3.py       ✅ 완료 (15 tests passed)
 │   ├── test_baseline_b4.py       ✅ 완료 (13 tests passed)
 │   ├── test_baseline_b5.py       ✅ 완료 (13 tests passed)
-│   ├── test_evaluate.py          ✅ 완료 (13 tests passed)
+│   ├── test_evaluate.py          ✅ 완료 (14 tests passed)
 │   ├── test_role_parser.py       ✅ 완료 (47 tests passed)
 │   ├── test_consistency_monitor.py ✅ 완료 (46 tests passed)
 │   ├── test_pilot_threshold.py   ✅ 완료 (52 tests passed)
 │   ├── test_pipeline.py          ✅ 완료 (36 tests passed)
 │   └── test_integration.py       ✅ 완료 (19 tests, 실제 모델 검증)
-├── dataset/                      ⬜ 예정
 ├── docs/
 │   ├── proposal.md
 │   └── PROGRESS.md               ← 이 파일
@@ -612,34 +653,34 @@ COSE461-proj/
 
 ## 5. 주요 설계 결정 사항
 
-| 항목 | 결정 | 근거 |
-|---|---|---|
-| Checkpoint 타이밍 | Fixed (C1 pre-pick, C2 pre-place) | BT: pre-condition / PAL: pre-irreversible |
-| G₀ 표현 | label + coord (int) | label-only → identity 구분 불가 |
-| t₀ Step 2 강제 호출 | `response=""` 빈 answer | 좌표 확보 목적 |
-| coord 타입 | int (픽셀) | proposal 예시는 float이나 Molmo 출력은 정수 |
-| ambiguity=true 처리 | RuntimeError raise → 상위 pipeline에서 ASK 처리 | extractor는 G₀ 추출 책임만 |
-| STOP 범위 | Conservative (INVALID만 STOP) | 나머지는 ASK → 사용자 판단 위임 |
-| Disambiguation 순서 | destination 먼저, target 나중 | BT 논문 명시 |
-| B5 baseline 포함 | GPT-4V-class LLM에 initial/checkpoint 직접 비교 | reviewer 질문 "그냥 GPT-4V면 되지 않나?" 방어 |
-| Molmo/SmolVLA 배치 | Molmo는 server, SmolVLA는 desktop local | Molmo VRAM 부담과 30 Hz action latency 분리 |
-| SmolVLA precision | `bfloat16` 기본 | RTX 3060 8 GB VRAM 목표 |
-| SmolVLA checkpoint | `lerobot/smolvla` | `local_model_checkpoint`로 local path override 가능 |
-| 실제 로봇 connector | LeRobot 0.5.x SOFollower/SOLeader 기준 | SO-ARM100/101 hardware API와 맞춤 |
-| live checkpoint monitor | 아직 미통합 | 현재 live loop는 episode_start AmbRes + SmolVLA action loop만 수행 |
+| 항목                    | 결정                                            | 근거                                                               |
+| ----------------------- | ----------------------------------------------- | ------------------------------------------------------------------ |
+| Checkpoint 타이밍       | Fixed (C1 pre-pick, C2 pre-place)               | BT: pre-condition / PAL: pre-irreversible                          |
+| G₀ 표현                 | label + coord (int)                             | label-only → identity 구분 불가                                    |
+| t₀ Step 2 강제 호출     | `response=""` 빈 answer                         | 좌표 확보 목적                                                     |
+| coord 타입              | int (픽셀)                                      | proposal 예시는 float이나 Molmo 출력은 정수                        |
+| ambiguity=true 처리     | RuntimeError raise → 상위 pipeline에서 ASK 처리 | extractor는 G₀ 추출 책임만                                         |
+| STOP 범위               | Conservative (INVALID만 STOP)                   | 나머지는 ASK → 사용자 판단 위임                                    |
+| Disambiguation 순서     | destination 먼저, target 나중                   | BT 논문 명시                                                       |
+| B5 baseline 포함        | GPT-4V-class LLM에 initial/checkpoint 직접 비교 | reviewer 질문 "그냥 GPT-4V면 되지 않나?" 방어                      |
+| Molmo/SmolVLA 배치      | Molmo는 server, SmolVLA는 desktop local         | Molmo VRAM 부담과 30 Hz action latency 분리                        |
+| SmolVLA precision       | `bfloat16` 기본                                 | RTX 3060 8 GB VRAM 목표                                            |
+| SmolVLA checkpoint      | `lerobot/smolvla`                               | `local_model_checkpoint`로 local path override 가능                |
+| 실제 로봇 connector     | LeRobot 0.5.x SOFollower/SOLeader 기준          | SO-ARM100/101 hardware API와 맞춤                                  |
+| live checkpoint monitor | 아직 미통합                                     | 현재 live loop는 episode_start AmbRes + SmolVLA action loop만 수행 |
 
 ---
 
 ## 6. 평가 지표
 
-| Metric | 정의 |
-|---|---|
-| Grounding State Accuracy | gold state vs 예측 state 일치율 |
-| Decision Accuracy | CONTINUE/ASK/STOP 일치율 |
-| False Alarm Rate | CLEAR 상황에서 ASK 출력한 비율 |
-| Miss Rate | ASK/STOP 상황에서 CONTINUE 출력한 비율 |
-| C1 vs C2 contribution | C1-only / C2-only / both ablation |
-| Coord vs label-only | B4 vs Ours accuracy 차이 |
+| Metric                        | 정의                                   |
+| ----------------------------- | -------------------------------------- |
+| Grounding State Accuracy      | gold state vs 예측 state 일치율        |
+| Decision Accuracy             | CONTINUE/ASK/STOP 일치율               |
+| False Alarm Rate              | CLEAR 상황에서 ASK 출력한 비율         |
+| Miss Rate                     | ASK/STOP 상황에서 CONTINUE 출력한 비율 |
+| C1 vs C2 contribution         | C1-only / C2-only / both ablation      |
+| Coord vs label-only           | B4 vs Ours accuracy 차이               |
 | External VLM API Cost/Latency | B5 GPT-4V-class 호출 비용 및 응답 시간 |
 
-**최신 로컬 unit test:** `pytest tests/ -m "not integration"` → **273 passed, 1 skipped, 40 deselected**
+**최신 로컬 unit test:** `pytest tests/ -m "not integration"` → **274 passed, 1 skipped, 40 deselected**

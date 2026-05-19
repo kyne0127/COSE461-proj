@@ -20,6 +20,19 @@ dataset/
     └── ...
 ```
 
+Current collected-image manifest:
+
+- `manifest.jsonl` contains the first red-mug / Sprite-bottle scene.
+- Included rows: `S1` clear continuation, `S2` same-label target added,
+  `S3` target disappeared, `S5` distractor added, and `S6` target moved.
+- `S1` uses copied no-change checkpoint images from `t0`; this is acceptable
+  for the static image-only sanity pass, but a real robot snapshot is still
+  better for the final experiment.
+- `images/red_mug_sprite_001_c2_red_mug_sprite_bottle_gone.png` is kept as a
+  real C2-style frame, but it is not yet a standard S1-S6 row because it is
+  closer to invalid destination than the S4 "destination candidate added"
+  scenario in `docs/baselines.md`.
+
 ## Manifest Fields
 
 Each JSONL row is one evaluated checkpoint.
@@ -47,6 +60,12 @@ AmbRes/OpenAI models.
 
 ```bash
 python src/evaluate.py dataset/manifest.example.jsonl --validate-only
+```
+
+After collecting real images, also check that every referenced image path exists:
+
+```bash
+python src/evaluate.py dataset/manifest.jsonl --validate-only --check-images
 ```
 
 ## Run Evaluation
