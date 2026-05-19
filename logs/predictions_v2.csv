@@ -1,0 +1,31 @@
+sample_id,scenario,method,checkpoint,gold_state,gold_decision,predicted_decision,predicted_state,reason,question,correct
+red_mug_sprite_001_s1_c1,S1,B1_INITIAL_ONLY,C1,CLEAR,CONTINUE,ASK,,Initial scene is ambiguous,Which sprite bottle do you mean?,False
+red_mug_sprite_001_s1_c1,S1,B2_NO_MEMORY,C1,CLEAR,CONTINUE,CONTINUE,,C1 scene is unambiguous without memory,,True
+red_mug_sprite_001_s1_c1,S1,B3_ATTRIBUTE_AWARE_COUNT,C1,CLEAR,CONTINUE,CONTINUE,,Exactly one target and one destination found,,True
+red_mug_sprite_001_s1_c1,S1,B4_BINARY_ANOMALY,C1,CLEAR,CONTINUE,CONTINUE,,No binary grounding anomaly detected,,True
+red_mug_sprite_001_s1_c1,S1,OURS,C1,CLEAR,CONTINUE,CONTINUE,CLEAR,,,True
+red_mug_sprite_001_s2_c1,S2,B1_INITIAL_ONLY,C1,AMBIGUOUS_TARGET,ASK,ASK,,Initial scene is ambiguous,Which sprite bottle do you mean?,True
+red_mug_sprite_001_s2_c1,S2,B2_NO_MEMORY,C1,AMBIGUOUS_TARGET,ASK,ASK,,C1 scene is ambiguous,Which red mug do you mean?,True
+red_mug_sprite_001_s2_c1,S2,B3_ATTRIBUTE_AWARE_COUNT,C1,AMBIGUOUS_TARGET,ASK,CONTINUE,,Exactly one target and one destination found,,False
+red_mug_sprite_001_s2_c1,S2,B4_BINARY_ANOMALY,C1,AMBIGUOUS_TARGET,ASK,ASK,,Grounding anomaly detected: multiple target candidates for 'red mug'; destination 'sprite bottle' moved beyond threshold,Grounding anomaly detected. Please clarify the task grounding.,True
+red_mug_sprite_001_s2_c1,S2,OURS,C1,AMBIGUOUS_TARGET,ASK,ASK,AMBIGUOUS_TARGET,,,True
+red_mug_sprite_001_s3_c1,S3,B1_INITIAL_ONLY,C1,INVALID_TARGET,STOP,ASK,,Initial scene is ambiguous,Which red mug do you mean?,False
+red_mug_sprite_001_s3_c1,S3,B2_NO_MEMORY,C1,INVALID_TARGET,STOP,ASK,,C1 scene is ambiguous,Which mug do you mean?,False
+red_mug_sprite_001_s3_c1,S3,B3_ATTRIBUTE_AWARE_COUNT,C1,INVALID_TARGET,STOP,CONTINUE,,Exactly one target and one destination found,,False
+red_mug_sprite_001_s3_c1,S3,B4_BINARY_ANOMALY,C1,INVALID_TARGET,STOP,ASK,,Grounding anomaly detected: target 'right red mug' moved beyond threshold; destination 'sprite bottle' moved beyond threshold,Grounding anomaly detected. Please clarify the task grounding.,False
+red_mug_sprite_001_s3_c1,S3,OURS,C1,INVALID_TARGET,STOP,STOP,INVALID_TARGET,C1 INVALID_TARGET → STOP,,True
+red_mug_sprite_001_s4_c2,S4,B1_INITIAL_ONLY,C2,AMBIGUOUS_DESTINATION,ASK,ASK,,Initial scene is ambiguous,Which red mug do you mean?,True
+red_mug_sprite_001_s4_c2,S4,B2_NO_MEMORY,C2,AMBIGUOUS_DESTINATION,ASK,ASK,,C2 scene is ambiguous,Which sprite bottle do you want the mug next to?,True
+red_mug_sprite_001_s4_c2,S4,B3_ATTRIBUTE_AWARE_COUNT,C2,AMBIGUOUS_DESTINATION,ASK,CONTINUE,,Exactly one target and one destination found,,False
+red_mug_sprite_001_s4_c2,S4,B4_BINARY_ANOMALY,C2,AMBIGUOUS_DESTINATION,ASK,ASK,,Grounding anomaly detected: target 'red mug' moved beyond threshold; destination 'right sprite bottle' moved beyond threshold,Grounding anomaly detected. Please clarify the task grounding.,True
+red_mug_sprite_001_s4_c2,S4,OURS,C2,AMBIGUOUS_DESTINATION,ASK,ASK,AMBIGUOUS_DESTINATION,,,True
+red_mug_sprite_001_s5_c1,S5,B1_INITIAL_ONLY,C1,CLEAR,CONTINUE,CONTINUE,,Initial scene is unambiguous; B1 proceeds without checkpoints,,True
+red_mug_sprite_001_s5_c1,S5,B2_NO_MEMORY,C1,CLEAR,CONTINUE,ASK,,C1 scene is ambiguous,Which mug do you mean?,False
+red_mug_sprite_001_s5_c1,S5,B3_ATTRIBUTE_AWARE_COUNT,C1,CLEAR,CONTINUE,CONTINUE,,Exactly one target and one destination found,,True
+red_mug_sprite_001_s5_c1,S5,B4_BINARY_ANOMALY,C1,CLEAR,CONTINUE,ASK,,Grounding anomaly detected: target 'red mug' moved beyond threshold; destination 'sprite bottle' moved beyond threshold,Grounding anomaly detected. Please clarify the task grounding.,False
+red_mug_sprite_001_s5_c1,S5,OURS,C1,CLEAR,CONTINUE,CONTINUE,CLEAR,,,True
+red_mug_sprite_001_s6_c1,S6,B1_INITIAL_ONLY,C1,AMBIGUOUS_TARGET,ASK,ASK,,Initial scene is ambiguous,Which red mug do you mean?,True
+red_mug_sprite_001_s6_c1,S6,B2_NO_MEMORY,C1,AMBIGUOUS_TARGET,ASK,ASK,,C1 scene is ambiguous,Which red mug do you want me to move?,True
+red_mug_sprite_001_s6_c1,S6,B3_ATTRIBUTE_AWARE_COUNT,C1,AMBIGUOUS_TARGET,ASK,CONTINUE,,Exactly one target and one destination found,,False
+red_mug_sprite_001_s6_c1,S6,B4_BINARY_ANOMALY,C1,AMBIGUOUS_TARGET,ASK,ASK,,Grounding anomaly detected: target 'left red mug' moved beyond threshold; destination 'sprite bottle' moved beyond threshold,Grounding anomaly detected. Please clarify the task grounding.,True
+red_mug_sprite_001_s6_c1,S6,OURS,C1,AMBIGUOUS_TARGET,ASK,ASK,AMBIGUOUS_TARGET,,,True

@@ -6,3 +6,6 @@ __pycache__/
 
 # Byte-compiled files with suffixes from temp editors
 *.pyc.*
+
+# Timestamped pytest logs (keep latest.log and named logs)
+logs/pytest_*.log

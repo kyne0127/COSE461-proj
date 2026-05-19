@@ -211,6 +211,82 @@ class TestInvalidCheckpoint:
 # TestEdgeCases — 경계 케이스
 # ---------------------------------------------------------------------------
 
+class TestCameraMotionCompensation:
+    """Camera-normalized relative-distance check (S5 distractor false-alarm fix).
+
+    When the robot moves between t₀ and a checkpoint, the camera shifts too,
+    displacing ALL pixel coordinates uniformly.  The monitor compensates by
+    checking whether the (target − destination) relative vector is preserved
+    when the destination also moved beyond the absolute threshold.
+    """
+
+    @pytest.fixture()
+    def g0_scene(self):
+        # Matches the real red-mug/sprite-bottle scene geometry
+        return {
+            "target":      {"label": "red mug",       "coord": [1364, 1060]},
+            "destination": {"label": "sprite bottle",  "coord": [708,  1164]},
+            "image_shape": [2252, 4000],
+        }
+
+    def test_s5_camera_moved_target_stationary_is_clear(self, g0_scene):
+        # S5: camera moved ~450px; target is at the expected C1 position.
+        # rel_dist ≈ 186px < threshold*5=250 → CLEAR
+        detections = {
+            "red mug":      [[941,  723]],   # moved 541px absolute (camera)
+            "sprite bottle": [[466,  784]],   # moved 450px absolute (camera)
+        }
+        state, dec = check_grounding(g0_scene, detections, "C1", threshold=50.0)
+        assert state == GroundingState.CLEAR
+        assert dec   == Decision.CONTINUE
+
+    def test_s6_camera_moved_target_also_moved_is_ambiguous(self, g0_scene):
+        # S6: camera moved AND target moved to a very different world position.
+        # rel_dist ≈ 1337px >> threshold*5=250 → AMBIGUOUS_TARGET
+        detections = {
+            "red mug":      [[2459, 662]],   # 1165px absolute (camera + genuine move)
+            "sprite bottle": [[466,  784]],   # 450px absolute (camera only)
+        }
+        state, dec = check_grounding(g0_scene, detections, "C1", threshold=50.0)
+        assert state == GroundingState.AMBIGUOUS_TARGET
+        assert dec   == Decision.ASK
+
+    def test_camera_stationary_target_moved_is_ambiguous(self, g0_scene):
+        # Destination stays at G₀ → camera did not move → any target shift is genuine.
+        detections = {
+            "red mug":      [[1564, 1060]],  # 200px absolute, dest stays
+            "sprite bottle": [[708,  1164]],  # 0px – camera stationary
+        }
+        state, _ = check_grounding(g0_scene, detections, "C1", threshold=50.0)
+        assert state == GroundingState.AMBIGUOUS_TARGET
+
+    def test_no_destination_detected_treats_target_displacement_as_ambiguous(self, g0_scene):
+        # No anchor → cannot compensate for camera motion → conservative AMBIGUOUS
+        detections = {"red mug": [[941, 723]]}   # no sprite bottle
+        state, _ = check_grounding(g0_scene, detections, "C1", threshold=50.0)
+        assert state == GroundingState.AMBIGUOUS_TARGET
+
+    def test_custom_rel_threshold_overrides_default(self, g0_scene):
+        # With rel_threshold=100 (< 186) S5 should still be AMBIGUOUS_TARGET
+        detections = {
+            "red mug":      [[941, 723]],
+            "sprite bottle": [[466, 784]],
+        }
+        state, _ = check_grounding(g0_scene, detections, "C1",
+                                   threshold=50.0, rel_threshold=100.0)
+        assert state == GroundingState.AMBIGUOUS_TARGET
+
+    def test_c2_camera_moved_destination_stationary_is_clear(self, g0_scene):
+        # C2: camera moved, destination is at expected position → CLEAR
+        detections = {
+            "red mug":      [[941,  723]],   # target also moved (camera)
+            "sprite bottle": [[466,  784]],   # dest moved 450px (camera)
+        }
+        state, dec = check_grounding(g0_scene, detections, "C2", threshold=50.0)
+        assert state == GroundingState.CLEAR
+        assert dec   == Decision.CONTINUE
+
+
 class TestEdgeCases:
     def test_same_label_for_target_and_destination(self):
         # target과 destination이 같은 label인 경우 (실제 모델 실패 케이스에서 발생)

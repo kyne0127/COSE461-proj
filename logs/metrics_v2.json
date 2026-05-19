@@ -1,0 +1,47 @@
+{
+  "B1_INITIAL_ONLY": {
+    "n": 6,
+    "correct": 4,
+    "decision_accuracy": 0.6666666666666666,
+    "miss_rate": 0.0,
+    "false_alarm_rate": 0.5,
+    "state_accuracy": 0.0,
+    "state_n": 0
+  },
+  "B2_NO_MEMORY": {
+    "n": 6,
+    "correct": 4,
+    "decision_accuracy": 0.6666666666666666,
+    "miss_rate": 0.0,
+    "false_alarm_rate": 0.5,
+    "state_accuracy": 0.0,
+    "state_n": 0
+  },
+  "B3_ATTRIBUTE_AWARE_COUNT": {
+    "n": 6,
+    "correct": 2,
+    "decision_accuracy": 0.3333333333333333,
+    "miss_rate": 1.0,
+    "false_alarm_rate": 0.0,
+    "state_accuracy": 0.0,
+    "state_n": 0
+  },
+  "B4_BINARY_ANOMALY": {
+    "n": 6,
+    "correct": 4,
+    "decision_accuracy": 0.6666666666666666,
+    "miss_rate": 0.0,
+    "false_alarm_rate": 0.5,
+    "state_accuracy": 0.0,
+    "state_n": 0
+  },
+  "OURS": {
+    "n": 6,
+    "correct": 6,
+    "decision_accuracy": 1.0,
+    "miss_rate": 0.0,
+    "false_alarm_rate": 0.0,
+    "state_accuracy": 1.0,
+    "state_n": 6
+  }
+}

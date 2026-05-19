@@ -294,6 +294,7 @@ def run_method(
             sample.task,
             handler=handler,
             session_id=f"{sample.sample_id}_b4_g0",
+            allow_ambiguous=True,
         )
         result = run_b4_binary_anomaly(
             g0,
@@ -325,6 +326,7 @@ def run_method(
             handler=handler,
             threshold=threshold,
             session_prefix=f"{sample.sample_id}_ours",
+            allow_ambiguous=True,
         )
         return _prediction_from_ours(sample, result)
     raise ValueError(f"Unknown method {method!r}")

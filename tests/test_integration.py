@@ -107,9 +107,16 @@ class TestExtractG0MarkerIntegration:
             assert isinstance(x, int) and isinstance(y, int)
 
     def test_known_roles_marker_and_sprite(self, real_handler):
-        """Sanity: model assigns 'marker'=target, 'sprite bottle'=destination."""
+        """Sanity: model assigns the marker object as target, sprite bottle as destination.
+
+        The VLM sometimes returns a qualified label ('yellow marker', 'left marker', …)
+        instead of the bare noun 'marker'.  We accept any label whose core noun
+        ends with 'marker' to stay robust to model output variation.
+        """
         g0 = _extract(REAL_IMAGE_MARKER, TASK_MARKER, real_handler, "integ_m_roles")
-        assert g0["target"]["label"] == "marker"
+        assert g0["target"]["label"].lower().endswith("marker"), (
+            f"Expected target label ending in 'marker', got: {g0['target']['label']!r}"
+        )
         assert g0["destination"]["label"] == "sprite bottle"
 
 

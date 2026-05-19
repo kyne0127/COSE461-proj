@@ -37,7 +37,9 @@ def _find_object_after_terms(
     task_tokens = _tokenize(task_description)
     skip = set(skip_terms)
     objects = sorted((_normalize(obj), obj) for obj in object_list)
-    best: tuple[int, int, str] | None = None
+    # (start_pos, match_type, -match_len, original_obj)
+    # match_type: 0=exact, 1=suffix — minimise so exact beats suffix
+    best: tuple[int, int, int, str] | None = None
 
     for idx, token in enumerate(task_tokens):
         if token not in terms:
@@ -52,23 +54,47 @@ def _find_object_after_terms(
                 continue
             end = start + len(obj_tokens)
             if task_tokens[start:end] == obj_tokens:
-                candidate = (start, -len(obj_tokens), original_obj)
+                candidate = (start, 0, -len(obj_tokens), original_obj)
                 if best is None or candidate < best:
                     best = candidate
+                continue
+            # Suffix fallback: 'yellow marker' → try suffix ['marker'] at start
+            for sfx in range(1, len(obj_tokens)):
+                suffix = obj_tokens[sfx:]
+                end_s = start + len(suffix)
+                if task_tokens[start:end_s] == suffix:
+                    candidate = (start, 1, -len(suffix), original_obj)
+                    if best is None or candidate < best:
+                        best = candidate
+                    break
 
-    return best[2] if best else None
+    return best[3] if best else None
 
 
 def _find_object_in_text(object_list: Iterable[str], text: str) -> str | None:
     normalized_text = f" {_normalize(text)} "
-    matches = []
+    # (match_type, match_len, obj): match_type 0=exact, 1=suffix — minimise type,
+    # maximise match_len so longest exact beats longest suffix.
+    matches: list[tuple[int, int, str]] = []
     for obj in object_list:
         normalized_obj = _normalize(obj)
-        if normalized_obj and f" {normalized_obj} " in normalized_text:
-            matches.append((len(normalized_obj), obj))
+        if not normalized_obj:
+            continue
+        if f" {normalized_obj} " in normalized_text:
+            matches.append((0, len(normalized_obj), obj))
+            continue
+        # Suffix fallback: 'yellow marker' → try 'marker' when model returns a more
+        # specific label than the task wording (e.g. VLM adds a colour qualifier).
+        tokens = normalized_obj.split()
+        for suffix_start in range(1, len(tokens)):
+            suffix = " ".join(tokens[suffix_start:])
+            if suffix and f" {suffix} " in normalized_text:
+                matches.append((1, len(suffix), obj))
+                break
     if not matches:
         return None
-    return max(matches)[1]
+    # Prefer exact (type=0), then longer match length
+    return max(matches, key=lambda t: (-t[0], t[1]))[2]
 
 
 def parse_roles(object_list: list[str], task_description: str) -> dict[str, str]:
