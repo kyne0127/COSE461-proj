@@ -1,12 +1,24 @@
 # SmolVLA compact VLA model configuration
 # Target hardware: desktop GPU (RTX 3060 / 8 GB VRAM)
 
-model_id: "lerobot/smolvla"   # HuggingFace checkpoint
+model_id: "lerobot/smolvla_base"  # HuggingFace checkpoint (lerobot 0.5.x)
 device: cuda
-precision: bfloat16            # ~2x VRAM savings vs float32
-action_horizon: 1              # single-step execution from each chunk
+precision: bfloat16               # ~2x VRAM savings vs float32
 use_amp: true
 
-# Fine-tuning params (only used if train_step() is called)
-lr: 1e-4
+# ── Fine-tuning mode ────────────────────────────────────────────────────────
+# visual_finetune: true
+#   SigLIP (vision_model) + lm_expert train; SmolLM2 text_model stays frozen.
+#   Use this when adapting to a new camera / environment appearance.
+# visual_finetune: false (default)
+#   lm_expert only (SmolVLA default train_expert_only=True behaviour).
+visual_finetune: false
+
+# Gradient checkpointing — automatically enabled when visual_finetune=true.
+# Set explicitly to override.
+# grad_checkpoint: true
+
+# ── Optimiser (used only when train_step() is called) ───────────────────────
+lr: 1e-4          # lm_expert learning rate
+lr_vision: 1e-5   # SigLIP learning rate (10x lower to preserve pretrained features)
 weight_decay: 1e-5

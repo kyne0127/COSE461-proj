@@ -92,7 +92,7 @@ def run_collect(args, config: dict) -> None:
     )
 
     # Collect
-    with connector.session():
+    with connector.session(calibrate=args.calibrate):
         stats = collector.collect_episodes(
             n_episodes=n_episodes,
             task_text=task_text,
@@ -325,6 +325,8 @@ def main() -> None:
     p_collect.add_argument("--n-episodes",  type=int, default=10)
     p_collect.add_argument("--task",        default="")
     p_collect.add_argument("--dataset-id",  default=None)
+    p_collect.add_argument("--calibrate",    action="store_true", default=False,
+                           help="Run motor calibration on connect (interactive)")
 
     # infer
     p_infer = sub.add_parser("infer", help="Run autonomous inference")

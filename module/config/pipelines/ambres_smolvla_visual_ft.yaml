@@ -1,0 +1,35 @@
+# AmbRes (server) + SmolVLA (local desktop) — visual fine-tuning mode
+#
+# Same pipeline as ambres_smolvla.yaml but with visual_finetune=true:
+#   - SigLIP vision encoder  → trainable (adapts to this camera / environment)
+#   - lm_expert              → trainable (action generation)
+#   - SmolLM2 text_model     → frozen   (language unchanged)
+#
+# Use this config when running inference with a fine-tuned checkpoint.
+# Point local_model_checkpoint to the output of your training run.
+
+local_model_type: smolvla
+local_model_checkpoint: ""        # set to path of fine-tuned checkpoint
+local_model_config:
+  model_id: "lerobot/smolvla_base"
+  device: cuda
+  precision: bfloat16
+  use_amp: true
+  visual_finetune: true           # SigLIP + lm_expert; text frozen
+  grad_checkpoint: false          # not needed at inference time
+
+fps: 30.0
+max_episode_steps: 500
+
+pre_handlers:
+  - handler_id: ambres
+    method: query
+    trigger: episode_start
+    input_map:
+      task_text: task_description
+    output_map:
+      task_objects: task_text
+    output_transform: join_list
+    clarify_on: task_ambiguous
+    clarify_prompt_key: clarifying_question
+    clarify_method: respond

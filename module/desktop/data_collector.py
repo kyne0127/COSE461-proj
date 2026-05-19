@@ -129,6 +129,19 @@ class DataCollector:
                 logger.info("Interrupted during episode %d", ep_idx + 1)
                 stats.aborted = True
                 break
+            except ConnectionError as e:
+                logger.error(
+                    "Episode %d — robot connection lost, skipping: %s", ep_idx + 1, e
+                )
+                print(
+                    f"\n[collect] ⚠ Episode {ep_idx + 1} skipped (connection error). "
+                    "Check USB/power cable on the arm.\n"
+                )
+                # Discard the partial episode from the buffer
+                try:
+                    self._buffer.end_episode()
+                except Exception:
+                    pass
             except Exception as e:
                 logger.error("Episode %d failed: %s", ep_idx + 1, e)
                 raise

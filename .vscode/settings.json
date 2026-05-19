@@ -1,0 +1,4 @@
+{
+    "python.defaultInterpreterPath": "/home/hands/miniforge3/envs/vla-nlp/bin/python",
+    "python.terminal.activateEnvironment": false
+}

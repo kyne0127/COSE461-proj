@@ -16,10 +16,9 @@
 local_model_type: smolvla
 local_model_checkpoint: ""        # empty = download from HF (lerobot/smolvla)
 local_model_config:
-  model_id: "lerobot/smolvla"
+  model_id: "lerobot/smolvla_base"
   device: cuda
   precision: bfloat16
-  action_horizon: 1
   use_amp: true
 
 fps: 30.0

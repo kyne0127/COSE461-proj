@@ -33,29 +33,18 @@ robot:
   robot_type: "so101"     # so100 | so101
   fps: 30.0               # 제어 주파수
   robot_config:
-    # Follower arm (팔로워) 포트 매핑 (양팔)
+    # Follower arm (팔로워) 포트 매핑
     follower_arms:
-      right:
-        port: "/dev/ttyACM3"
-      left:
+      main:
         port: "/dev/ttyACM2"
-    # Leader arm (리더, 텔레오퍼레이션용) 포트 매핑 (양팔)
+    # Leader arm (리더, 텔레오퍼레이션용) 포트 매핑
     leader_arms:
-      right:
+      main:
         port: "/dev/ttyACM1"
-      left:
-        port: "/dev/ttyACM0"
     # 카메라 설정 (OpenCV)
-    # - egoview 카메라 2대: 640x480
-    # - ZED-M은 global view로 sensors.zed_mini에서 사용
     cameras:
-      egoview_right:
+      egoview:
         camera_index: 0
-        fps: 60
-        width: 640
-        height: 480
-      egoview_left:
-        camera_index: 2
         fps: 60
         width: 640
         height: 480
