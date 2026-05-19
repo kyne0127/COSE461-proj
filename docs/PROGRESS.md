@@ -2,7 +2,7 @@
 
 > 이 파일은 proposal.md 기반 실행 계획과 진행 상태를 하나의 문서로 관리한다.  
 > 작업이 완료될 때마다 이 파일의 상태를 업데이트한다.
-> Last updated: 2026-05-19 — S5 false alarm 수정: consistency_monitor에 카메라 이동 보정(destination-anchored relative coord) 추가, Ours 6/6 완벽 달성 (100% decision accuracy, 0% miss/false alarm, 100% state accuracy)
+> Last updated: 2026-05-19 — Phase 1.5 파인튜닝 준비: 글로벌뷰 카메라 테스트 스크립트(`scripts/test_camera.py`) 추가, 카메라 설정 가이드(`docs/camera_guide.md`) 작성
 
 ---
 
@@ -438,11 +438,11 @@ python pilot_threshold.py \
 
 ---
 
-### Phase 1.5: SmolVLA + 실제 로봇 팔 연동 — ✅ 구현 완료 / ⚠️ 실기 검증 필요
+### Phase 1.5: SmolVLA + 실제 로봇 팔 연동 — ✅ 코드 구현 완료 / 🔄 파인튜닝 준비 진행 중
 
 **목표:** AmbRes/Molmo는 server에서 ambiguity resolution을 담당하고, SmolVLA는 desktop에서 low-latency action model로 실행하여 SO-ARM100/101 실제 로봇 팔을 제어한다.
 
-> 현재 연구 진행 순서는 Phase 2 이미지 기반 baseline/evaluator 실험을 먼저 완료한 뒤, 실제 SO-ARM101 환경에서 Phase 1.5 smoke test와 C1/C2 monitor 통합을 검증하는 방향으로 정리한다.
+> Phase 2 이미지 기반 평가(B1~B4+Ours 6/6 완벽 달성)가 완료됨에 따라, 현재는 실제 SO-ARM101 환경에서의 파인튜닝 데이터 수집 및 smoke test로 진행 방향을 전환한다. 첫 단계로 글로벌뷰 카메라 연결/캡처를 검증한다.
 
 **구현 완료 범위:**
 
@@ -499,8 +499,22 @@ python scripts/run_desktop.py \
   --n-episodes 1
 ```
 
+**파인튜닝 준비 진행 상황:**
+
+| 단계 | 내용 | 상태 |
+|------|------|------|
+| ① 글로벌뷰 카메라 테스트 | `scripts/test_camera.py` — ZED Mini / USB scan/캡처/저장, AmbRes end-to-end | ✅ 스크립트 완료 |
+| ② AmbRes G₀ 추출 현장 검증 | 실제 카메라로 캡처 → G₀ 정상 추출 확인 | ⬜ |
+| ③ 데모 데이터 수집 | `run_desktop.py collect` — leader-follower teleoperation 에피소드 | ⬜ |
+| ④ SmolVLA 파인튜닝 트리거 | `run_desktop.py train --model-type smolvla` | ⬜ |
+| ⑤ SmolVLA smoke test | action dim / camera key / joint range 검증 | ⬜ |
+| ⑥ C1/C2 monitor 통합 | live loop에 `check_grounding()` → CONTINUE/ASK/STOP gating 추가 | ⬜ |
+
+**관련 문서:** [docs/camera_guide.md](camera_guide.md) — 카메라 설정, 테스트 스크립트 사용법, AmbRes 연동 절차
+
 **현재 한계 / 다음 작업:**
 
+- **즉시**: 로컬 데스크탑에서 `test_camera.py --mode scan` 실행 → global view 카메라 인덱스 확인
 - 실제 SO-ARM101 hardware에서 SmolVLA end-to-end smoke test 필요
   - observation camera key가 SmolVLA checkpoint가 기대하는 key와 맞는지 확인
   - action dimension과 `state_keys` 길이가 일치하는지 확인
@@ -657,10 +671,12 @@ COSE461-proj/
 ├── scripts/run_server.py         ✅ 완료 (gRPC server entrypoint)
 ├── scripts/open_tunnel.py        ✅ 완료 (RunPod SSH tunnel)
 ├── scripts/check_connection.py   ✅ 완료 (desktop ↔ server 연결 확인)
+├── scripts/test_camera.py        ✅ 완료 (글로벌뷰 카메라 단독 테스트: scan/usb/zed + AmbRes 연동)
 ├── module/                       ✅ 실제 로봇/서버 분리 실행 패키지
 │   ├── desktop/
 │   │   ├── pipeline.py           ✅ 완료 (AmbRes pre-handler + local SmolVLA action loop)
 │   │   ├── robot_connector.py    ✅ 완료 (SO-ARM100/101 follower/leader 연결)
+│   │   ├── zed_connector.py      ✅ 완료 (ZEDCapture / USBCapture / SyncCapture)
 │   │   ├── data_collector.py     ✅ 완료 (teleop demonstration 수집)
 │   │   └── generic_client.py     ✅ 완료 (AmbRes generic gRPC client)
 │   ├── models/
@@ -699,6 +715,11 @@ COSE461-proj/
 │   └── test_integration.py       ✅ 완료 (19 tests, 실제 모델 검증)
 ├── docs/
 │   ├── proposal.md
+│   ├── camera_guide.md           ✅ 완료 (ZED Mini/USB 설정, test_camera.py 사용법, AmbRes 연동)
+│   ├── setup_and_workflow.md     ✅ 완료 (환경 설정, 데이터 수집, 학습, 추론 전체 절차)
+│   ├── runpod_connection.md      ✅ 완료 (RunPod SSH 터널 연결 가이드)
+│   ├── baselines.md              ✅ 완료 (B1~B5 baseline 설계)
+│   ├── molmo_smolvla_arch.md     ✅ 완료 (Molmo + SmolVLA 아키텍처)
 │   └── PROGRESS.md               ← 이 파일
 ```
 
