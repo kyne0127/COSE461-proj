@@ -247,62 +247,57 @@ def run_zed(
 # ────────────────────────────────────────────────────────────────────────────
 
 def run_ambres_on_frame(rgb_frame: np.ndarray, task: str, config: dict) -> None:
-    print(f"\n=== AmbRes G₀ 추출 테스트 ===")
-    print(f"  task: {task!r}")
+    """Send captured frame to RunPod server via gRPC and run AmbRes query."""
+    print(f"\n=== AmbRes gRPC 전송 테스트 ===")
+    print(f"  task : {task!r}")
+    print(f"  frame: {rgb_frame.shape}  dtype={rgb_frame.dtype}")
 
-    # Save frame to temp file
-    import tempfile
-    with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as f:
-        tmp_path = f.name
-    bgr = cv2.cvtColor(rgb_frame, cv2.COLOR_RGB2BGR)
-    cv2.imwrite(tmp_path, bgr)
-    print(f"  임시 이미지: {tmp_path}")
+    grpc_cfg = config.get("grpc", {})
+    host = grpc_cfg.get("host", "localhost")
+    port = grpc_cfg.get("port", 50051)
+    print(f"  gRPC : {host}:{port}")
 
     try:
-        # Set up TF stub
-        import importlib.util
-        from types import ModuleType
-        if "tensorflow" not in sys.modules:
-            tf = ModuleType("tensorflow")
-            tf.__spec__ = importlib.util.spec_from_loader("tensorflow", loader=None)
-            tf.Tensor = type("Tensor", (), {})
-            tf.Variable = type("Variable", (), {})
-            sys.modules["tensorflow"] = tf
+        from module.desktop.generic_client import GenericClient
 
-        grpc_cfg = config.get("grpc", {})
-        host = grpc_cfg.get("host", "localhost")
-        port = grpc_cfg.get("port", 50051)
+        with GenericClient(host=host, port=port, timeout=120.0) as client:
+            # 1. Load AmbRes handler on server
+            print("\n  [1/3] 서버에 AmbRes 핸들러 로드 중...")
+            ok = client.load_handler("ambres", config={
+                "model_type": "finetune",
+                "adapter_ckpt": "43qazb3XcrZF5rZWnjRPVm",
+                "save_dir": "/tmp/ambres_received",
+            })
+            if not ok:
+                print("  [ERROR] 핸들러 로드 실패")
+                return
+            print("  ✓ 핸들러 로드 완료")
 
-        from module.desktop.generic_client import GenericInferenceClient
-        client = GenericInferenceClient(host=host, port=port)
+            # 2. Reset session
+            print("\n  [2/3] 세션 리셋...")
+            client.infer("ambres", "reset", session_id="cam_test")
+            print("  ✓ 리셋 완료")
 
-        from module.models.ambres.handler import AmbResHandler
-        handler = AmbResHandler()
-        handler.setup({
-            "model_type": "finetune",
-            "adapter_ckpt": "43qazb3XcrZF5rZWnjRPVm",
-            "use_detection": False,
-        })
+            # 3. Send frame + query
+            print("\n  [3/3] 이미지 전송 및 query 실행...")
+            t0 = time.perf_counter()
+            result = client.infer(
+                handler_id="ambres",
+                method="query",
+                payload={"task_description": task},
+                images={"image": rgb_frame},
+                session_id="cam_test",
+            )
+            elapsed = time.perf_counter() - t0
+            print(f"  ✓ 응답 수신 ({elapsed:.2f}s)")
 
-        from extraction.ambres_g0_extractor import extract_g0
-        g0 = extract_g0(
-            tmp_path, task,
-            handler=handler,
-            allow_ambiguous=True,
-            session_id="cam_test",
-        )
-        print("\n  G₀ 추출 결과:")
-        print(json.dumps(g0, indent=4, ensure_ascii=False))
+            print("\n  AmbRes query 결과:")
+            print(json.dumps(result, indent=4, ensure_ascii=False))
 
     except Exception as e:
-        print(f"  [ERROR] AmbRes 실행 실패: {e}")
+        print(f"  [ERROR] gRPC 전송 실패: {e}")
         import traceback
         traceback.print_exc()
-    finally:
-        try:
-            os.unlink(tmp_path)
-        except Exception:
-            pass
 
 
 # ────────────────────────────────────────────────────────────────────────────
