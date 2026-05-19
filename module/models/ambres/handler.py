@@ -55,6 +55,13 @@ class AmbResHandler(BaseHandler):
         model_type    = config.get("model_type", "fs_prompt")
         use_detection = config.get("use_detection", False)
         use_sam       = config.get("use_sam", False)
+        save_dir      = config.get("save_dir", None)
+
+        self._save_dir = save_dir
+        if save_dir:
+            import os
+            os.makedirs(save_dir, exist_ok=True)
+            logger.info("AmbResHandler: received images will be saved to %s", save_dir)
 
         logger.info(
             "AmbResHandler.setup: model_type=%s  use_detection=%s  use_sam=%s",
@@ -130,14 +137,23 @@ class AmbResHandler(BaseHandler):
     # 이미지 변환
     # ------------------------------------------------------------------ #
 
-    @staticmethod
-    def _to_pil(arr: np.ndarray) -> Image.Image:
+    def _to_pil(self, arr: np.ndarray, tag: str = "") -> Image.Image:
         """
         gRPC로 수신한 float32 [0,1] (H, W, 3) 텐서를 PIL RGB 이미지로 변환.
         generic_client.py의 _images_to_protos가 uint8→float32/255 변환해서 전송함.
+        save_dir 설정 시 수신 이미지를 서버 로컬에 저장.
         """
+        import time
         uint8 = (np.clip(arr, 0.0, 1.0) * 255).astype(np.uint8)
-        return Image.fromarray(uint8, mode="RGB")
+        pil = Image.fromarray(uint8, mode="RGB")
+        if self._save_dir:
+            import os
+            ts = time.strftime("%Y%m%d_%H%M%S")
+            fname = f"{ts}_{tag}.png" if tag else f"{ts}.png"
+            path = os.path.join(self._save_dir, fname)
+            pil.save(path)
+            logger.info("AmbResHandler: saved received image → %s", path)
+        return pil
 
     # ------------------------------------------------------------------ #
     # 메인 핸들러
@@ -176,7 +192,7 @@ class AmbResHandler(BaseHandler):
 
             task_description = payload.get("task_description", "")
             # AmbRes는 학습/평가 시 이미지를 4배 다운샘플하므로 동일하게 적용
-            pil_img = self._to_pil(tensors[0]).reduce(4)
+            pil_img = self._to_pil(tensors[0], tag=f"query_{session_id}").reduce(4)
 
             with self._lock:
                 self._load_session(session_id)
@@ -225,7 +241,7 @@ class AmbResHandler(BaseHandler):
             if not tensors:
                 return self.err("tensors[0] (이미지)가 필요합니다 — method='detect'")
 
-            pil_img = self._to_pil(tensors[0])
+            pil_img = self._to_pil(tensors[0], tag=f"detect_{session_id}")
 
             with self._lock:
                 # detect_pretty는 self.images[0]만 사용하므로 직접 세팅
