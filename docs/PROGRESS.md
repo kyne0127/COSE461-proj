@@ -2,7 +2,7 @@
 
 > 이 파일은 proposal.md 기반 실행 계획과 진행 상태를 하나의 문서로 관리한다.  
 > 작업이 완료될 때마다 이 파일의 상태를 업데이트한다.
-> Last updated: 2026-05-20 — RunPod 환경 재설정 완료, gRPC 서버 기동 확인, `test_camera.py --run-ambres` end-to-end 이미지 수신 저장 확인, `dataset/annotator.py` 구현 및 annotator1 라벨링 완료 (6/6 gold label 일치)
+> Last updated: 2026-05-20 — C1/C2 체크포인트 모니터 live robot pipeline 통합 완료 (`module/desktop/pipeline.py`), `dataset/annotator.py` 구현 및 annotator1 라벨링 완료 (6/6)
 
 ---
 
@@ -508,7 +508,7 @@ python scripts/run_desktop.py \
 | ③ 데모 데이터 수집 | `run_desktop.py collect` — leader-follower teleoperation 에피소드 | ⬜ |
 | ④ SmolVLA 파인튜닝 트리거 | `run_desktop.py train --model-type smolvla` | ⬜ |
 | ⑤ SmolVLA smoke test | action dim / camera key / joint range 검증 | ⬜ |
-| ⑥ C1/C2 monitor 통합 | live loop에 `check_grounding()` → CONTINUE/ASK/STOP gating 추가 | ⬜ |
+| ⑥ C1/C2 monitor 통합 | live loop에 `check_grounding()` → CONTINUE/ASK/STOP gating 추가 | ✅ 완료 |
 
 **관련 문서:** [docs/camera_guide.md](camera_guide.md) — 카메라 설정, 테스트 스크립트 사용법, AmbRes 연동 절차
 
@@ -519,10 +519,13 @@ python scripts/run_desktop.py \
   - observation camera key가 SmolVLA checkpoint가 기대하는 key와 맞는지 확인
   - action dimension과 `state_keys` 길이가 일치하는지 확인
   - joint unit/range가 LeRobot policy 출력과 follower arm 입력 사이에서 맞는지 확인
-- live robot loop에 Execution-Aware C1/C2 monitor 통합 필요
-  - 현재 `module/desktop/pipeline.py`는 episode_start ambiguity resolution만 수행
-  - C1(pre-pick), C2(pre-place) checkpoint 타이밍을 action policy 또는 high-level controller에서 받아야 함
-  - checkpoint에서 `get_checkpoint_detections()` → `check_grounding()` → CONTINUE/ASK/STOP gating 추가 예정
+- live robot loop C1/C2 monitor 통합 완료 (`module/desktop/pipeline.py`)
+  - `CheckpointMonitorConfig`: `enabled`, `handler_id`, `threshold`, `c1_step`, `c2_step`
+  - episode_start 후 G₀ 자동 추출 (`_extract_g0_grpc`: reset→query→respond("")→detect)
+  - action loop의 `c1_step` / `c2_step`에서 `_detect_grpc` → `check_grounding` → CONTINUE/ASK/STOP
+  - ASK: `input()`으로 실제 사용자 답변 수신 → `_update_g0_grpc`로 rolling G₀ update
+  - STOP: 에피소드 즉시 중단, 다음 에피소드로 진행
+  - `ambres_smolvla.yaml`에 `checkpoint_monitor` 섹션 추가 (c1_step=100, c2_step=300)
 - safety guard 필요
   - action clipping / joint limit validation
   - emergency stop hook
@@ -755,7 +758,7 @@ COSE461-proj/
 | SmolVLA precision       | `bfloat16` 기본                                 | RTX 3060 8 GB VRAM 목표                                            |
 | SmolVLA checkpoint      | `lerobot/smolvla`                               | `local_model_checkpoint`로 local path override 가능                |
 | 실제 로봇 connector     | LeRobot 0.5.x SOFollower/SOLeader 기준          | SO-ARM100/101 hardware API와 맞춤                                  |
-| live checkpoint monitor | 아직 미통합                                     | 현재 live loop는 episode_start AmbRes + SmolVLA action loop만 수행 |
+| live checkpoint monitor | ✅ 통합 완료                                    | C1/C2 스텝 도달 시 G₀ 일관성 확인 → ASK(사용자 입력+rolling update) / STOP(에피소드 중단) |
 
 ---
 

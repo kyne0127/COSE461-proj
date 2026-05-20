@@ -24,6 +24,17 @@ local_model_config:
 fps: 30.0
 max_episode_steps: 500            # 30 Hz × 500 ≈ 16 s
 
+# ── C1/C2 체크포인트 모니터 ──────────────────────────────────────────────
+# episode_start 이후 G₀(target+destination 좌표)를 추출하고,
+# c1_step / c2_step에서 G₀ 일관성을 확인한다.
+# CONTINUE → 계속 진행 / ASK → 사용자 입력 후 G₀ rolling update / STOP → 에피소드 중단
+checkpoint_monitor:
+  enabled: true
+  handler_id: ambres
+  threshold: 50.0       # 픽셀 거리 임계값 (pilot_threshold.py로 결정 권장)
+  c1_step: 100          # pre-pick 체크포인트 스텝 (30 Hz × 100 ≈ 3.3 s)
+  c2_step: 300          # pre-place 체크포인트 스텝 (30 Hz × 300 ≈ 10 s)
+
 pre_handlers:
   - handler_id: ambres
     method: query

@@ -27,6 +27,13 @@ YAML 설정 예시:
         clarify_prompt_key: clarifying_question
         clarify_method: respond
 
+    checkpoint_monitor:
+      enabled: true
+      handler_id: ambres
+      threshold: 50.0
+      c1_step: 100      # 이 스텝에서 C1(pre-pick) 체크포인트 실행
+      c2_step: 300      # 이 스텝에서 C2(pre-place) 체크포인트 실행
+
 확장 방법:
     pre_handlers에 항목 추가만으로 새 VLM/핸들러 연결 가능.
     e.g. scene_classifier → ambres → action_model
@@ -35,13 +42,23 @@ YAML 설정 예시:
 from __future__ import annotations
 
 import logging
+import sys
 import time
 import uuid
 import yaml
 from dataclasses import dataclass, field
-from typing import Any, Dict, Iterator, List, Optional
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 import numpy as np
+
+# src/ 패키지 경로 추가 (consistency_monitor, role_parser 사용)
+_PIPELINE_DIR = Path(__file__).resolve().parent          # module/desktop
+_REPO_ROOT    = _PIPELINE_DIR.parent.parent              # COSE461-proj
+_SRC_ROOT     = _REPO_ROOT / "src"
+for _p in (str(_SRC_ROOT), str(_REPO_ROOT)):
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
 
 logger = logging.getLogger(__name__)
 
@@ -85,6 +102,25 @@ class HandlerStepConfig:
 
 
 @dataclass
+class CheckpointMonitorConfig:
+    """
+    C1/C2 체크포인트 일관성 모니터 설정.
+
+    Attributes:
+        enabled    : 모니터 활성화 여부
+        handler_id : gRPC AmbRes 핸들러 ID
+        threshold  : G₀ 좌표 비교 픽셀 거리 임계값
+        c1_step    : C1(pre-pick) 체크포인트를 실행할 action loop 스텝 번호 (0=비활성)
+        c2_step    : C2(pre-place) 체크포인트를 실행할 action loop 스텝 번호 (0=비활성)
+    """
+    enabled: bool = False
+    handler_id: str = "ambres"
+    threshold: float = 50.0
+    c1_step: int = 0
+    c2_step: int = 0
+
+
+@dataclass
 class PipelineConfig:
     """
     전체 파이프라인 설정.
@@ -97,6 +133,7 @@ class PipelineConfig:
         fps                   : 제어 루프 주기
         max_episode_steps     : 에피소드 당 최대 스텝 수 (0이면 무제한)
         pre_handlers          : 액션 루프 전에 실행되는 핸들러 단계 목록
+        checkpoint_monitor    : C1/C2 체크포인트 모니터 설정
     """
     action_model_id: str = ""
     local_model_type: str = ""
@@ -105,6 +142,9 @@ class PipelineConfig:
     fps: float = 30.0
     max_episode_steps: int = 500
     pre_handlers: List[HandlerStepConfig] = field(default_factory=list)
+    checkpoint_monitor: CheckpointMonitorConfig = field(
+        default_factory=CheckpointMonitorConfig
+    )
 
 
 def load_pipeline_config(path: str) -> PipelineConfig:
@@ -127,6 +167,15 @@ def load_pipeline_config(path: str) -> PipelineConfig:
             clarify_method=h.get("clarify_method"),
         ))
 
+    cm_raw = raw.get("checkpoint_monitor", {})
+    cm_cfg = CheckpointMonitorConfig(
+        enabled=cm_raw.get("enabled", False),
+        handler_id=cm_raw.get("handler_id", "ambres"),
+        threshold=float(cm_raw.get("threshold", 50.0)),
+        c1_step=int(cm_raw.get("c1_step", 0)),
+        c2_step=int(cm_raw.get("c2_step", 0)),
+    )
+
     return PipelineConfig(
         action_model_id=raw.get("action_model_id", ""),
         local_model_type=raw.get("local_model_type", ""),
@@ -135,6 +184,7 @@ def load_pipeline_config(path: str) -> PipelineConfig:
         fps=float(raw.get("fps", 30.0)),
         max_episode_steps=int(raw.get("max_episode_steps", 500)),
         pre_handlers=steps,
+        checkpoint_monitor=cm_cfg,
     )
 
 
@@ -150,11 +200,14 @@ class InferencePipeline:
         1. episode_start 핸들러 순차 실행
            - 결과를 context dict에 누적
            - clarify_on 조건이 True이면 사용자 입력 요청 후 clarify_method 호출
-        2. 액션 루프 (fps 주기):
+        2. [checkpoint_monitor 활성 시] G₀ 추출 (t₀ 이미지 → AmbRes detect)
+        3. 액션 루프 (fps 주기):
            a. 로봇에서 observation 수집
            b. every_step 핸들러 순차 실행
-           c. context의 task_text로 액션 모델 추론
-           d. 로봇에 액션 전송
+           c. [c1_step 도달 시] C1 체크포인트 — G₀ 일관성 확인 → CONTINUE/ASK/STOP
+           d. [c2_step 도달 시] C2 체크포인트 — G₀ 일관성 확인 → CONTINUE/ASK/STOP
+           e. context의 task_text로 액션 모델 추론
+           f. 로봇에 액션 전송
     """
 
     def __init__(
@@ -172,6 +225,7 @@ class InferencePipeline:
         self._port      = grpc_port
         self._use_tls   = use_tls
         self._timeout   = timeout
+        self._cm_cfg    = pipeline_cfg.checkpoint_monitor
 
         self._generic      = None   # GenericClient
         self._infer        = None   # InferenceClient (grpc_client.py)
@@ -269,7 +323,24 @@ class InferencePipeline:
 
                     logger.info("Episode %d  task_text='%s'", ep, context.get("task_text", ""))
 
+                    # ── G₀ 추출 (checkpoint_monitor 활성 시) ─────────────
+                    if self._cm_cfg.enabled:
+                        task_desc = context.get("task_text", task_text)
+                        g0 = self._extract_g0_grpc(obs, task_desc, f"{session_id}_g0")
+                        if g0 is not None:
+                            context["_g0"] = g0
+                            logger.info(
+                                "G₀ extracted: target=%s@%s  dest=%s@%s",
+                                g0["target"]["label"], g0["target"]["coord"],
+                                g0["destination"]["label"], g0["destination"]["coord"],
+                            )
+                        else:
+                            logger.warning(
+                                "G₀ extraction failed — checkpoint monitor disabled this episode"
+                            )
+
                     # ── 액션 루프 ─────────────────────────────────────────
+                    episode_aborted = False
                     for step_idx in range(max_steps):
                         t0  = time.perf_counter()
                         obs = self._robot.get_observation()
@@ -278,14 +349,41 @@ class InferencePipeline:
                         for s in self._every_step_steps:
                             self._run_step(s, obs, context, session_id)
 
+                        # C1 체크포인트
+                        if (self._cm_cfg.enabled
+                                and self._cm_cfg.c1_step > 0
+                                and step_idx == self._cm_cfg.c1_step
+                                and "_g0" in context):
+                            aborted = self._run_checkpoint(
+                                "C1", obs, context, task_text, session_id
+                            )
+                            if aborted:
+                                episode_aborted = True
+                                break
+
+                        # C2 체크포인트
+                        if (self._cm_cfg.enabled
+                                and self._cm_cfg.c2_step > 0
+                                and step_idx == self._cm_cfg.c2_step
+                                and "_g0" in context):
+                            aborted = self._run_checkpoint(
+                                "C2", obs, context, task_text, session_id
+                            )
+                            if aborted:
+                                episode_aborted = True
+                                break
+
+                        if episode_aborted:
+                            break
+
                         # 액션 추론 (로컬 모델 or 서버 모델)
-                        task_text = context.get("task_text", "")
+                        current_task = context.get("task_text", task_text)
                         if self._local_model is not None:
                             from module.models.base_model import Observation as ModelObs
                             obs_obj = ModelObs(
                                 images=obs.images,
                                 state=obs.state,
-                                task_text=task_text,
+                                task_text=current_task,
                                 episode_id=ep,
                                 step=step_idx,
                             )
@@ -295,7 +393,7 @@ class InferencePipeline:
                                 model_id=self._cfg.action_model_id,
                                 images=obs.images,
                                 state=obs.state,
-                                task_text=task_text,
+                                task_text=current_task,
                                 episode_id=ep,
                                 step=step_idx,
                             )
@@ -305,10 +403,239 @@ class InferencePipeline:
                         if dt - elapsed > 0:
                             time.sleep(dt - elapsed)
 
+                    if episode_aborted:
+                        logger.info("Episode %d aborted by checkpoint monitor", ep)
                     ep += 1
 
             except KeyboardInterrupt:
                 print(f"\n[pipeline] Stopped at episode {ep}")
+
+    # ------------------------------------------------------------------ #
+    # C1/C2 체크포인트 모니터
+    # ------------------------------------------------------------------ #
+
+    def _run_checkpoint(
+        self,
+        checkpoint: str,
+        obs,
+        context: Dict[str, Any],
+        task_text: str,
+        session_id: str,
+    ) -> bool:
+        """
+        C1 또는 C2 체크포인트에서 G₀ 일관성을 확인합니다.
+
+        Returns:
+            True  — 에피소드를 중단해야 함 (STOP 결정)
+            False — 계속 진행 (CONTINUE 또는 ASK 후 사용자 답변 반영)
+        """
+        from monitoring.consistency_monitor import Decision, check_grounding
+
+        g0 = context["_g0"]
+        role = "target" if checkpoint == "C1" else "destination"
+
+        # 현재 체크포인트에서 detections 수집
+        detections = self._detect_grpc(obs, g0, f"{session_id}_{checkpoint.lower()}")
+        state, decision = check_grounding(g0, detections, checkpoint, self._cm_cfg.threshold)
+
+        logger.info("[%s] state=%s  decision=%s", checkpoint, state.value, decision.value)
+        print(f"\n[{checkpoint}] {state.value} → {decision.value}")
+
+        if decision == Decision.STOP:
+            print(f"[{checkpoint} STOP] {state.value} — 로봇을 정지합니다.")
+            logger.warning("[%s STOP] %s", checkpoint, state.value)
+            return True  # abort episode
+
+        if decision == Decision.ASK:
+            question = self._clarifying_question(g0, role, state.value)
+            print(f"[{checkpoint} ASK] {question}")
+            try:
+                user_resp = input("> ").strip()
+            except (EOFError, KeyboardInterrupt):
+                user_resp = ""
+
+            if user_resp:
+                task_desc = context.get("task_text", task_text)
+                updated_g0 = self._update_g0_grpc(
+                    obs, task_desc, user_resp,
+                    f"{session_id}_{checkpoint.lower()}_update",
+                )
+                if updated_g0 is not None:
+                    context["_g0"] = updated_g0
+                    logger.info(
+                        "[%s] G₀ updated: target=%s@%s  dest=%s@%s",
+                        checkpoint,
+                        updated_g0["target"]["label"], updated_g0["target"]["coord"],
+                        updated_g0["destination"]["label"], updated_g0["destination"]["coord"],
+                    )
+            else:
+                logger.info("[%s] 사용자 답변 없음 — G₀ 유지", checkpoint)
+
+        return False  # continue episode
+
+    def _extract_g0_grpc(
+        self,
+        obs,
+        task_description: str,
+        session_id: str,
+    ) -> Optional[Dict[str, Any]]:
+        """
+        t₀ observation에서 G₀를 추출합니다 (gRPC AmbRes 경유).
+
+        순서: reset → query → respond("") → detect → G₀ dict 반환
+        """
+        hid = self._cm_cfg.handler_id
+
+        self._generic.infer(hid, "reset", payload={}, session_id=session_id)
+
+        step1 = self._generic.infer(
+            hid, "query",
+            payload={"task_description": task_description},
+            images=obs.images,
+            session_id=session_id,
+        )
+        if step1.get("task_ambiguous"):
+            logger.warning("G₀ extraction: t₀ ambiguous — skipping")
+            return None
+
+        step2 = self._generic.infer(
+            hid, "respond",
+            payload={"response": ""},
+            session_id=session_id,
+        )
+
+        object_list = step2.get("task_objects") or step1.get("task_objects") or []
+        if isinstance(object_list, str):
+            object_list = [o.strip() for o in object_list.split(",") if o.strip()]
+        if not object_list:
+            logger.warning("G₀ extraction: no task_objects returned")
+            return None
+
+        try:
+            from extraction.role_parser import parse_roles
+            roles = parse_roles(object_list, task_description)
+        except Exception as exc:
+            logger.warning("G₀ extraction: role_parser failed: %s", exc)
+            return None
+
+        labels = [roles["target"], roles["destination"]]
+        detect_result = self._generic.infer(
+            hid, "detect",
+            payload={"objects": labels},
+            images=obs.images,
+            session_id=session_id,
+        )
+        detections = detect_result.get("detections", {})
+
+        return {
+            "target": {
+                "label": roles["target"],
+                "coord": self._first_coord(detections, roles["target"]),
+            },
+            "destination": {
+                "label": roles["destination"],
+                "coord": self._first_coord(detections, roles["destination"]),
+            },
+        }
+
+    def _detect_grpc(
+        self,
+        obs,
+        g0: Dict[str, Any],
+        session_id: str,
+    ) -> Dict[str, list]:
+        """
+        체크포인트 이미지에서 G₀ 라벨들을 detect합니다.
+
+        Returns:
+            detections_all: {"label": [[x,y], ...]} 형식 (all valid coords)
+        """
+        hid = self._cm_cfg.handler_id
+        labels = [g0["target"]["label"], g0["destination"]["label"]]
+
+        result = self._generic.infer(
+            hid, "detect",
+            payload={"objects": labels},
+            images=obs.images,
+            session_id=session_id,
+        )
+        raw = result.get("detections", {})
+
+        detections_all: Dict[str, list] = {}
+        for label, coords in raw.items():
+            valid = []
+            for c in (coords or []):
+                if isinstance(c, (list, tuple)) and len(c) >= 2:
+                    try:
+                        valid.append([float(c[0]), float(c[1])])
+                    except (TypeError, ValueError):
+                        continue
+            if valid:
+                detections_all[label] = valid
+
+        return detections_all
+
+    def _update_g0_grpc(
+        self,
+        obs,
+        task_description: str,
+        user_response: str,
+        session_id: str,
+    ) -> Optional[Dict[str, Any]]:
+        """
+        사용자 답변으로 G₀를 rolling update합니다 (gRPC AmbRes 경유).
+
+        순서: reset → query → respond(user_response) → detect → 새 G₀ 반환
+        """
+        hid = self._cm_cfg.handler_id
+
+        self._generic.infer(hid, "reset", payload={}, session_id=session_id)
+
+        step1 = self._generic.infer(
+            hid, "query",
+            payload={"task_description": task_description},
+            images=obs.images,
+            session_id=session_id,
+        )
+        step2 = self._generic.infer(
+            hid, "respond",
+            payload={"response": user_response},
+            session_id=session_id,
+        )
+
+        object_list = step2.get("task_objects") or step1.get("task_objects") or []
+        if isinstance(object_list, str):
+            object_list = [o.strip() for o in object_list.split(",") if o.strip()]
+        if not object_list:
+            logger.warning("G₀ rolling update: no task_objects returned")
+            return None
+
+        try:
+            from extraction.role_parser import parse_roles
+            roles = parse_roles(object_list, task_description)
+        except Exception as exc:
+            logger.warning("G₀ rolling update: role_parser failed: %s", exc)
+            return None
+
+        labels = [roles["target"], roles["destination"]]
+        detect_result = self._generic.infer(
+            hid, "detect",
+            payload={"objects": labels},
+            images=obs.images,
+            session_id=session_id,
+        )
+        detections = detect_result.get("detections", {})
+
+        return {
+            "target": {
+                "label": roles["target"],
+                "coord": self._first_coord(detections, roles["target"]),
+            },
+            "destination": {
+                "label": roles["destination"],
+                "coord": self._first_coord(detections, roles["destination"]),
+            },
+        }
 
     # ------------------------------------------------------------------ #
     # 핸들러 단계 실행
@@ -398,3 +725,28 @@ class InferencePipeline:
                 "Pipeline context update: %s = %r  (from %s.%s)",
                 ctx_key, value, step.handler_id, step.method,
             )
+
+    @staticmethod
+    def _first_coord(
+        detections: Dict[str, list],
+        label: str,
+    ) -> Optional[list]:
+        """detections에서 label의 첫 번째 유효 좌표를 int [x, y]로 반환합니다."""
+        for c in detections.get(label, []):
+            if isinstance(c, (list, tuple)) and len(c) >= 2:
+                try:
+                    return [int(float(c[0])), int(float(c[1]))]
+                except (TypeError, ValueError):
+                    continue
+        return None
+
+    @staticmethod
+    def _clarifying_question(g0: Dict[str, Any], role: str, state_value: str) -> str:
+        """사용자에게 보여줄 명확화 질문을 생성합니다."""
+        label = g0[role]["label"]
+        templates = {
+            "target":      f"어떤 '{label}'을(를) 집어야 하나요?",
+            "destination": f"어떤 '{label}'에 놓아야 하나요?",
+        }
+        question = templates.get(role, f"'{label}'에 대해 명확히 해주세요.")
+        return f"[{state_value}] {question}"
