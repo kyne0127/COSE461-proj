@@ -82,18 +82,24 @@ for targets, t_label in [
 # 태스크 자동 생성
 # ────────────────────────────────────────────────────────────────────────────
 
-TASK_TEMPLATES = [
+TASK_TEMPLATES_PLACE = [
     "Put the {tgt} next to the {box}.",
     "Place the {tgt} inside the {box}.",
     "Move the {tgt} to the {box}.",
     "Pick up the {tgt} and place it near the {box}.",
 ]
 
+TASK_TEMPLATES_PICK = [
+    "Pick up the {tgt}.",
+    "Grasp the {tgt}.",
+    "Bring me the {tgt}.",
+]
+
 def generate_tasks(obj_list: list[str], amb_map: dict) -> list[str]:
     """obj_list + ambiguity_map → 태스크 목록 자동 생성."""
-    # target 플레이스홀더: ambiguity_map 키 우선, 없으면 obj 이름 그대로
+    # target 플레이스홀더
     tgt_phs: list[str] = []
-    seen = set()
+    seen: set[str] = set()
     for obj in obj_list:
         if "cube" in obj:
             ph = "cube" if "cube" in amb_map else obj
@@ -115,11 +121,21 @@ def generate_tasks(obj_list: list[str], amb_map: dict) -> list[str]:
                 box_phs.append(ph)
                 seen.add(ph)
 
-    tasks = []
-    for tgt in tgt_phs:
-        for box in box_phs:
-            for tmpl in TASK_TEMPLATES:
-                tasks.append(tmpl.replace("{tgt}", "{" + tgt + "}").replace("{box}", "{" + box + "}"))
+    tasks: list[str] = []
+    if box_phs:
+        # pick-and-place 태스크
+        for tgt in tgt_phs:
+            for box in box_phs:
+                for tmpl in TASK_TEMPLATES_PLACE:
+                    tasks.append(
+                        tmpl.replace("{tgt}", "{" + tgt + "}")
+                            .replace("{box}", "{" + box + "}")
+                    )
+    else:
+        # 상자 없음 → pick-only 태스크
+        for tgt in tgt_phs:
+            for tmpl in TASK_TEMPLATES_PICK:
+                tasks.append(tmpl.replace("{tgt}", "{" + tgt + "}"))
     return tasks
 
 
@@ -157,12 +173,9 @@ def select_scene() -> dict:
     if n_cup == "s":
         return {}
 
-    # 최소 1개 이상의 target, destination 필요
+    # target 최소 1개 필요
     if int(n_cube) + int(n_cup) == 0:
         print("  ✗ 큐브 또는 종이컵이 최소 1개 필요합니다.")
-        return select_scene()
-    if has_red == "n" and has_yel == "n":
-        print("  ✗ 상자가 최소 1개 필요합니다.")
         return select_scene()
 
     # obj_list 구성
