@@ -26,7 +26,7 @@ grpc:
   host: "localhost"        # SSH 터널 사용 시 localhost (권장)
   port: 50051
   use_tls: false
-  timeout_secs: 5.0        # 단일 inference RPC 타임아웃
+  timeout_secs: 30.0       # 단일 inference RPC 타임아웃 (Molmo 추론 ~10s + 여유)
 
 # 로봇 설정 (lerobot 0.5.x API 기준)
 robot:
