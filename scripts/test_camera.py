@@ -267,7 +267,7 @@ def run_ambres_on_frame(rgb_frame: np.ndarray, task: str, config: dict) -> None:
             print("\n  [1/3] 서버에 AmbRes 핸들러 로드 중...")
             ok = client.load_handler("ambres", config={
                 "model_type": "finetune",
-                "adapter_ckpt": "gpn796wVTQB6MeWwZkgb6R",
+                "adapter_ckpt": "nFwD6qtf9T8dkJaQXU9vkW",
                 "save_dir": "/tmp/train_captures",
             })
             if not ok:
