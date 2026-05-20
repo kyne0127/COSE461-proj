@@ -263,11 +263,8 @@ class AmbResHandler(BaseHandler):
                 return self.err("tensors[0] (이미지)가 필요합니다 — method='query'")
 
             task_description = payload.get("task_description", "")
-            # AmbRes 학습 데이터는 640×480(4:3) 기준. 비율이 다른 이미지(ZED 16:9 등)는
-            # center-crop으로 4:3으로 맞춘 뒤 4배 다운샘플 적용.
+            # 학습 데이터와 동일하게: ZED 672×376 원본 그대로 사용
             pil_img = self._to_pil(tensors[0], tag=f"query_{session_id}")
-            pil_img = self._normalize_aspect(pil_img)
-            pil_img = pil_img.reduce(4)
 
             t0 = time.time()
             with self._lock:

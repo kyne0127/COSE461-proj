@@ -32,7 +32,7 @@ handlers:
   - handler_id: ambres
     config:
       model_type: finetune
-      adapter_ckpt: "Rhgf7Mn96FZssqYXbYrSAW"
+      adapter_ckpt: "nFwD6qtf9T8dkJaQXU9vkW"
       use_detection: false
       use_sam: false
       save_dir: "/tmp/train_captures"
