@@ -191,6 +191,16 @@ class AmbResHandler(BaseHandler):
         session_id: str,
     ) -> Dict[str, Any]:
 
+        # ── save_image ─────────────────────────────────────────────────────
+        # 추론 없이 이미지만 저장 (데이터 수집 전용)
+        if method == "save_image":
+            if not tensors:
+                return self.err("tensors[0] (이미지)가 필요합니다 — method='save_image'")
+            tag = payload.get("tag", "capture")
+            pil_img = self._to_pil(tensors[0], tag=tag)
+            w, h = pil_img.size
+            return self.ok({"saved": True, "width": w, "height": h})
+
         # ── reset ──────────────────────────────────────────────────────────
         if method == "reset":
             with self._lock:

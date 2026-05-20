@@ -266,7 +266,7 @@ def run_ambres_on_frame(rgb_frame: np.ndarray, task: str, config: dict) -> None:
             ok = client.load_handler("ambres", config={
                 "model_type": "finetune",
                 "adapter_ckpt": "43qazb3XcrZF5rZWnjRPVm",
-                "save_dir": "/tmp/ambres_received",
+                "save_dir": "/tmp/train_captures",
             })
             if not ok:
                 print("  [ERROR] 핸들러 로드 실패")
