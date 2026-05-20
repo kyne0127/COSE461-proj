@@ -271,15 +271,13 @@ class AmbResHandler(BaseHandler):
                 self._load_session(session_id)
                 result = self._model.handle_query(task_description, pil_img)
 
-                # 로깅 전용: 객체별 인스턴스 수를 detect로 확인
-                instance_counts: dict = {}
+                # 로깅 전용: 객체별 pixel 좌표를 detect로 확인
+                detections_log: dict = {}
                 task_objects = result.get("task_objects") or []
                 if task_objects:
                     try:
                         self._model.images = [pil_img]
-                        detections = self._model.detect_pretty(task_objects)
-                        for obj, pts in detections.items():
-                            instance_counts[obj] = len(pts) if pts else 0
+                        detections_log = self._model.detect_pretty(task_objects)
                     except Exception as _e:
                         logger.warning("detect-for-logging failed: %s", _e)
 
@@ -288,6 +286,39 @@ class AmbResHandler(BaseHandler):
 
             # obj_detection_messages는 내부 Molmo 대화 기록이므로 제거
             result.pop("obj_detection_messages", None)
+
+            # ── 탐지 포인트 시각화 이미지 저장 ────────────────────────────
+            if detections_log and self._save_dir:
+                try:
+                    from PIL import ImageDraw
+                    palette = [
+                        "#FF4444", "#44BB44", "#4488FF",
+                        "#FFAA00", "#FF44FF", "#00CCCC",
+                    ]
+                    annotated = pil_img.copy()
+                    draw = ImageDraw.Draw(annotated)
+                    r = max(6, pil_img.width // 60)   # 점 반지름 (이미지 크기 비례)
+                    for idx, (obj, pts) in enumerate(detections_log.items()):
+                        color = palette[idx % len(palette)]
+                        for (x, y) in pts:
+                            x, y = int(x), int(y)
+                            # 외곽 원 (객체 영역 표시)
+                            draw.ellipse([x - r*2, y - r*2, x + r*2, y + r*2],
+                                         outline=color, width=2)
+                            # 중심점
+                            draw.ellipse([x - r//2, y - r//2, x + r//2, y + r//2],
+                                         fill=color)
+                            # 레이블
+                            draw.text((x + r*2 + 3, y - r), obj, fill=color)
+                    ts = time.strftime("%Y%m%d_%H%M%S")
+                    ann_path = os.path.join(
+                        self._save_dir, f"{ts}_annotated_{session_id}.png"
+                    )
+                    annotated.save(ann_path)
+                    logger.info("AmbResHandler: saved annotated image → %s", ann_path)
+                except Exception as _e:
+                    logger.warning("Annotation drawing failed: %s", _e)
+            # ──────────────────────────────────────────────────────────────
 
             # ── 추론 과정 구조화 로그 ──────────────────────────────────────
             lines = [
@@ -301,10 +332,15 @@ class AmbResHandler(BaseHandler):
                 "",
                 "  ├─ STEP 2: Instance Detection (detect_pretty)",
             ]
-            if instance_counts:
-                for obj, cnt in instance_counts.items():
+            if detections_log:
+                for idx, (obj, pts) in enumerate(detections_log.items()):
+                    cnt = len(pts)
                     flag = "⚠ 복수 인스턴스!" if cnt > 1 else "✓ 단일"
+                    coords = ", ".join(f"({int(x)},{int(y)})" for x, y in pts[:4])
+                    if len(pts) > 4:
+                        coords += f" ... +{len(pts)-4}개"
                     lines.append(f"  │    {obj!r:20s} → {cnt}개  {flag}")
+                    lines.append(f"  │    {'':20s}   coords: {coords}")
             else:
                 lines.append("  │    (detect 실패 또는 객체 없음)")
             lines += [
