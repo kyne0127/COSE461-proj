@@ -2,7 +2,7 @@
 
 > 이 파일은 proposal.md 기반 실행 계획과 진행 상태를 하나의 문서로 관리한다.  
 > 작업이 완료될 때마다 이 파일의 상태를 업데이트한다.
-> Last updated: 2026-05-19 — Phase 1.5 파인튜닝 준비: 글로벌뷰 카메라 테스트 스크립트(`scripts/test_camera.py`) 추가, 카메라 설정 가이드(`docs/camera_guide.md`) 작성
+> Last updated: 2026-05-20 — RunPod 환경 재설정 완료, gRPC 서버 기동 확인, `test_camera.py --run-ambres` end-to-end 이미지 수신 저장 확인, `dataset/annotator.py` 구현 및 annotator1 라벨링 완료 (6/6 gold label 일치)
 
 ---
 
@@ -503,7 +503,7 @@ python scripts/run_desktop.py \
 
 | 단계 | 내용 | 상태 |
 |------|------|------|
-| ① 글로벌뷰 카메라 테스트 | `scripts/test_camera.py` — ZED Mini / USB scan/캡처/저장, AmbRes end-to-end | ✅ 스크립트 완료 |
+| ① 글로벌뷰 카메라 테스트 | `scripts/test_camera.py` — ZED Mini / USB scan/캡처/저장, AmbRes end-to-end | ✅ end-to-end 확인 완료 |
 | ② AmbRes G₀ 추출 현장 검증 | 실제 카메라로 캡처 → G₀ 정상 추출 확인 | ⬜ |
 | ③ 데모 데이터 수집 | `run_desktop.py collect` — leader-follower teleoperation 에피소드 | ⬜ |
 | ④ SmolVLA 파인튜닝 트리거 | `run_desktop.py train --model-type smolvla` | ⬜ |
@@ -619,14 +619,28 @@ python src/evaluate.py dataset/manifest.jsonl \
 - `/workspace/AmbRes` 클론 완료
 - `outlines==0.1.14` — `outlines.processors.JSONLogitsProcessor` 호환 버전 확인 (1.x는 API 변경으로 비호환)
 - `transformers==4.48`, `peft>=0.9.0`, `accelerate>=0.26.0` 설치 완료
+- `Molmo-7B-D-0924` (30GB) — `/workspace/hf_cache/hub/` 다운로드 완료, `HF_HOME` 영구 등록
 - `AmbRes/ckpt/43qazb3XcrZF5rZWnjRPVm/checkpoint-200/` — finetune 체크포인트 다운로드 완료
 - `AmbRes/ckpt/TtVVGPRoknCTELVSjH92xX/checkpoint-200/` — sim 체크포인트도 포함
+- gRPC 서버 (`scripts/run_server.py`) 기동 확인 — `0.0.0.0:50051`, `fs_prompt` + `finetune` 핸들러 프리로드
+- `test_camera.py --run-ambres` end-to-end 확인 — 서버 수신 이미지 `/tmp/ambres_received/` 저장 동작 확인
+
+**서버 운영 주의사항:**
+- 서버 재시작 시 이전 프로세스를 반드시 `kill -9`로 완전 종료 후 시작할 것 (`ps aux | grep run_server`로 확인)
+- 좀비 프로세스가 남으면 GPU VRAM(49140MiB) 부족으로 CUDA OOM 발생
+- `nvidia-smi | grep MiB` 로 GPU 메모리 해제 확인 후 재시작
+- `module/models/ambres/handler.py`의 `save_dir` 는 `server.yaml`이 아닌 클라이언트 `load_handler` 호출 시 config로 동적 주입됨 (`test_camera.py` 269번 줄)
 
 **버그 픽스 (2026-05-19):**
 - `src/extraction/role_parser.py`: VLM이 qualified label(`'yellow marker'`, `'left red mug'` 등)을 반환할 때 task 문자열과 매칭 실패 → `_find_object_after_terms` 및 `_find_object_in_text`에 suffix matching 추가
 - `tests/test_integration.py::test_known_roles_marker_and_sprite`: 모델 비결정성 대응으로 `endswith("marker")` 방식 변경
 - `src/evaluate.py`: `extract_g0`/`run_pipeline` 호출에 `allow_ambiguous=True` 추가 (t₀ false positive 방지)
 - `src/monitoring/consistency_monitor.py`: **camera-motion 보정** — destination-anchored relative distance 도입. 단일 감지 + abs_dist>threshold + dest도 이동(카메라 이동 신호) 시 relative check 적용; threshold×5 이내이면 CLEAR 반환. +6 테스트 추가 (`TestCameraMotionCompensation`)
+- `dataset/annotator.py`: inter-annotator agreement 측정용 CLI 라벨링 도구 구현
+  - 샘플별 이미지 경로 출력 + 번호 입력 방식 (State 1~6, Decision 1~3)
+  - 중단/재개 지원 (이미 라벨링된 항목 자동 건너뜀)
+  - `--kappa` 옵션으로 Cohen's kappa 자동 계산 및 `kappa_report.json` 저장
+  - annotator1 라벨링 완료: **6/6 gold label 완전 일치**
 
 **현재 한계:**
 - B5는 실제 OpenAI API key/model에서 검증 필요

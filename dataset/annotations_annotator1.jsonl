@@ -1,0 +1,6 @@
+{"id": "red_mug_sprite_001_s1_c1", "annotator": "annotator1", "gold_state": "CLEAR", "gold_decision": "CONTINUE", "note": ""}
+{"id": "red_mug_sprite_001_s2_c1", "annotator": "annotator1", "gold_state": "AMBIGUOUS_TARGET", "gold_decision": "ASK", "note": ""}
+{"id": "red_mug_sprite_001_s3_c1", "annotator": "annotator1", "gold_state": "INVALID_TARGET", "gold_decision": "STOP", "note": ""}
+{"id": "red_mug_sprite_001_s4_c2", "annotator": "annotator1", "gold_state": "AMBIGUOUS_DESTINATION", "gold_decision": "ASK", "note": ""}
+{"id": "red_mug_sprite_001_s5_c1", "annotator": "annotator1", "gold_state": "CLEAR", "gold_decision": "CONTINUE", "note": ""}
+{"id": "red_mug_sprite_001_s6_c1", "annotator": "annotator1", "gold_state": "AMBIGUOUS_TARGET", "gold_decision": "ASK", "note": ""}
