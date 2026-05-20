@@ -26,7 +26,9 @@ Config keys:
 from __future__ import annotations
 
 import logging
+import os
 import threading
+import time
 from typing import Any, Dict, List, Optional
 
 import numpy as np
@@ -35,6 +37,42 @@ from PIL import Image
 from module.models.base_handler import BaseHandler, HandlerRegistry
 
 logger = logging.getLogger(__name__)
+
+# ── 추론 전용 파일 로거 ────────────────────────────────────────────────────────
+_inference_log_path = os.environ.get(
+    "AMBRES_INFERENCE_LOG",
+    "/workspace/COSE461-proj/logs/ambres_inference.log",
+)
+os.makedirs(os.path.dirname(_inference_log_path), exist_ok=True)
+
+_inf_logger = logging.getLogger("ambres.inference")
+_inf_logger.setLevel(logging.DEBUG)
+if not _inf_logger.handlers:
+    _fh = logging.FileHandler(_inference_log_path, encoding="utf-8")
+    _fh.setFormatter(logging.Formatter(
+        "%(asctime)s  %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
+    ))
+    _inf_logger.addHandler(_fh)
+    # ambres.ambres_model 로거도 같은 파일로 연결
+    _model_logger = logging.getLogger("ambres.ambres_model")
+    _model_logger.setLevel(logging.DEBUG)
+    _model_logger.addHandler(_fh)
+
+
+def _log_inference(session_id: str, method: str, **fields) -> None:
+    """추론 이벤트를 구조화된 형식으로 기록."""
+    lines = [f"{'─'*70}",
+             f"[{method.upper()}]  session={session_id}"]
+    for k, v in fields.items():
+        v_str = str(v)
+        # 긴 필드는 여러 줄로 분할
+        if len(v_str) > 120:
+            lines.append(f"  {k}:")
+            for chunk in [v_str[i:i+110] for i in range(0, len(v_str), 110)]:
+                lines.append(f"    {chunk}")
+        else:
+            lines.append(f"  {k}: {v_str}")
+    _inf_logger.info("\n".join(lines))
 
 
 @HandlerRegistry.register("ambres")
@@ -231,13 +269,26 @@ class AmbResHandler(BaseHandler):
             pil_img = self._normalize_aspect(pil_img)
             pil_img = pil_img.reduce(4)
 
+            t0 = time.time()
             with self._lock:
                 self._load_session(session_id)
                 result = self._model.handle_query(task_description, pil_img)
                 self._save_session(session_id)
+            elapsed = time.time() - t0
 
             # obj_detection_messages는 내부 Molmo 대화 기록이므로 제거
             result.pop("obj_detection_messages", None)
+
+            _log_inference(
+                session_id, "query",
+                task_description=task_description,
+                image_size=f"{pil_img.width}x{pil_img.height}",
+                task_objects=result.get("task_objects"),
+                task_ambiguous=result.get("task_ambiguous"),
+                clarifying_question=result.get("clarifying_question", ""),
+                explanation=result.get("explanation", ""),
+                elapsed_s=f"{elapsed:.2f}",
+            )
             return self.ok(result)
 
         # ── respond ────────────────────────────────────────────────────────
@@ -251,12 +302,24 @@ class AmbResHandler(BaseHandler):
             """
             response_text = payload.get("response", "")
 
+            t0 = time.time()
             with self._lock:
                 self._load_session(session_id)
                 result = self._model.handle_response(response_text)
                 self._save_session(session_id)
+            elapsed = time.time() - t0
 
             result.pop("obj_detection_messages", None)
+
+            _log_inference(
+                session_id, "respond",
+                user_response=response_text,
+                task_objects=result.get("task_objects"),
+                task_ambiguous=result.get("task_ambiguous"),
+                clarifying_question=result.get("clarifying_question", ""),
+                explanation=result.get("explanation", ""),
+                elapsed_s=f"{elapsed:.2f}",
+            )
             return self.ok(result)
 
         # ── detect ─────────────────────────────────────────────────────────
@@ -280,11 +343,20 @@ class AmbResHandler(BaseHandler):
 
             pil_img = self._to_pil(tensors[0], tag=f"detect_{session_id}")
 
+            t0 = time.time()
             with self._lock:
                 # detect_pretty는 self.images[0]만 사용하므로 직접 세팅
                 self._model.images = [pil_img]
                 result = self._model.detect_pretty(objects)
+            elapsed = time.time() - t0
 
+            _log_inference(
+                session_id, "detect",
+                objects=objects,
+                image_size=f"{pil_img.width}x{pil_img.height}",
+                detections=result,
+                elapsed_s=f"{elapsed:.2f}",
+            )
             return self.ok({"detections": result})
 
         # ── set_image_sam ──────────────────────────────────────────────────
