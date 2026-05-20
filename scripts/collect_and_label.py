@@ -173,11 +173,6 @@ def select_scene() -> dict:
     if n_cup == "s":
         return {}
 
-    # target 최소 1개 필요
-    if int(n_cube) + int(n_cup) == 0:
-        print("  ✗ 큐브 또는 종이컵이 최소 1개 필요합니다.")
-        return select_scene()
-
     # obj_list 구성
     targets: list[str] = []
     if n_cube == "2":
