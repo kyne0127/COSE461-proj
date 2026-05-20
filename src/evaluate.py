@@ -471,6 +471,37 @@ def _prompt_capture(label: str, source: str, camera, save_path: Path, warmup: in
     return str(save_path)
 
 
+def _make_sample(
+    sample_id: str,
+    task: str,
+    t0_path: str,
+    c1_path: str,
+    c2_path: str,
+    checkpoint: str,
+) -> "EvalSample":
+    """평가용 임시 EvalSample을 생성합니다 (gold label 없음)."""
+    return EvalSample(
+        sample_id=sample_id,
+        scenario="camera",
+        task=task,
+        initial_img=t0_path,
+        c1_img=c1_path,
+        c2_img=c2_path,
+        checkpoint=checkpoint,
+        gold_state="CLEAR",
+        gold_decision=Decision.CONTINUE,
+        target_label="",
+        destination_label="",
+    )
+
+
+def _print_step_results(preds: list["EvalPrediction"]) -> None:
+    """체크포인트 단계별 결과를 출력합니다."""
+    for pred in preds:
+        state_str = f"  [{pred.predicted_state}]" if pred.predicted_state else ""
+        print(f"    {pred.method.upper():<8}: {pred.predicted_decision.value}{state_str}")
+
+
 def run_camera_eval(
     source: str,
     methods: list[str],
@@ -488,15 +519,15 @@ def run_camera_eval(
     metrics_json: str = "",
 ) -> None:
     """
-    ZED 또는 USB 카메라로 이미지를 캡처하며 평가를 진행합니다.
+    ZED 또는 USB 카메라로 이미지를 단계별로 캡처하며 평가를 진행합니다.
 
     흐름:
-      1. 카메라 초기화
-      2. t₀ 씬 준비 → Enter → 캡처 저장
-      3. C1 씬 연출 → Enter → 캡처 저장
-      4. C2 씬 연출 → Enter → 캡처 저장  (또는 's' 입력으로 건너뜀)
-      5. 지정 methods 로 평가 실행
-      6. 결과 출력 (gold label 입력 시 정확도 계산)
+      [Step 1] t₀ 캡처 → G₀ 추출 결과 즉시 표시
+      [Step 2] C1 캡처 → C1 체크포인트 결과 즉시 표시
+               → Ours STOP 시 C2 진행 여부 확인
+               → Ours ASK 시 사용자 답변 수신 (user_response_fn)
+      [Step 3] C2 캡처 → C2 체크포인트 결과 즉시 표시
+      [Summary] gold label 입력(선택) → 정확도 계산
     """
     _REPO_ROOT = Path(__file__).resolve().parent.parent
     sys.path.insert(0, str(_REPO_ROOT))
@@ -516,115 +547,176 @@ def run_camera_eval(
     save_dir = save_dir / ts
     save_dir.mkdir(parents=True, exist_ok=True)
 
-    print(f"[camera] 저장 경로: {save_dir}")
-    print(f"[camera] task: {task!r}")
+    print(f"[camera] 저장 경로 : {save_dir}")
+    print(f"[camera] task      : {task!r}")
+    print(f"[camera] methods   : {methods}")
+
+    all_predictions: list[EvalPrediction] = []
 
     try:
-        # ── 이미지 캡처 ──────────────────────────────────────────────────────
-        t0_path  = _prompt_capture("t₀  (초기 장면)", source, camera, save_dir / "t0.png",  warmup)
-        c1_path  = _prompt_capture("C1  (pre-pick  장면 변화)", source, camera, save_dir / "c1.png",  warmup)
+        # ════════════════════════════════════════════════════════════════
+        # Step 1: t₀ — 초기 장면 캡처 + G₀ 추출
+        # ════════════════════════════════════════════════════════════════
+        print(f"\n{'='*60}")
+        print("[Step 1/3]  t₀  — 초기 장면")
+        print("="*60)
 
-        print(f"\n  [C2] pre-place 장면 캡처 (s = C1 이미지 재사용, Enter = 새로 캡처, q = 종료): ",
-              end="", flush=True)
+        t0_path = _prompt_capture("t₀ 초기 장면", source, camera,
+                                   save_dir / "t0.png", warmup)
+
+        # G₀ 즉시 추출 및 표시
+        if handler is not None:
+            print("\n  G₀ 추출 중...", end=" ", flush=True)
+            try:
+                from extraction.ambres_g0_extractor import extract_g0 as _extract_g0
+                g0_preview = _extract_g0(
+                    t0_path, task,
+                    handler=handler,
+                    session_id=f"cam_{ts}_g0_preview",
+                    allow_ambiguous=True,
+                )
+                print("완료")
+                print(f"  target     : {g0_preview['target']['label']}"
+                      f"  @ {g0_preview['target']['coord']}")
+                print(f"  destination: {g0_preview['destination']['label']}"
+                      f"  @ {g0_preview['destination']['coord']}")
+            except Exception as exc:
+                print(f"(실패: {exc})")
+
+        # ════════════════════════════════════════════════════════════════
+        # Step 2: C1 — pre-pick 체크포인트
+        # ════════════════════════════════════════════════════════════════
+        print(f"\n{'='*60}")
+        print("[Step 2/3]  C1  — pre-pick 장면 변화")
+        print("="*60)
+
+        c1_path = _prompt_capture("C1 (pre-pick 씬 연출)", source, camera,
+                                   save_dir / "c1.png", warmup)
+
+        print("\n  C1 평가 결과:")
+        c1_sample = _make_sample(f"cam_{ts}_c1", task,
+                                  t0_path, c1_path, c1_path, "C1")
+        c1_preds: list[EvalPrediction] = []
+        for method in methods:
+            print(f"    {method.upper():<8}: ", end="", flush=True)
+            pred = run_method(c1_sample, method,
+                              handler=handler, threshold=threshold,
+                              llm_model=llm_model,
+                              user_response_fn=user_response_fn)
+            c1_preds.append(pred)
+            state_str = f"  [{pred.predicted_state}]" if pred.predicted_state else ""
+            print(f"{pred.predicted_decision.value}{state_str}")
+        all_predictions.extend(c1_preds)
+
+        # Ours STOP 시 C2 진행 여부 확인
+        ours_c1 = next((p for p in c1_preds if p.method.upper() == "OURS"), None)
+        proceed_c2 = True
+        if ours_c1 and ours_c1.predicted_decision == Decision.STOP:
+            print(f"\n  [OURS STOP] {ours_c1.predicted_state} "
+                  f"— 로봇이 정지해야 합니다.")
+            try:
+                cont = input("  C2 단계를 계속 진행하시겠습니까? (y/n, 기본=n): ").strip().lower()
+            except (EOFError, KeyboardInterrupt):
+                cont = "n"
+            proceed_c2 = (cont == "y")
+
+        if not proceed_c2:
+            print("\n  C2 평가 건너뜀 (STOP 결정)")
+            _finalize_camera_eval(all_predictions, save_dir,
+                                  predictions_csv, metrics_json)
+            return
+
+        # ════════════════════════════════════════════════════════════════
+        # Step 3: C2 — pre-place 체크포인트
+        # ════════════════════════════════════════════════════════════════
+        print(f"\n{'='*60}")
+        print("[Step 3/3]  C2  — pre-place 장면 변화")
+        print("="*60)
+
+        print("  s = C1 이미지 재사용 / Enter = 새로 캡처: ", end="", flush=True)
         try:
             c2_ans = input().strip().lower()
         except (EOFError, KeyboardInterrupt):
             c2_ans = "s"
 
-        if c2_ans == "q":
-            raise SystemExit(0)
-        elif c2_ans == "s":
+        if c2_ans == "s":
             c2_path = c1_path
             print(f"  C1 이미지 재사용: {c2_path}")
         else:
-            c2_path = _prompt_capture("C2  (pre-place 장면 변화)", source, camera, save_dir / "c2.png", warmup)
+            c2_path = _prompt_capture("C2 (pre-place 씬 연출)", source, camera,
+                                       save_dir / "c2.png", warmup)
 
-        # ── C1 / C2 체크포인트 판단 ──────────────────────────────────────────
-        print(f"\n  체크포인트 선택 (1=C1, 2=C2, 기본=C1): ", end="", flush=True)
-        try:
-            cp_ans = input().strip()
-        except (EOFError, KeyboardInterrupt):
-            cp_ans = "1"
-        checkpoint = "C2" if cp_ans == "2" else "C1"
-
-        # ── gold label 입력 (선택) ───────────────────────────────────────────
-        print(f"\n  gold_state 입력 (정확도 계산용, Enter 건너뜀): ", end="", flush=True)
-        try:
-            gold_state_in = input().strip().upper()
-        except (EOFError, KeyboardInterrupt):
-            gold_state_in = ""
-
-        print(f"  gold_decision 입력 (CONTINUE/ASK/STOP, Enter 건너뜀): ", end="", flush=True)
-        try:
-            gold_decision_in = input().strip().upper()
-        except (EOFError, KeyboardInterrupt):
-            gold_decision_in = ""
-
-        valid_states    = {s.value for s in __import__("monitoring.consistency_monitor",
-                           fromlist=["GroundingState"]).GroundingState}
-        gold_state_val  = gold_state_in  if gold_state_in   in valid_states           else "CLEAR"
-        gold_decision_val = gold_decision_in if gold_decision_in in {"CONTINUE","ASK","STOP"} else "CONTINUE"
-
-        # ── EvalSample 생성 ──────────────────────────────────────────────────
-        sample = EvalSample(
-            sample_id=f"camera_{ts}",
-            scenario="camera",
-            task=task,
-            initial_img=t0_path,
-            c1_img=c1_path,
-            c2_img=c2_path,
-            checkpoint=checkpoint,
-            gold_state=gold_state_val,
-            gold_decision=Decision(gold_decision_val),
-            target_label="",
-            destination_label="",
-        )
-
-        # ── 평가 실행 ────────────────────────────────────────────────────────
-        print(f"\n{'='*60}")
-        print(f"  평가 시작  methods={methods}  checkpoint={checkpoint}")
-        print(f"{'='*60}")
-
-        predictions: list[EvalPrediction] = []
+        print("\n  C2 평가 결과:")
+        c2_sample = _make_sample(f"cam_{ts}_c2", task,
+                                  t0_path, c1_path, c2_path, "C2")
+        c2_preds: list[EvalPrediction] = []
         for method in methods:
-            print(f"\n[{method.upper()}] 실행 중...")
-            pred = run_method(
-                sample, method,
-                handler=handler,
-                threshold=threshold,
-                llm_model=llm_model,
-                user_response_fn=user_response_fn,
-            )
-            predictions.append(pred)
-            correct_mark = "✓" if pred.predicted_decision == pred.gold_decision else "✗"
-            print(f"  결과: {pred.predicted_decision.value}  (gold={pred.gold_decision.value} {correct_mark})")
-            if pred.predicted_state:
-                print(f"  state: {pred.predicted_state}")
-            if pred.reason:
-                print(f"  reason: {pred.reason}")
+            print(f"    {method.upper():<8}: ", end="", flush=True)
+            pred = run_method(c2_sample, method,
+                              handler=handler, threshold=threshold,
+                              llm_model=llm_model,
+                              user_response_fn=user_response_fn)
+            c2_preds.append(pred)
+            state_str = f"  [{pred.predicted_state}]" if pred.predicted_state else ""
+            print(f"{pred.predicted_decision.value}{state_str}")
+        all_predictions.extend(c2_preds)
 
-        # ── metrics ──────────────────────────────────────────────────────────
-        if gold_decision_in:
-            metrics = compute_metrics(predictions)
-            print(f"\n{'='*60}")
-            print("  Metrics:")
-            print(json.dumps(metrics, ensure_ascii=False, indent=4))
-            if predictions_csv:
-                write_predictions_csv(predictions_csv, predictions)
-                print(f"  predictions → {predictions_csv}")
-            if metrics_json:
-                write_metrics_json(metrics_json, metrics)
-                print(f"  metrics     → {metrics_json}")
-        else:
-            print("\n  (gold label 미입력 — 정확도 계산 건너뜀)")
-
-        print(f"\n  캡처 이미지 저장 위치: {save_dir}")
+        # ── 최종 요약 ────────────────────────────────────────────────────────
+        _finalize_camera_eval(all_predictions, save_dir,
+                              predictions_csv, metrics_json)
 
     finally:
-        if source == "zed":
-            camera.release()
-        else:
-            camera.release()
+        camera.release()
+
+
+def _finalize_camera_eval(
+    predictions: list["EvalPrediction"],
+    save_dir: Path,
+    predictions_csv: str,
+    metrics_json: str,
+) -> None:
+    """gold label 입력 후 메트릭을 계산하고 결과를 저장합니다."""
+    print(f"\n{'='*60}")
+    print("  평가 완료 — 결과 요약")
+    print("="*60)
+
+    # gold label 입력 (선택)
+    print("\n  gold_state  입력 (Enter = 건너뜀): ", end="", flush=True)
+    try:
+        gold_state_in = input().strip().upper()
+    except (EOFError, KeyboardInterrupt):
+        gold_state_in = ""
+
+    print("  gold_decision 입력 (CONTINUE/ASK/STOP, Enter = 건너뜀): ",
+          end="", flush=True)
+    try:
+        gold_decision_in = input().strip().upper()
+    except (EOFError, KeyboardInterrupt):
+        gold_decision_in = ""
+
+    if gold_decision_in in {"CONTINUE", "ASK", "STOP"}:
+        from monitoring.consistency_monitor import GroundingState
+        valid_states = {s.value for s in GroundingState}
+        gold_state_val = gold_state_in if gold_state_in in valid_states else "CLEAR"
+
+        for pred in predictions:
+            pred.gold_decision = Decision(gold_decision_in)
+            pred.gold_state    = gold_state_val
+
+        metrics = compute_metrics(predictions)
+        print("\n  Metrics:")
+        print(json.dumps(metrics, ensure_ascii=False, indent=4))
+
+        if predictions_csv:
+            write_predictions_csv(predictions_csv, predictions)
+            print(f"\n  predictions → {predictions_csv}")
+        if metrics_json:
+            write_metrics_json(metrics_json, metrics)
+            print(f"  metrics     → {metrics_json}")
+    else:
+        print("\n  (gold label 미입력 — 정확도 계산 건너뜀)")
+
+    print(f"\n  캡처 이미지 저장 위치: {save_dir}")
 
 
 def main() -> None:
