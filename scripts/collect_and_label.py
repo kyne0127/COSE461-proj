@@ -1,17 +1,12 @@
 #!/usr/bin/env python3
 """
-AmbRes 재학습 데이터 수집 + 레이블링 스크립트
-물체 세트: 큐브, 빨간 상자, 노란 상자, 종이컵
+AmbRes 데이터 레이블링 스크립트
+물체: 큐브×2, 빨간상자, 노란상자, 종이컵×2
+역할: 큐브/종이컵 = target  |  빨간상자/노란상자 = destination
 
 실행:
   python scripts/collect_and_label.py --mode train
   python scripts/collect_and_label.py --mode test
-
-각 씬마다:
-  1. ZED/USB 카메라로 이미지 캡처
-  2. 씬에 어떤 물체가 있는지 선택
-  3. 태스크 선택
-  4. 자동으로 data_raw.jsonl에 저장
 """
 
 from __future__ import annotations
@@ -19,231 +14,207 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-import time
-import uuid
 from pathlib import Path
 
 sys.path.insert(0, "/workspace/AmbRes")
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 # ────────────────────────────────────────────────────────────────────────────
-# 물체 세트 정의
+# 씬 프리셋 정의
+# ────────────────────────────────────────────────────────────────────────────
+#
+# obj_list     : 씬에 실제로 있는 물체 이름 (구체적)
+# ambiguity_map: 모호한 물체 → 구체적 인스턴스 목록
+#   - 큐브 2개  → {"cube":      ["left cube",      "right cube"]}
+#   - 컵 2개    → {"paper cup": ["left paper cup", "right paper cup"]}
+#   - 상자 2개  → {"box":       ["red box",        "yellow box"]}
+
+def _s(targets, boxes):
+    """(target_list, box_list) → (obj_list, ambiguity_map) 자동 생성."""
+    obj_list = targets + boxes
+    amb = {}
+    if len([t for t in targets if "cube" in t]) >= 2:
+        cubes = [t for t in targets if "cube" in t]
+        amb["cube"] = cubes
+    if len([t for t in targets if "cup" in t]) >= 2:
+        cups = [t for t in targets if "cup" in t]
+        amb["paper cup"] = cups
+    if len(boxes) >= 2:
+        amb["box"] = boxes
+    return obj_list, amb
+
+SCENES = []
+
+# ── 타겟: 큐브 1개 ──────────────────────────────────────────────────────────
+T1 = ["cube"]
+T2 = ["left cube", "right cube"]
+P1 = ["paper cup"]
+P2 = ["left paper cup", "right paper cup"]
+
+for targets, t_label in [
+    (T1, "1큐브"),
+    (T2, "2큐브"),
+    (P1, "1종이컵"),
+    (P2, "2종이컵"),
+    (T1 + P1, "1큐브+1종이컵"),
+    (T2 + P1, "2큐브+1종이컵"),
+    (T1 + P2, "1큐브+2종이컵"),
+    (T2 + P2, "2큐브+2종이컵"),
+]:
+    for boxes, b_label in [
+        (["red box"],              "빨간상자"),
+        (["yellow box"],           "노란상자"),
+        (["red box", "yellow box"],"빨간상자+노란상자"),
+    ]:
+        obj_list, amb = _s(targets, boxes)
+        amb_note = ""
+        if "cube" in amb:      amb_note += " [큐브모호]"
+        if "paper cup" in amb: amb_note += " [컵모호]"
+        if "box" in amb:       amb_note += " [상자모호]"
+        if not amb_note:       amb_note = " [명확]"
+        SCENES.append({
+            "desc":          f"{t_label} + {b_label}{amb_note}",
+            "obj_list":      obj_list,
+            "ambiguity_map": amb,
+        })
+
+# ────────────────────────────────────────────────────────────────────────────
+# 태스크 자동 생성
 # ────────────────────────────────────────────────────────────────────────────
 
-OBJECTS = {
-    "1": "cube",
-    "2": "red box",
-    "3": "yellow box",
-    "4": "paper cup",
-}
-
-# 태스크 템플릿: {object} 플레이스홀더 사용
 TASK_TEMPLATES = [
-    "Put the {obj1} next to the {obj2}.",
-    "Move the {obj1} on top of the {obj2}.",
-    "Place the {obj1} inside the {obj2}.",
-    "Move the {obj1} to the left of the {obj2}.",
-    "Move the {obj1} to the right of the {obj2}.",
-    "Pick up the {obj1} and place it near the {obj2}.",
+    "Put the {tgt} next to the {box}.",
+    "Place the {tgt} inside the {box}.",
+    "Move the {tgt} to the {box}.",
+    "Pick up the {tgt} and place it near the {box}.",
 ]
 
-# 씬에 있는 물체 조합 예시 (레이블링 시 선택)
-SCENE_PRESETS = {
-    "A": {
-        "desc": "큐브 + 빨간 상자 + 노란 상자 + 종이컵 (4개 모두)",
-        "obj_list": ["cube", "red box", "yellow box", "paper cup"],
-        "ambiguity_map": {"box": ["red box", "yellow box"]},
-    },
-    "B": {
-        "desc": "큐브 + 빨간 상자 + 종이컵",
-        "obj_list": ["cube", "red box", "paper cup"],
-        "ambiguity_map": {},
-    },
-    "C": {
-        "desc": "큐브 + 노란 상자 + 종이컵",
-        "obj_list": ["cube", "yellow box", "paper cup"],
-        "ambiguity_map": {},
-    },
-    "D": {
-        "desc": "빨간 상자 + 노란 상자 + 종이컵",
-        "obj_list": ["red box", "yellow box", "paper cup"],
-        "ambiguity_map": {"box": ["red box", "yellow box"]},
-    },
-    "E": {
-        "desc": "큐브 + 빨간 상자 + 노란 상자",
-        "obj_list": ["cube", "red box", "yellow box"],
-        "ambiguity_map": {"box": ["red box", "yellow box"]},
-    },
-    "F": {
-        "desc": "큐브 + 종이컵 (2개)",
-        "obj_list": ["cube", "paper cup"],
-        "ambiguity_map": {},
-    },
-    "G": {
-        "desc": "직접 입력",
-        "obj_list": None,
-        "ambiguity_map": None,
-    },
-}
+def generate_tasks(obj_list: list[str], amb_map: dict) -> list[str]:
+    """obj_list + ambiguity_map → 태스크 목록 자동 생성."""
+    # target 플레이스홀더: ambiguity_map 키 우선, 없으면 obj 이름 그대로
+    tgt_phs: list[str] = []
+    seen = set()
+    for obj in obj_list:
+        if "cube" in obj:
+            ph = "cube" if "cube" in amb_map else obj
+        elif "cup" in obj:
+            ph = "paper cup" if "paper cup" in amb_map else obj
+        else:
+            continue
+        if ph not in seen:
+            tgt_phs.append(ph)
+            seen.add(ph)
+
+    # destination 플레이스홀더
+    box_phs: list[str] = []
+    seen = set()
+    for obj in obj_list:
+        if "box" in obj:
+            ph = "box" if "box" in amb_map else obj
+            if ph not in seen:
+                box_phs.append(ph)
+                seen.add(ph)
+
+    tasks = []
+    for tgt in tgt_phs:
+        for box in box_phs:
+            for tmpl in TASK_TEMPLATES:
+                tasks.append(tmpl.replace("{tgt}", "{" + tgt + "}").replace("{box}", "{" + box + "}"))
+    return tasks
 
 
 # ────────────────────────────────────────────────────────────────────────────
-# 카메라 캡처
+# 레이블링 루프
 # ────────────────────────────────────────────────────────────────────────────
 
-def capture_image(source: str, camera_index: int, img_save_path: Path) -> bool:
-    """카메라에서 이미지 1장 캡처 후 저장. 성공하면 True."""
-    import cv2
-    import numpy as np
-    from PIL import Image
+def show_scenes() -> None:
+    print("\n  번호  씬 구성")
+    print("  " + "─" * 55)
+    for i, s in enumerate(SCENES, 1):
+        print(f"  {i:2d})  {s['desc']}")
+    print("  " + "─" * 55)
 
-    if source == "zed":
+def select_scene() -> dict:
+    show_scenes()
+    while True:
+        raw = input(f"\n  씬 번호 입력 (1~{len(SCENES)}, s=건너뜀): ").strip().lower()
+        if raw == "s":
+            return {}
         try:
-            sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-            from module.desktop.zed_connector import ZEDCapture
-            cam = ZEDCapture(resolution="VGA", fps=30)
-            for _ in range(5):  # warmup
-                cam.capture_synchronized()
-            rgb, _ = cam.capture_synchronized()
-            cam.release()
-        except Exception as e:
-            print(f"  [오류] ZED 캡처 실패: {e}")
-            return False
-    else:
-        cap = cv2.VideoCapture(camera_index)
-        if not cap.isOpened():
-            print(f"  [오류] USB 카메라 index={camera_index} 열기 실패")
-            return False
-        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-        for _ in range(5):  # warmup
-            cap.read()
-        ret, frame = cap.read()
-        cap.release()
-        if not ret:
-            print("  [오류] 프레임 캡처 실패")
-            return False
-        rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            n = int(raw)
+            if 1 <= n <= len(SCENES):
+                return SCENES[n - 1]
+        except ValueError:
+            pass
+        print(f"  ✗ 1~{len(SCENES)} 또는 s 입력")
 
-    img_save_path.parent.mkdir(parents=True, exist_ok=True)
-    bgr = cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
-    cv2.imwrite(str(img_save_path), bgr)
-    h, w = rgb.shape[:2]
-    print(f"  ✓ 저장: {img_save_path}  ({w}×{h})")
+
+def label_one(img_path: Path, img_index: int, total: int, raw_file: Path) -> bool:
+    """이미지 1장 레이블링. 저장 성공 시 True."""
+    # 이미지 정보
+    try:
+        from PIL import Image as PILImage
+        with PILImage.open(img_path) as im:
+            w, h = im.size
+        img_info = f"{w}×{h}"
+    except Exception:
+        img_info = "크기 불명"
+
+    print(f"\n{'═'*60}")
+    print(f"  [{img_index}/{total}]  {img_path.name}  ({img_info})")
+    print(f"  경로: {img_path.resolve()}")
+    print(f"{'═'*60}")
+
+    # 씬 선택
+    scene = select_scene()
+    if not scene:
+        print("  건너뜀.")
+        return False
+
+    obj_list = scene["obj_list"]
+    amb_map  = scene["ambiguity_map"]
+    tasks    = generate_tasks(obj_list, amb_map)
+
+    print(f"\n  obj_list      : {obj_list}")
+    print(f"  ambiguity_map : {amb_map}")
+    print(f"  태스크 {len(tasks)}개 자동 생성:")
+    for t in tasks:
+        print(f"    - {t}")
+
+    confirm = input("\n  저장할까요? (Enter = 저장, r = 씬 재선택, s = 건너뜀): ").strip().lower()
+    if confirm == "s":
+        return False
+    if confirm == "r":
+        return label_one(img_path, img_index, total, raw_file)
+
+    sample = {
+        "id":            img_path.stem,
+        "obj_list":      obj_list,
+        "tasks":         tasks,
+        "ambiguity_map": amb_map,
+    }
+    with open(raw_file, "a") as f:
+        f.write(json.dumps(sample, ensure_ascii=False) + "\n")
     return True
 
 
 # ────────────────────────────────────────────────────────────────────────────
-# 씬 레이블링
-# ────────────────────────────────────────────────────────────────────────────
-
-def select_scene_preset() -> dict:
-    print("\n  씬 구성 선택:")
-    for key, preset in SCENE_PRESETS.items():
-        print(f"    {key}) {preset['desc']}")
-    while True:
-        ans = input("  선택 (A~G): ").strip().upper()
-        if ans in SCENE_PRESETS:
-            preset = SCENE_PRESETS[ans]
-            if preset["obj_list"] is not None:
-                return dict(preset)
-            # G: 직접 입력
-            return direct_input()
-        print("  ✗ A~G 중 선택하세요.")
-
-
-def direct_input() -> dict:
-    print("\n  물체 번호를 입력하세요:")
-    for k, v in OBJECTS.items():
-        print(f"    {k}) {v}")
-    print("  (복수 선택: 1,2,3 또는 all)")
-    while True:
-        raw = input("  > ").strip().lower()
-        if raw == "all":
-            selected = list(OBJECTS.values())
-            break
-        nums = [x.strip() for x in raw.split(",")]
-        if all(n in OBJECTS for n in nums):
-            selected = [OBJECTS[n] for n in nums]
-            break
-        print("  ✗ 올바른 번호를 입력하세요.")
-
-    # ambiguity_map 자동 생성
-    amb_map = {}
-    if "red box" in selected and "yellow box" in selected:
-        amb_map["box"] = ["red box", "yellow box"]
-
-    print(f"  obj_list      : {selected}")
-    print(f"  ambiguity_map : {amb_map}")
-    return {"obj_list": selected, "ambiguity_map": amb_map}
-
-
-def select_tasks(obj_list: list[str], amb_map: dict) -> list[str]:
-    """태스크 템플릿을 obj_list의 물체 쌍으로 채워 선택하도록 합니다."""
-    from itertools import combinations
-
-    # 사용 가능한 (obj1, obj2) 쌍 생성
-    pairs = list(combinations(obj_list, 2))
-    # ambiguous 물체는 'box' 형태 플레이스홀더로도 추가
-    if amb_map:
-        for amb_key in amb_map:
-            for other in obj_list:
-                if other not in amb_map.get(amb_key, []):
-                    pairs.append((amb_key, other))
-                    pairs.append((other, amb_key))
-
-    # 중복 제거
-    pairs = list(dict.fromkeys(pairs))
-
-    # 태스크 후보 생성
-    candidates = []
-    for o1, o2 in pairs[:6]:  # 너무 많으면 잘라냄
-        for tmpl in TASK_TEMPLATES[:3]:
-            t = tmpl.replace("{obj1}", "{" + o1 + "}").replace("{obj2}", "{" + o2 + "}")
-            candidates.append(t)
-
-    print("\n  태스크 선택 (복수 선택 가능, 쉼표 구분 또는 all):")
-    for i, t in enumerate(candidates, 1):
-        print(f"    {i:2d}) {t}")
-
-    while True:
-        raw = input("  > ").strip().lower()
-        if raw == "all":
-            return candidates
-        if raw == "s":
-            return []
-        try:
-            nums = [int(x.strip()) for x in raw.split(",")]
-            if all(1 <= n <= len(candidates) for n in nums):
-                return [candidates[n - 1] for n in nums]
-        except ValueError:
-            pass
-        print(f"  ✗ 1~{len(candidates)} 중 선택하세요. (s = 건너뜀)")
-
-
-# ────────────────────────────────────────────────────────────────────────────
-# 메인
+# 진입점
 # ────────────────────────────────────────────────────────────────────────────
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="AmbRes 데이터 수집 + 레이블링")
-    parser.add_argument("--mode",   choices=["train", "test"], default="train")
-    parser.add_argument("--source", choices=["zed", "usb", "skip"], default="zed",
-                        help="카메라 소스 (skip = 카메라 없이 레이블만)")
-    parser.add_argument("--camera-index", type=int, default=0)
-    parser.add_argument("--n-scenes", type=int, default=0,
-                        help="촬영할 씬 수 (0 = Ctrl+C까지 무한)")
+    parser = argparse.ArgumentParser(description="AmbRes 데이터 레이블링")
+    parser.add_argument("--mode", choices=["train", "test"], default="train")
     args = parser.parse_args()
 
     from ambres import ASSETS_DIR, DATA_DIR
 
     img_dir  = DATA_DIR.get_dir("real", args.mode)
     raw_file = ASSETS_DIR.get_dir("real", args.mode) / "data_raw.jsonl"
-    img_dir.mkdir(parents=True, exist_ok=True)
     raw_file.parent.mkdir(parents=True, exist_ok=True)
     raw_file.touch()
 
-    # 완료된 ID 로드
+    # 완료된 ID
     done_ids: set[str] = set()
     with open(raw_file) as f:
         for line in f:
@@ -254,79 +225,43 @@ def main() -> None:
                 except Exception:
                     pass
 
+    imgs = sorted(
+        list(img_dir.glob("*.png"))
+        + list(img_dir.glob("*.jpeg"))
+        + list(img_dir.glob("*.jpg"))
+    )
+    remaining = [p for p in imgs if p.stem not in done_ids]
+
     print(f"\n{'='*60}")
-    print(f"  AmbRes 데이터 수집  ({args.mode})")
-    print(f"  이미지 저장: {img_dir}")
+    print(f"  AmbRes 레이블링  ({args.mode})")
+    print(f"  이미지 경로: {img_dir}")
     print(f"  레이블 파일: {raw_file}")
-    print(f"  완료된 씬  : {len(done_ids)}개")
-    print(f"  물체 세트  : 큐브 / 빨간 상자 / 노란 상자 / 종이컵")
+    print(f"  전체 {len(imgs)}장  완료 {len(done_ids)}장  남은 {len(remaining)}장")
+    print(f"  물체: 큐브×2 / 빨간상자 / 노란상자 / 종이컵×2")
+    print(f"  역할: 큐브·종이컵=target  /  상자=destination")
     print(f"{'='*60}")
-    print("  Ctrl+C 로 중단, 재실행 시 이어서 진행\n")
+    print("  Ctrl+C = 중단 (재실행 시 이어서 진행)\n")
 
-    scene_count = 0
+    if not remaining:
+        print("  모두 레이블링 완료.")
+        return
+
+    labeled = 0
     try:
-        while args.n_scenes == 0 or scene_count < args.n_scenes:
-            scene_count += 1
-            img_id = str(uuid.uuid4()).replace("-", "")[:22]
-            img_path = img_dir / f"{img_id}.jpeg"
+        for i, img_path in enumerate(remaining, 1):
+            if label_one(img_path, i + len(done_ids), len(imgs), raw_file):
+                labeled += 1
+                print(f"  ✓ 저장 완료  (누적 {len(done_ids) + labeled}/{len(imgs)})")
+    except (KeyboardInterrupt, EOFError):
+        print("\n\n  중단됨. 재실행하면 이어서 진행합니다.")
 
-            print(f"\n{'─'*60}")
-            print(f"  씬 #{scene_count}  ID={img_id}")
-            print(f"{'─'*60}")
-
-            # 1. 카메라 캡처
-            if args.source != "skip":
-                input(f"\n  [1] 씬을 구성하고 Enter 입력 (캡처)... ")
-                ok = capture_image(args.source, args.camera_index, img_path)
-                if not ok:
-                    print("  캡처 실패 — 이 씬 건너뜀")
-                    continue
-            else:
-                print(f"\n  [1] 카메라 skip 모드 — 이미지 없이 레이블만 생성")
-                img_path.touch()  # 빈 파일 생성
-
-            # 2. 씬 구성 선택
-            print("\n  [2] 이 씬의 물체 구성을 선택하세요:")
-            preset = select_scene_preset()
-            obj_list   = preset["obj_list"]
-            amb_map    = preset["ambiguity_map"]
-            print(f"  obj_list      : {obj_list}")
-            print(f"  ambiguity_map : {amb_map}")
-
-            # 3. 태스크 선택
-            print("\n  [3] 이 씬에 적합한 태스크를 선택하세요 (all 또는 번호):")
-            tasks = select_tasks(obj_list, amb_map)
-            if not tasks:
-                print("  태스크 없음 — 이 씬 건너뜀")
-                img_path.unlink(missing_ok=True)
-                continue
-            print(f"  선택된 태스크 {len(tasks)}개")
-
-            # 4. 저장
-            sample = {
-                "id": img_id,
-                "obj_list": obj_list,
-                "tasks": tasks,
-                "ambiguity_map": amb_map,
-            }
-            with open(raw_file, "a") as f:
-                f.write(json.dumps(sample, ensure_ascii=False) + "\n")
-
-            print(f"\n  ✓ 저장 완료  (누적: {len(done_ids) + scene_count}개)")
-
-            ans = input("\n  계속하시겠습니까? (Enter = 계속, q = 종료): ").strip().lower()
-            if ans == "q":
-                break
-
-    except KeyboardInterrupt:
-        print("\n\n  중단됨.")
-
-    total = len(done_ids) + scene_count
-    print(f"\n  총 {total}개 씬 완료.")
-    print(f"\n  다음 단계:")
-    print(f"  1. 반대 모드도 수집: python scripts/collect_and_label.py --mode test")
-    print(f"  2. 샘플 생성: cd /workspace/AmbRes && python scripts/make_samples.py --env real")
-    print(f"  3. 학습: HF_HOME=/workspace/hf_cache python scripts/train.py --env real")
+    print(f"\n  이번 세션 {labeled}장 완료.")
+    if args.mode == "train":
+        print(f"\n  다음: python scripts/collect_and_label.py --mode test")
+    else:
+        print(f"\n  다음 단계:")
+        print(f"  1. 샘플 생성: cd /workspace/AmbRes && python scripts/make_samples.py --env real")
+        print(f"  2. 학습     : HF_HOME=/workspace/hf_cache python scripts/train.py --env real")
 
 
 if __name__ == "__main__":
