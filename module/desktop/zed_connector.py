@@ -56,6 +56,7 @@ class ZEDCapture:
         depth_min_dist: float = 0.3,   # metres
         depth_max_dist: float = 3.0,   # metres
         use_zed_sdk: bool = True,
+        fallback_device_index: int = 0,  # OpenCV fallback camera index
     ) -> None:
         """
         Initialize ZED capture.
@@ -74,6 +75,7 @@ class ZEDCapture:
         self._depth_min = depth_min_dist
         self._depth_max = depth_max_dist
         self._use_zed_sdk = use_zed_sdk and _ZED_SDK_AVAILABLE
+        self._fallback_device_index = fallback_device_index
 
         self._camera = None
         self._initialized = False
@@ -104,10 +106,14 @@ class ZEDCapture:
                 else sl.RESOLUTION.HD720
             )
             init_params.camera_fps = self._fps
-            init_params.depth_mode = (
-                sl.DEPTH_MODE.PERFORMANCE if self._depth_mode == "PERFORMANCE"
-                else sl.DEPTH_MODE.QUALITY
-            )
+            depth_mode_map = {
+                "PERFORMANCE": sl.DEPTH_MODE.PERFORMANCE,
+                "QUALITY":     sl.DEPTH_MODE.QUALITY,
+                "ULTRA":       sl.DEPTH_MODE.ULTRA,
+                "NEURAL":      sl.DEPTH_MODE.NEURAL,
+            }
+            init_params.depth_mode = depth_mode_map.get(self._depth_mode, sl.DEPTH_MODE.NEURAL)
+            init_params.coordinate_units = sl.UNIT.METER
             init_params.depth_minimum_distance = self._depth_min
             init_params.depth_maximum_distance = self._depth_max
 
@@ -127,7 +133,7 @@ class ZEDCapture:
 
     def _init_opencv_fallback(self) -> None:
         """Initialize OpenCV fallback (simulated depth)."""
-        self._camera = cv2.VideoCapture(0)
+        self._camera = cv2.VideoCapture(self._fallback_device_index)
         if not self._camera.isOpened():
             raise RuntimeError("Failed to open camera with OpenCV")
 
@@ -157,19 +163,18 @@ class ZEDCapture:
         """Capture from ZED SDK."""
         runtime_params = sl.RuntimeParameters()
         if self._camera.grab(runtime_params) == sl.ERROR_CODE.SUCCESS:
-            # Capture RGB
+            # Capture RGB from left camera (BGRA → RGB)
             image = sl.Mat()
-            self._camera.retrieve_image(image, sl.VIEW.RGB)
-            rgb = image.get_data().astype(np.uint8)[..., :3]  # Remove alpha
+            self._camera.retrieve_image(image, sl.VIEW.LEFT)
+            bgra = image.get_data()                          # [H, W, 4] uint8
+            rgb = bgra[..., 2::-1].copy()                   # BGRA → RGB, [H, W, 3]
 
-            # Capture Depth (in millimeters)
+            # Capture Depth (metres, set by coordinate_units=METER)
             depth_map = sl.Mat()
             self._camera.retrieve_measure(depth_map, sl.MEASURE.DEPTH)
-            depth_mm = depth_map.get_data().astype(np.float32)
-
-            # Convert to metres
-            depth_m = depth_mm / 1000.0
-            depth_m = np.expand_dims(depth_m, axis=-1)  # [H, W, 1]
+            depth_m = depth_map.get_data().astype(np.float32)
+            depth_m = np.nan_to_num(depth_m, nan=0.0, posinf=0.0, neginf=0.0)
+            depth_m = np.expand_dims(depth_m, axis=-1)      # [H, W, 1]
 
             return rgb, depth_m
         else:

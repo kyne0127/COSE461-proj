@@ -11,7 +11,9 @@ module.desktop.data_collector
 
 from __future__ import annotations
 
+import select
 import signal
+import sys
 import threading
 import time
 from dataclasses import dataclass
@@ -83,11 +85,18 @@ class DataCollector:
     # Public API
     # ------------------------------------------------------------------ #
 
+    @staticmethod
+    def _stdin_has_input() -> bool:
+        """Non-blocking check: True if ENTER was pressed on stdin."""
+        rlist, _, _ = select.select([sys.stdin], [], [], 0)
+        return bool(rlist)
+
     def collect_episodes(
         self,
         n_episodes:     int,
         task_text:      str = "",
         metadata:       Optional[Dict[str, Any]] = None,
+        interactive:    bool = False,
     ) -> CollectionStats:
         """
         Collect `n_episodes` teleoperation demonstrations.
@@ -111,16 +120,29 @@ class DataCollector:
                 stats.aborted = True
                 break
 
+            # Interactive mode: wait for ENTER before starting each episode
+            if interactive:
+                print(f"\n  [Episode {ep_idx + 1}/{n_episodes}] 초기 자세로 설정 후 ENTER ▶  (q+ENTER = 전체 종료)")
+                try:
+                    line = sys.stdin.readline()
+                except EOFError:
+                    break
+                if line.strip().lower() == 'q':
+                    break
+                print(f"  ▶ 수집 중...  ENTER = 이 에피소드 종료  |  Ctrl+C = 전체 중단")
+
             logger.info("▶ Episode %d / %d  (task: '%s')", ep_idx + 1, n_episodes, task_text)
             ep_meta = {**(metadata or {}), "task": task_text, "ep_idx": ep_idx}
 
             try:
-                episode = self._collect_one_episode(ep_meta)
+                episode = self._collect_one_episode(ep_meta, interactive=interactive)
                 stats.n_episodes += 1
                 stats.n_frames   += len(episode)
                 logger.info(
                     "✓ Episode %d done — %d frames", ep_idx + 1, len(episode)
                 )
+                if interactive:
+                    print(f"  ✓ Episode {ep_idx + 1} 완료 — {len(episode)} frames 저장됨")
 
                 if self._on_episode_end:
                     self._on_episode_end(episode)
@@ -164,10 +186,11 @@ class DataCollector:
     # Core loop
     # ------------------------------------------------------------------ #
 
-    def _collect_one_episode(self, metadata: Dict[str, Any]) -> Episode:
+    def _collect_one_episode(self, metadata: Dict[str, Any], interactive: bool = False) -> Episode:
         """
         Inner loop for one teleoperation episode.
         Runs at self._fps until max_steps is reached or stop is signalled.
+        In interactive mode, ENTER key ends the episode early.
         """
         episode = self._buffer.start_episode(metadata=metadata)
         step    = 0
@@ -179,6 +202,12 @@ class DataCollector:
                 self._robot.teleop_step()
 
         while step < self._max_steps and not self._stop_event.is_set():
+            # Interactive: ENTER ends this episode (consume the newline)
+            if interactive and self._stdin_has_input():
+                sys.stdin.readline()
+                logger.info("Episode ended by user at step %d", step)
+                break
+
             t0 = time.perf_counter()
 
             # Collect one step

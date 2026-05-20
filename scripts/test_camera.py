@@ -185,6 +185,7 @@ def run_zed(
     n_frames: int,
     save_dir: Path | None,
     warmup: int,
+    fallback_device_index: int = 0,
 ) -> np.ndarray | None:
     print(f"\n=== ZED Mini 테스트 (resolution={resolution}) ===\n")
 
@@ -199,6 +200,7 @@ def run_zed(
             resolution=resolution,
             fps=fps_target,
             depth_mode=depth_mode,
+            fallback_device_index=fallback_device_index,
         )
     except Exception as e:
         print(f"[ERROR] ZEDCapture 초기화 실패: {e}")
@@ -349,12 +351,26 @@ def main() -> None:
     # Load config (optional)
     config = _load_config(args.config)
 
-    # desktop.yaml에서 global view 카메라 인덱스 자동 검출
+    # desktop.yaml에서 USB camera index 자동 검출
     usb_cfg = config.get("sensors", {}).get("usb_camera", {})
     if args.mode == "usb" and args.camera_index == 0 and usb_cfg.get("device_index") is not None:
         auto_idx = usb_cfg["device_index"]
         print(f"[config] desktop.yaml에서 camera_index={auto_idx} 자동 설정")
         args.camera_index = auto_idx
+
+    # desktop.yaml에서 ZED 설정 자동 적용 (CLI에서 명시하지 않은 경우)
+    zed_cfg = config.get("sensors", {}).get("zed_mini", {})
+    if args.mode == "zed" and zed_cfg:
+        # argparse default와 비교해 명시적으로 지정되지 않은 항목만 덮어씀
+        if args.resolution == "VGA" and zed_cfg.get("resolution"):
+            args.resolution = zed_cfg["resolution"]
+            print(f"[config] desktop.yaml에서 resolution={args.resolution} 자동 설정")
+        if args.fps == 30 and zed_cfg.get("fps"):
+            args.fps = zed_cfg["fps"]
+            print(f"[config] desktop.yaml에서 fps={args.fps} 자동 설정")
+        if args.depth_mode == "PERFORMANCE" and zed_cfg.get("depth_mode"):
+            args.depth_mode = zed_cfg["depth_mode"]
+            print(f"[config] desktop.yaml에서 depth_mode={args.depth_mode} 자동 설정")
 
     save_dir = Path(args.save_dir) if args.save_dir else None
 
@@ -383,6 +399,7 @@ def main() -> None:
             n_frames=args.n_frames,
             save_dir=save_dir,
             warmup=args.warmup,
+            fallback_device_index=args.camera_index,
         )
 
     # ── AmbRes 연동 테스트 ────────────────────────────────────────────

@@ -48,10 +48,15 @@ robot:
         fps: 60
         width: 640
         height: 480
+      global_view:
+        camera_index: 4
+        fps: 30
+        width: 1344
+        height: 376
 
 # 데이터 수집 설정
 collection:
-  max_episode_steps: 500  # 에피소드당 최대 스텝 수
+  max_episode_steps: 200  # 에피소드당 최대 스텝 수 (~6.7s @ 30fps)
   warmup_steps: 10        # 카메라 노출 안정화 대기 스텝
   dataset_id: "my_dataset"  # 업로드할 데이터셋 ID
 
@@ -61,7 +66,7 @@ sensors:
     enabled: true              # global view camera
     resolution: "VGA"        # HD720 | VGA (VGA=360p, 더 빠름)
     fps: 30
-    depth_mode: "PERFORMANCE" # ULTRA | QUALITY | PERFORMANCE
+    depth_mode: "NEURAL"    # NEURAL | ULTRA | QUALITY | PERFORMANCE(deprecated)
     depth_min_dist: 0.3      # metres
     depth_max_dist: 3.0      # metres
   usb_camera:

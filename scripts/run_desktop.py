@@ -60,7 +60,7 @@ def run_collect(args, config: dict) -> None:
     from module.desktop.robot_connector import RobotConnector
     from module.desktop.data_collector import DataCollector
     from module.desktop.grpc_client import TrainingClient
-    from module.utils.dataset import EpisodeBuffer
+    from module.utils.dataset import EpisodeBuffer, DatasetWriter
     from module.utils.logging import setup_logging
 
     setup_logging(
@@ -75,12 +75,15 @@ def run_collect(args, config: dict) -> None:
     dataset_id = args.dataset_id or coll_cfg.get("dataset_id", "default_dataset")
     n_episodes = args.n_episodes
     task_text  = args.task
+    data_root  = args.data_root or coll_cfg.get("data_root", "data")
 
     print(f"[collect] dataset_id={dataset_id}  n_episodes={n_episodes}")
     print(f"[collect] task: '{task_text}'")
+    print(f"[collect] save → {data_root}/{dataset_id}/")
 
     # Build components
     buffer    = EpisodeBuffer(dataset_id=dataset_id)
+    writer    = DatasetWriter(root=data_root, dataset_id=dataset_id)
     connector = RobotConnector.from_config(robot_cfg)
 
     collector = DataCollector(
@@ -89,6 +92,7 @@ def run_collect(args, config: dict) -> None:
         fps=robot_cfg.get("fps", 30.0),
         max_episode_steps=coll_cfg.get("max_episode_steps", 500),
         warmup_steps=coll_cfg.get("warmup_steps", 10),
+        on_episode_end=lambda ep: writer.write_episode(ep),
     )
 
     # Collect
@@ -96,20 +100,25 @@ def run_collect(args, config: dict) -> None:
         stats = collector.collect_episodes(
             n_episodes=n_episodes,
             task_text=task_text,
+            interactive=args.interactive,
         )
 
     print(f"\n[collect] ✓ Collected {stats.n_episodes} eps / {stats.n_frames} frames "
           f"in {stats.elapsed_secs:.1f}s")
+    print(f"[collect] ✓ Saved to {writer.dataset_path}")
 
-    # Upload to server
-    if stats.n_episodes > 0:
+    # Upload to server (optional — skip if server unreachable)
+    if stats.n_episodes > 0 and not args.no_upload:
         print(f"\n[upload] Connecting to server {grpc_cfg.get('host')}:{grpc_cfg.get('port', 50051)} ...")
-        with TrainingClient(
-            host=grpc_cfg.get("host", "localhost"),
-            port=grpc_cfg.get("port", 50051),
-        ) as client:
-            n_ok = client.upload_all_episodes(buffer.completed_episodes)
-            print(f"[upload] ✓ {n_ok}/{stats.n_episodes} episodes uploaded")
+        try:
+            with TrainingClient(
+                host=grpc_cfg.get("host", "localhost"),
+                port=grpc_cfg.get("port", 50051),
+            ) as client:
+                n_ok = client.upload_all_episodes(buffer.completed_episodes)
+                print(f"[upload] ✓ {n_ok}/{stats.n_episodes} episodes uploaded")
+        except Exception as e:
+            print(f"[upload] ⚠ 서버 업로드 생략 (로컬에 저장됨): {e}")
 
 
 # ────────────────────────────────────────────────────────────────────────────
@@ -325,6 +334,12 @@ def main() -> None:
     p_collect.add_argument("--n-episodes",  type=int, default=10)
     p_collect.add_argument("--task",        default="")
     p_collect.add_argument("--dataset-id",  default=None)
+    p_collect.add_argument("--data-root",   default=None,
+                           help="로컬 데이터 저장 경로 (기본: data/)")
+    p_collect.add_argument("--no-upload",   action="store_true", default=False,
+                           help="서버 업로드 없이 로컬 저장만")
+    p_collect.add_argument("--interactive", action="store_true", default=False,
+                           help="에피소드별 수동 시작/종료 (ENTER로 제어)")
     p_collect.add_argument("--calibrate",    action="store_true", default=False,
                            help="Run motor calibration on connect (interactive)")
 
