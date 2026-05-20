@@ -248,6 +248,21 @@ def _prediction_from_ours(sample: EvalSample, result: PipelineResult) -> EvalPre
     )
 
 
+def _make_interactive_response_fn() -> Callable[[str, dict], str]:
+    """ASK 결정 시 터미널에서 사용자 답변을 받는 콜백."""
+    def fn(question: str, g0: dict) -> str:
+        print(f"\n{'━'*60}")
+        print(f"  [ASK] {question}")
+        print(f"  현재 G₀ → target: {g0['target']['label']} / dest: {g0['destination']['label']}")
+        try:
+            ans = input("  답변 (Enter = 건너뜀): ").strip()
+        except (EOFError, KeyboardInterrupt):
+            ans = ""
+        print(f"{'━'*60}")
+        return ans
+    return fn
+
+
 def run_method(
     sample: EvalSample,
     method: str,
@@ -256,6 +271,7 @@ def run_method(
     threshold: float = 50.0,
     llm_client: Callable[..., Any] | None = None,
     llm_model: str = "gpt-4o",
+    user_response_fn: Callable[[str, dict], str] | None = None,
 ) -> EvalPrediction:
     method_key = method.lower()
     if method_key == "b1":
@@ -325,6 +341,7 @@ def run_method(
             sample.task,
             handler=handler,
             threshold=threshold,
+            user_response_fn=user_response_fn,
             session_prefix=f"{sample.sample_id}_ours",
             allow_ambiguous=True,
         )
@@ -411,8 +428,15 @@ def main() -> None:
     parser.add_argument("--adapter-ckpt", default="")
     parser.add_argument("--threshold", type=float, default=50.0)
     parser.add_argument("--llm-model", default="gpt-4o")
+    parser.add_argument("--openai-api-key", default="",
+                        help="OpenAI API key for B5 (기본: OPENAI_API_KEY 환경변수 사용)")
     parser.add_argument("--predictions-csv", default="")
     parser.add_argument("--metrics-json", default="")
+    parser.add_argument(
+        "--interactive",
+        action="store_true",
+        help="ASK 결정 시 터미널에서 실제 사용자 답변을 받아 rolling G₀ update 수행 (Ours 전용).",
+    )
     parser.add_argument(
         "--validate-only",
         action="store_true",
@@ -445,6 +469,11 @@ def main() -> None:
     if args.model_type == "finetune" and not args.adapter_ckpt:
         parser.error("--model-type finetune requires --adapter-ckpt")
 
+    # OpenAI API key 설정 (--openai-api-key > 환경변수 순서)
+    import os
+    if args.openai_api_key:
+        os.environ["OPENAI_API_KEY"] = args.openai_api_key
+
     methods = [m.lower() for m in args.methods]
     needs_handler = any(m in {"b1", "b2", "b3", "b4", "ours"} for m in methods)
     handler = (
@@ -452,9 +481,14 @@ def main() -> None:
         if needs_handler else None
     )
 
+    # ASK 시 사용자 입력 콜백 (--interactive 시만 활성화)
+    user_response_fn = _make_interactive_response_fn() if args.interactive else None
+
     predictions: list[EvalPrediction] = []
     for sample in samples:
         for method in methods:
+            if args.interactive:
+                print(f"\n[{sample.sample_id}] {method.upper()} 실행 중...")
             predictions.append(
                 run_method(
                     sample,
@@ -462,6 +496,7 @@ def main() -> None:
                     handler=handler,
                     threshold=args.threshold,
                     llm_model=args.llm_model,
+                    user_response_fn=user_response_fn,
                 )
             )
 

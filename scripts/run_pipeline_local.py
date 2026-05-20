@@ -372,8 +372,6 @@ def interactive_loop(
         again = _safe_input("\n[입력] 다시 실행할까요? (y/n): ").lower()
         if again != "y":
             break
-            if again != "y":
-                break
 
 
 # ══════════════════════════════════════════════════════════════════════════════
