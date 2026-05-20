@@ -127,26 +127,71 @@ def generate_tasks(obj_list: list[str], amb_map: dict) -> list[str]:
 # 레이블링 루프
 # ────────────────────────────────────────────────────────────────────────────
 
-def show_scenes() -> None:
-    print("\n  번호  씬 구성")
-    print("  " + "─" * 55)
-    for i, s in enumerate(SCENES, 1):
-        print(f"  {i:2d})  {s['desc']}")
-    print("  " + "─" * 55)
+def _ask(prompt: str, choices: list[str]) -> str:
+    while True:
+        raw = input(prompt).strip().lower()
+        if raw in choices:
+            return raw
+        print(f"  ✗ {'/'.join(choices)} 중 입력하세요.")
+
 
 def select_scene() -> dict:
-    show_scenes()
-    while True:
-        raw = input(f"\n  씬 번호 입력 (1~{len(SCENES)}, s=건너뜀): ").strip().lower()
-        if raw == "s":
-            return {}
-        try:
-            n = int(raw)
-            if 1 <= n <= len(SCENES):
-                return SCENES[n - 1]
-        except ValueError:
-            pass
-        print(f"  ✗ 1~{len(SCENES)} 또는 s 입력")
+    print()
+    # 1. 큐브 개수
+    n_cube = _ask("  1) 큐브 개수    (0 / 1 / 2): ", ["0", "1", "2", "s"])
+    if n_cube == "s":
+        return {}
+
+    # 2. 빨간 상자
+    has_red = _ask("  2) 빨간 상자    (y / n): ", ["y", "n", "s"])
+    if has_red == "s":
+        return {}
+
+    # 3. 노란 상자
+    has_yel = _ask("  3) 노란 상자    (y / n): ", ["y", "n", "s"])
+    if has_yel == "s":
+        return {}
+
+    # 4. 종이컵 개수
+    n_cup = _ask("  4) 종이컵 개수  (0 / 1 / 2): ", ["0", "1", "2", "s"])
+    if n_cup == "s":
+        return {}
+
+    # 최소 1개 이상의 target, destination 필요
+    if int(n_cube) + int(n_cup) == 0:
+        print("  ✗ 큐브 또는 종이컵이 최소 1개 필요합니다.")
+        return select_scene()
+    if has_red == "n" and has_yel == "n":
+        print("  ✗ 상자가 최소 1개 필요합니다.")
+        return select_scene()
+
+    # obj_list 구성
+    targets: list[str] = []
+    if n_cube == "2":
+        targets += ["left cube", "right cube"]
+    elif n_cube == "1":
+        targets += ["cube"]
+
+    if n_cup == "2":
+        targets += ["left paper cup", "right paper cup"]
+    elif n_cup == "1":
+        targets += ["paper cup"]
+
+    boxes: list[str] = []
+    if has_red == "y":
+        boxes.append("red box")
+    if has_yel == "y":
+        boxes.append("yellow box")
+
+    obj_list, amb_map = _s(targets, boxes)
+    desc_parts = []
+    if n_cube != "0": desc_parts.append(f"큐브×{n_cube}")
+    if has_red == "y": desc_parts.append("빨간상자")
+    if has_yel == "y": desc_parts.append("노란상자")
+    if n_cup != "0": desc_parts.append(f"종이컵×{n_cup}")
+    desc = " + ".join(desc_parts)
+
+    return {"desc": desc, "obj_list": obj_list, "ambiguity_map": amb_map}
 
 
 def label_one(img_path: Path, img_index: int, total: int, raw_file: Path) -> bool:
