@@ -31,6 +31,8 @@ gpu:
 handlers:
   - handler_id: ambres
     config:
-      model_type: fs_prompt   # "fs_prompt" | "finetune"
+      model_type: finetune
+      adapter_ckpt: "Rhgf7Mn96FZssqYXbYrSAW"
       use_detection: false
       use_sam: false
+      save_dir: "/tmp/train_captures"
