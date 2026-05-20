@@ -270,22 +270,56 @@ class AmbResHandler(BaseHandler):
             with self._lock:
                 self._load_session(session_id)
                 result = self._model.handle_query(task_description, pil_img)
+
+                # 로깅 전용: 객체별 인스턴스 수를 detect로 확인
+                instance_counts: dict = {}
+                task_objects = result.get("task_objects") or []
+                if task_objects:
+                    try:
+                        self._model.images = [pil_img]
+                        detections = self._model.detect_pretty(task_objects)
+                        for obj, pts in detections.items():
+                            instance_counts[obj] = len(pts) if pts else 0
+                    except Exception as _e:
+                        logger.warning("detect-for-logging failed: %s", _e)
+
                 self._save_session(session_id)
             elapsed = time.time() - t0
 
             # obj_detection_messages는 내부 Molmo 대화 기록이므로 제거
             result.pop("obj_detection_messages", None)
 
-            _log_inference(
-                session_id, "query",
-                task_description=task_description,
-                image_size=f"{pil_img.width}x{pil_img.height}",
-                task_objects=result.get("task_objects"),
-                task_ambiguous=result.get("task_ambiguous"),
-                clarifying_question=result.get("clarifying_question", ""),
-                explanation=result.get("explanation", ""),
-                elapsed_s=f"{elapsed:.2f}",
-            )
+            # ── 추론 과정 구조화 로그 ──────────────────────────────────────
+            lines = [
+                f"{'═'*70}",
+                f"[QUERY]  session={session_id}",
+                f"  task : {task_description}",
+                f"  image: {pil_img.width}x{pil_img.height}",
+                "",
+                "  ┌─ STEP 1: Object Grounding (greedy)",
+                f"  │  추출된 작업 객체: {task_objects}",
+                "",
+                "  ├─ STEP 2: Instance Detection (detect_pretty)",
+            ]
+            if instance_counts:
+                for obj, cnt in instance_counts.items():
+                    flag = "⚠ 복수 인스턴스!" if cnt > 1 else "✓ 단일"
+                    lines.append(f"  │    {obj!r:20s} → {cnt}개  {flag}")
+            else:
+                lines.append("  │    (detect 실패 또는 객체 없음)")
+            lines += [
+                "",
+                "  ├─ STEP 3: Ambiguity Reasoning (do_sample=True)",
+                f"  │  ambiguous : {result.get('task_ambiguous')}",
+                f"  │  explanation: {result.get('explanation', '')}",
+                f"  │  question  : {result.get('clarifying_question', '') or '(없음)'}",
+                "",
+                f"  └─ 처리 시간: {elapsed:.2f}s",
+                f"{'═'*70}",
+            ]
+            _inf_logger.info("\n".join(lines))
+            # ────────────────────────────────────────────────────────────────
+
             return self.ok(result)
 
         # ── respond ────────────────────────────────────────────────────────
