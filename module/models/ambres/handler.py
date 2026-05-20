@@ -155,6 +155,30 @@ class AmbResHandler(BaseHandler):
             logger.info("AmbResHandler: saved received image → %s", path)
         return pil
 
+    @staticmethod
+    def _normalize_aspect(pil_img: Image.Image, target_ratio: float = 4 / 3) -> Image.Image:
+        """
+        이미지를 target_ratio(기본 4:3) 비율로 center-crop합니다.
+        AmbRes 학습 데이터(640×480, 4:3)와 비율을 맞춰 도메인 갭을 줄입니다.
+        ZED VGA(672×376, ~16:9) 같이 비율이 다른 카메라 이미지에 적용됩니다.
+        이미 4:3에 가까운 이미지(오차 5% 이내)는 그대로 반환합니다.
+        """
+        w, h = pil_img.size
+        current_ratio = w / h
+        if abs(current_ratio - target_ratio) / target_ratio < 0.05:
+            return pil_img
+        if current_ratio > target_ratio:
+            # 너무 넓음 → 좌우 crop
+            new_w = int(h * target_ratio)
+            left = (w - new_w) // 2
+            pil_img = pil_img.crop((left, 0, left + new_w, h))
+        else:
+            # 너무 좁음 → 상하 crop
+            new_h = int(w / target_ratio)
+            top = (h - new_h) // 2
+            pil_img = pil_img.crop((0, top, w, top + new_h))
+        return pil_img
+
     # ------------------------------------------------------------------ #
     # 메인 핸들러
     # ------------------------------------------------------------------ #
@@ -191,8 +215,11 @@ class AmbResHandler(BaseHandler):
                 return self.err("tensors[0] (이미지)가 필요합니다 — method='query'")
 
             task_description = payload.get("task_description", "")
-            # AmbRes는 학습/평가 시 이미지를 4배 다운샘플하므로 동일하게 적용
-            pil_img = self._to_pil(tensors[0], tag=f"query_{session_id}").reduce(4)
+            # AmbRes 학습 데이터는 640×480(4:3) 기준. 비율이 다른 이미지(ZED 16:9 등)는
+            # center-crop으로 4:3으로 맞춘 뒤 4배 다운샘플 적용.
+            pil_img = self._to_pil(tensors[0], tag=f"query_{session_id}")
+            pil_img = self._normalize_aspect(pil_img)
+            pil_img = pil_img.reduce(4)
 
             with self._lock:
                 self._load_session(session_id)
