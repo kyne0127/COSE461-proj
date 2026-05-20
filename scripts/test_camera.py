@@ -268,6 +268,7 @@ def run_ambres_on_frame(rgb_frame: np.ndarray, task: str, config: dict) -> None:
             ok = client.load_handler("ambres", config={
                 "model_type": "finetune",
                 "adapter_ckpt": "nFwD6qtf9T8dkJaQXU9vkW",
+                "use_detection": True,
                 "save_dir": "/tmp/train_captures",
             })
             if not ok:
