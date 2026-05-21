@@ -24,6 +24,7 @@ python scripts/record_scenario.py \
     --task "<task description>" \
     --target-label <cup|cube> \
     --destination-label <box|red box> \
+    --out-dir <저장할_폴더>          # 생략 시 기본값: data-evaluation/
     --append-manifest
 ```
 
@@ -58,9 +59,25 @@ C1  컵 1개 + 빨간박스 1개  (동일)
 C2  컵 1개 + 빨간박스 1개  (동일)
 ```
 
-**Task**: `"pick the cup and put it in the red box"`
-
 > 장면을 그대로 유지한 채 SPACE → 1 → 2 → q 순서로 촬영.
+
+**Cup (컵 5 trial)**
+```bash
+python scripts/record_scenario.py \
+    --scenario S1 \
+    --task "pick the cup and put it in the red box" \
+    --target-label cup --destination-label "red box" \
+    --append-manifest
+```
+
+**Cube (큐브 5 trial)**
+```bash
+python scripts/record_scenario.py \
+    --scenario S1 \
+    --task "pick the cube and put it in the red box" \
+    --target-label cube --destination-label "red box" \
+    --append-manifest
+```
 
 ---
 
@@ -76,9 +93,25 @@ C1  컵 2개 + 빨간박스 1개
 C2  컵 2개 + 빨간박스 1개
 ```
 
-**Task**: `"pick the cup and put it in the red box"`
-
 > 추가하는 컵은 원래 컵에서 충분히 떨어진 위치에 놓는다 (너무 붙이면 1개처럼 보임).
+
+**Cup (컵 5 trial)**
+```bash
+python scripts/record_scenario.py \
+    --scenario S2 \
+    --task "pick the cup and put it in the red box" \
+    --target-label cup --destination-label "red box" \
+    --append-manifest
+```
+
+**Cube (큐브 5 trial)**
+```bash
+python scripts/record_scenario.py \
+    --scenario S2 \
+    --task "pick the cube and put it in the red box" \
+    --target-label cube --destination-label "red box" \
+    --append-manifest
+```
 
 ---
 
@@ -94,9 +127,25 @@ C1  (컵 없음) + 빨간박스 1개
 C2  (컵 없음) + 빨간박스 1개  ← C1과 동일 장면으로 촬영
 ```
 
-**Task**: `"pick the cup and put it in the red box"`
-
 > C1에서 STOP이므로 C2는 실질적 의미 없음. 같은 장면 그대로 `2` 눌러서 저장.
+
+**Cup (컵 5 trial)**
+```bash
+python scripts/record_scenario.py \
+    --scenario S3 \
+    --task "pick the cup and put it in the red box" \
+    --target-label cup --destination-label "red box" \
+    --append-manifest
+```
+
+**Cube (큐브 5 trial)**
+```bash
+python scripts/record_scenario.py \
+    --scenario S3 \
+    --task "pick the cube and put it in the red box" \
+    --target-label cube --destination-label "red box" \
+    --append-manifest
+```
 
 ---
 
@@ -112,10 +161,26 @@ C1  컵 1개 + 빨간박스 1개  (C1은 변화 없음)
 C2  컵 1개 + 빨간박스 1개 + 노란박스 1개
 ```
 
-**Task**: `"pick the cup and put it in the box"` ← **색 명시 금지**
-
 > task에 "red box"라고 쓰면 노란박스를 추가해도 destination이 명확해져서 S4가 성립하지 않는다.  
 > 반드시 "box"로만 표기.
+
+**Cup (컵 5 trial)** ← destination-label도 반드시 `box`
+```bash
+python scripts/record_scenario.py \
+    --scenario S4 \
+    --task "pick the cup and put it in the box" \
+    --target-label cup --destination-label box \
+    --append-manifest
+```
+
+**Cube (큐브 5 trial)**
+```bash
+python scripts/record_scenario.py \
+    --scenario S4 \
+    --task "pick the cube and put it in the box" \
+    --target-label cube --destination-label box \
+    --append-manifest
+```
 
 ---
 
@@ -131,10 +196,26 @@ C1  컵 1개 + 빨간박스 1개 + 큐브 1개
 C2  컵 1개 + 빨간박스 1개 + 큐브 1개
 ```
 
-**Task**: `"pick the cup and put it in the red box"`
-
 > 큐브는 task 오브젝트(컵, 빨간박스)와 다른 카테고리여야 distractor로 인식됨.  
 > 큐브를 추가해도 target/destination은 여전히 각 1개 → CLEAR 유지.
+
+**Cup (컵 5 trial)** — distractor: 큐브
+```bash
+python scripts/record_scenario.py \
+    --scenario S5 \
+    --task "pick the cup and put it in the red box" \
+    --target-label cup --destination-label "red box" \
+    --append-manifest
+```
+
+**Cube (큐브 5 trial)** — distractor: 컵
+```bash
+python scripts/record_scenario.py \
+    --scenario S5 \
+    --task "pick the cube and put it in the red box" \
+    --target-label cube --destination-label "red box" \
+    --append-manifest
+```
 
 ---
 
@@ -150,10 +231,26 @@ C1  컵 1개(위치 B) + 빨간박스 1개
 C2  컵 1개(위치 B) + 빨간박스 1개
 ```
 
-**Task**: `"pick the cup and put it in the red box"`
-
 > **이동 거리가 핵심**: 화면 기준으로 컵이 반대편으로 이동할 정도면 충분.  
 > G₀ coord(위치 A)와 Gₜ coord(위치 B) 간 거리가 threshold(50px) × 5 = 250px 이상이어야 AMBIGUOUS로 분류됨.
+
+**Cup (컵 5 trial)**
+```bash
+python scripts/record_scenario.py \
+    --scenario S6 \
+    --task "pick the cup and put it in the red box" \
+    --target-label cup --destination-label "red box" \
+    --append-manifest
+```
+
+**Cube (큐브 5 trial)**
+```bash
+python scripts/record_scenario.py \
+    --scenario S6 \
+    --task "pick the cube and put it in the red box" \
+    --target-label cube --destination-label "red box" \
+    --append-manifest
+```
 
 ---
 

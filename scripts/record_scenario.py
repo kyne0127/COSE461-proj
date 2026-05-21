@@ -163,7 +163,7 @@ def _next_trial_number(out_root: Path) -> int:
 
 def run(args: argparse.Namespace) -> None:
     meta   = SCENARIO_META[args.scenario]
-    out_root = ROOT / "data_eval" / args.scenario
+    out_root = Path(args.out_dir) / args.scenario
     trial  = args.trial if args.trial else _next_trial_number(out_root)
     trial_dir = out_root / f"trial_{trial:03d}"
     trial_dir.mkdir(parents=True, exist_ok=True)
@@ -304,6 +304,8 @@ def _parse() -> argparse.Namespace:
     p.add_argument("--trial",             type=int, default=None,
                    help="trial 번호 (생략 시 자동 증가)")
     p.add_argument("--resolution",        default="VGA", choices=["VGA", "HD720"])
+    p.add_argument("--out-dir",           default=str(ROOT / "data-evaluation"),
+                   help="출력 루트 디렉터리 (기본: data_eval/)")
     p.add_argument("--append-manifest",   action="store_true",
                    help="dataset/manifest.jsonl 에 자동 추가")
     return p.parse_args()
