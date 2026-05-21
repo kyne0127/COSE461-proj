@@ -182,10 +182,57 @@ def show_detections(detections: dict, obj_list: list[str]) -> None:
         valid  = [c for c in coords if c and len(c) >= 2]
         cnt    = len(valid)
         flag   = "⚠ 복수!" if cnt > 1 else ("✓" if cnt == 1 else "✗ 미감지")
-        coord_str = "  ".join(f"({int(c[0])},{int(c[1])})" for c in valid[:4])
+        coord_str = "  ".join(f"[{i}]({int(c[0])},{int(c[1])})" for i, c in enumerate(valid[:4]))
         if len(valid) > 4: coord_str += f" +{len(valid)-4}"
         print(f"  {obj:<24}  {cnt:>2}개 {flag:<7}  {coord_str}")
     print()
+
+
+def correct_detections(detections: dict, obj_list: list[str]) -> dict:
+    """각 물체의 감지 좌표를 사용자가 수정. 수정된 grounding dict 반환."""
+    print("  ── 좌표 수정 ─────────────────────────────────────────────")
+    print("  각 물체에 대해 올바른 좌표를 선택하세요.")
+    print("  Enter=전부유지  숫자=인덱스선택  d=직접입력  x=삭제\n")
+
+    corrected: dict = {}
+    for obj in obj_list:
+        coords = detections.get(obj, [])
+        valid  = [c for c in coords if c and len(c) >= 2]
+
+        coord_str = "  ".join(f"[{i}]({int(c[0])},{int(c[1])})" for i, c in enumerate(valid))
+        flag = "⚠ 복수!" if len(valid) > 1 else ("✓" if len(valid) == 1 else "✗ 미감지")
+        print(f"  {obj}  →  {len(valid)}개 {flag}  {coord_str}")
+
+        raw = input("    > ").strip().lower()
+
+        if raw == "" :
+            corrected[obj] = [[int(c[0]), int(c[1])] for c in valid]
+        elif raw == "x":
+            corrected[obj] = []
+            print(f"    → {obj}: 삭제됨")
+        elif raw == "d":
+            coords_in = input("    좌표 입력 (x,y 형식, 여러 개는 세미콜론으로: 342,212;477,191): ").strip()
+            pts = []
+            for part in coords_in.split(";"):
+                part = part.strip()
+                if "," in part:
+                    x, y = part.split(",", 1)
+                    pts.append([int(x.strip()), int(y.strip())])
+            corrected[obj] = pts
+            print(f"    → {obj}: {pts}")
+        else:
+            # 인덱스 선택 (쉼표로 여러 개 가능: "0,1")
+            try:
+                indices = [int(i.strip()) for i in raw.split(",") if i.strip().isdigit()]
+                chosen = [[int(valid[i][0]), int(valid[i][1])] for i in indices if i < len(valid)]
+                corrected[obj] = chosen
+                print(f"    → {obj}: {chosen}")
+            except Exception:
+                corrected[obj] = [[int(c[0]), int(c[1])] for c in valid]
+                print(f"    → 입력 오류, 원본 유지")
+        print()
+
+    return corrected
 
 
 # ────────────────────────────────────────────────────────────────────────────
@@ -237,6 +284,7 @@ def process_one(img_path: Path, img_index: int, total: int,
         print("\n  그라운딩 검증 중...")
         result = verify_grounding(img_path, obj_list, host=host, port=port)
 
+        grounding: dict = {}
         if result:
             detections, ann_path = result
             print(f"  annotated: {ann_path}")
@@ -246,19 +294,29 @@ def process_one(img_path: Path, img_index: int, total: int,
             if missing:
                 print(f"  ⚠ 미감지: {missing}")
         else:
+            detections = {}
             print("  (그라운딩 없이 진행)")
 
         action = input(
-            "  확인: Enter=저장  r=재감지  n=씬재선택  s=건너뜀\n  > "
+            "  확인: Enter=저장  c=좌표수정후저장  r=재감지  n=씬재선택  s=건너뜀\n  > "
         ).strip().lower()
 
         if action == "s":
             return False
         if action == "r":
-            continue  # 재감지 (씬 변경 없이)
+            continue
         if action == "n":
             need_scene = True
             continue
+        if action == "c":
+            grounding = correct_detections(detections, obj_list)
+        elif detections:
+            # Enter: 자동 감지 결과 그대로 저장
+            grounding = {
+                obj: [[int(c[0]), int(c[1])] for c in detections.get(obj, [])
+                      if c and len(c) >= 2]
+                for obj in obj_list
+            }
 
         # 저장
         sample = {
@@ -267,7 +325,8 @@ def process_one(img_path: Path, img_index: int, total: int,
             "tasks":         tasks,
             "ambiguity_map": amb_map,
         }
-        # 기존 항목 덮어쓰기 또는 신규 추가
+        if grounding:
+            sample["grounding"] = grounding
         _rewrite_or_append(raw_file, sample)
         return True
 
