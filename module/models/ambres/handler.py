@@ -340,6 +340,7 @@ class AmbResHandler(BaseHandler):
                     if len(pts) > 4:
                         coords += f" ... +{len(pts)-4}개"
                     lines.append(f"  │    {obj!r:20s} → {cnt}개  {flag}")
+                    lines.append(f"  │    {'':20s}   pts_raw: {pts!r}")
                     lines.append(f"  │    {'':20s}   coords: {coords}")
             else:
                 lines.append("  │    (detect 실패 또는 객체 없음)")
