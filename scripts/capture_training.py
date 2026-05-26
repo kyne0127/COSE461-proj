@@ -2,27 +2,27 @@
 """
 scripts/capture_training.py
 ============================
-AmbRes/Molmo finetuning 학습 데이터 촬영 스크립트.
+Scene capture script for AmbRes/Molmo finetuning.
 
-물체 조합(cup/cube × red box/yellow box)별로 씬 구성을 안내하며
-이미지를 체계적으로 촬영한다.
+Guides through object combinations (cup/cube x red box/yellow box)
+and captures images systematically for training data collection.
 
-조작법:
-  SPACE  →  현재 씬 촬영 (같은 조합 반복 촬영 가능)
-  n      →  다음 조합으로 이동
-  p      →  이전 조합으로 이동
-  r      →  마지막 촬영 취소
-  q      →  저장 후 종료
+Controls:
+  SPACE  ->  Capture current scene (repeat for same combo)
+  n      ->  Next combo
+  p      ->  Previous combo
+  r      ->  Undo last capture
+  q      ->  Save and quit
 
-출력 구조:
+Output structure:
   data-training/
     <combo_id>/
       img_001.png
       img_002.png
       ...
-      meta.json   (label 정보)
+      meta.json
 
-사용 예:
+Usage:
   python scripts/capture_training.py
   python scripts/capture_training.py --out-dir /path/to/output --target-per-combo 10
 """
@@ -50,8 +50,8 @@ COMBOS: list[dict] = [
     # ── Clear scenes ─────────────────────────────────────────────────────────
     {
         "id": "cup1_redbox1",
-        "desc": "컵 1개 + 빨간박스 1개",
-        "setup": "컵 1개, 빨간박스 1개를 겹치지 않게 배치",
+        "desc": "cup x1 + red box x1",
+        "setup": "Place 1 cup and 1 red box without overlap",
         "task": "pick the cup and put it in the red box",
         "target_label": "cup",
         "destination_label": "red box",
@@ -60,8 +60,8 @@ COMBOS: list[dict] = [
     },
     {
         "id": "cup1_yellowbox1",
-        "desc": "컵 1개 + 노란박스 1개",
-        "setup": "컵 1개, 노란박스 1개를 겹치지 않게 배치",
+        "desc": "cup x1 + yellow box x1",
+        "setup": "Place 1 cup and 1 yellow box without overlap",
         "task": "pick the cup and put it in the yellow box",
         "target_label": "cup",
         "destination_label": "yellow box",
@@ -70,8 +70,8 @@ COMBOS: list[dict] = [
     },
     {
         "id": "cube1_redbox1",
-        "desc": "큐브 1개 + 빨간박스 1개",
-        "setup": "큐브 1개, 빨간박스 1개를 겹치지 않게 배치",
+        "desc": "cube x1 + red box x1",
+        "setup": "Place 1 cube and 1 red box without overlap",
         "task": "pick the cube and put it in the red box",
         "target_label": "cube",
         "destination_label": "red box",
@@ -80,8 +80,8 @@ COMBOS: list[dict] = [
     },
     {
         "id": "cube1_yellowbox1",
-        "desc": "큐브 1개 + 노란박스 1개",
-        "setup": "큐브 1개, 노란박스 1개를 겹치지 않게 배치",
+        "desc": "cube x1 + yellow box x1",
+        "setup": "Place 1 cube and 1 yellow box without overlap",
         "task": "pick the cube and put it in the yellow box",
         "target_label": "cube",
         "destination_label": "yellow box",
@@ -91,8 +91,8 @@ COMBOS: list[dict] = [
     # ── Ambiguous target ──────────────────────────────────────────────────────
     {
         "id": "cup2_redbox1",
-        "desc": "컵 2개 + 빨간박스 1개",
-        "setup": "동일한 컵 2개(서로 충분히 떨어진 위치), 빨간박스 1개 배치",
+        "desc": "cup x2 + red box x1",
+        "setup": "Place 2 identical cups (well separated) and 1 red box",
         "task": "pick the cup and put it in the red box",
         "target_label": "cup",
         "destination_label": "red box",
@@ -101,8 +101,8 @@ COMBOS: list[dict] = [
     },
     {
         "id": "cup2_yellowbox1",
-        "desc": "컵 2개 + 노란박스 1개",
-        "setup": "동일한 컵 2개(서로 충분히 떨어진 위치), 노란박스 1개 배치",
+        "desc": "cup x2 + yellow box x1",
+        "setup": "Place 2 identical cups (well separated) and 1 yellow box",
         "task": "pick the cup and put it in the yellow box",
         "target_label": "cup",
         "destination_label": "yellow box",
@@ -111,8 +111,8 @@ COMBOS: list[dict] = [
     },
     {
         "id": "cube2_redbox1",
-        "desc": "큐브 2개 + 빨간박스 1개",
-        "setup": "동일한 큐브 2개(서로 충분히 떨어진 위치), 빨간박스 1개 배치",
+        "desc": "cube x2 + red box x1",
+        "setup": "Place 2 identical cubes (well separated) and 1 red box",
         "task": "pick the cube and put it in the red box",
         "target_label": "cube",
         "destination_label": "red box",
@@ -121,8 +121,8 @@ COMBOS: list[dict] = [
     },
     {
         "id": "cube2_yellowbox1",
-        "desc": "큐브 2개 + 노란박스 1개",
-        "setup": "동일한 큐브 2개(서로 충분히 떨어진 위치), 노란박스 1개 배치",
+        "desc": "cube x2 + yellow box x1",
+        "setup": "Place 2 identical cubes (well separated) and 1 yellow box",
         "task": "pick the cube and put it in the yellow box",
         "target_label": "cube",
         "destination_label": "yellow box",
@@ -132,8 +132,8 @@ COMBOS: list[dict] = [
     # ── Ambiguous destination ─────────────────────────────────────────────────
     {
         "id": "cup1_twobox",
-        "desc": "컵 1개 + 빨간박스 + 노란박스",
-        "setup": "컵 1개, 빨간박스 1개, 노란박스 1개 배치 (task에 색 없음)",
+        "desc": "cup x1 + red box + yellow box",
+        "setup": "Place 1 cup, 1 red box, 1 yellow box  [task has no color]",
         "task": "pick the cup and put it in the box",
         "target_label": "cup",
         "destination_label": "box",
@@ -142,8 +142,8 @@ COMBOS: list[dict] = [
     },
     {
         "id": "cube1_twobox",
-        "desc": "큐브 1개 + 빨간박스 + 노란박스",
-        "setup": "큐브 1개, 빨간박스 1개, 노란박스 1개 배치 (task에 색 없음)",
+        "desc": "cube x1 + red box + yellow box",
+        "setup": "Place 1 cube, 1 red box, 1 yellow box  [task has no color]",
         "task": "pick the cube and put it in the box",
         "target_label": "cube",
         "destination_label": "box",
@@ -153,8 +153,8 @@ COMBOS: list[dict] = [
     # ── Distractor ────────────────────────────────────────────────────────────
     {
         "id": "cup1_redbox1_cube_distractor",
-        "desc": "컵 1개 + 빨간박스 1개 + 큐브(distractor)",
-        "setup": "컵 1개, 빨간박스 1개, 큐브 1개(무관 물체) 배치",
+        "desc": "cup x1 + red box x1 + cube (distractor)",
+        "setup": "Place 1 cup, 1 red box, 1 cube (unrelated object)",
         "task": "pick the cup and put it in the red box",
         "target_label": "cup",
         "destination_label": "red box",
@@ -163,8 +163,8 @@ COMBOS: list[dict] = [
     },
     {
         "id": "cube1_redbox1_cup_distractor",
-        "desc": "큐브 1개 + 빨간박스 1개 + 컵(distractor)",
-        "setup": "큐브 1개, 빨간박스 1개, 컵 1개(무관 물체) 배치",
+        "desc": "cube x1 + red box x1 + cup (distractor)",
+        "setup": "Place 1 cube, 1 red box, 1 cup (unrelated object)",
         "task": "pick the cube and put it in the red box",
         "target_label": "cube",
         "destination_label": "red box",
@@ -174,8 +174,8 @@ COMBOS: list[dict] = [
     # ── Invalid target ────────────────────────────────────────────────────────
     {
         "id": "noobj_redbox1",
-        "desc": "빨간박스만 (target 없음)",
-        "setup": "빨간박스 1개만 배치. 컵/큐브는 씬에서 제거",
+        "desc": "red box only  (no target)",
+        "setup": "Place only 1 red box. Remove all cups and cubes from scene.",
         "task": "pick the cup and put it in the red box",
         "target_label": "cup",
         "destination_label": "red box",
@@ -184,8 +184,8 @@ COMBOS: list[dict] = [
     },
     {
         "id": "noobj_yellowbox1",
-        "desc": "노란박스만 (target 없음)",
-        "setup": "노란박스 1개만 배치. 컵/큐브는 씬에서 제거",
+        "desc": "yellow box only  (no target)",
+        "setup": "Place only 1 yellow box. Remove all cups and cubes from scene.",
         "task": "pick the cube and put it in the yellow box",
         "target_label": "cube",
         "destination_label": "yellow box",
@@ -194,12 +194,11 @@ COMBOS: list[dict] = [
     },
 ]
 
-# 상태별 색상
 _GOLD_COLOR = {
-    "CLEAR":                  (50,  220,  80),   # 초록
-    "AMBIGUOUS_TARGET":       (50,  200, 255),   # 노란-주황
-    "AMBIGUOUS_DESTINATION":  (50,  150, 255),   # 주황
-    "INVALID_TARGET":         (80,   80, 255),   # 빨강
+    "CLEAR":                  (50,  220,  80),
+    "AMBIGUOUS_TARGET":       (50,  200, 255),
+    "AMBIGUOUS_DESTINATION":  (50,  150, 255),
+    "INVALID_TARGET":         (80,   80, 255),
 }
 
 
@@ -222,12 +221,12 @@ def draw_overlay(bgr: np.ndarray, combo: dict, combo_idx: int,
     progress_col = (50, 255, 120) if captured >= target_per else (200, 200, 200)
 
     _put(canvas, f"[{combo_idx+1}/{total}] {combo['desc']}", 24, state_col, 0.65, 2)
-    _put(canvas, f"  세팅: {combo['setup']}", 48, (255, 230, 80), 0.55)
-    _put(canvas, f"  Task: {combo['task']}", 70, (200, 200, 200), 0.52)
-    _put(canvas, f"  Gold: {combo['gold_state']}", 92, state_col, 0.52)
-    _put(canvas, f"  촬영: {captured}/{target_per}장", 114, progress_col, 0.55)
+    _put(canvas, f"  Setup: {combo['setup']}", 48, (255, 230, 80), 0.55)
+    _put(canvas, f"  Task : {combo['task']}", 70, (200, 200, 200), 0.52)
+    _put(canvas, f"  Gold : {combo['gold_state']}", 92, state_col, 0.52)
+    _put(canvas, f"  Captured: {captured}/{target_per}", 114, progress_col, 0.55)
     _put(canvas,
-         "[SPACE] 촬영  [n] 다음  [p] 이전  [r] 마지막 취소  [q] 종료",
+         "[SPACE] capture  [n] next  [p] prev  [r] undo last  [q] quit",
          138, (160, 160, 160), 0.48)
 
     # 진행 바
@@ -256,8 +255,8 @@ def run(args: argparse.Namespace) -> None:
     cv2.namedWindow("capture_training", cv2.WINDOW_NORMAL)
     cv2.resizeWindow("capture_training", 900, 530)
 
-    print(f"\n총 {total}개 조합  |  조합당 목표 {args.target_per_combo}장")
-    print("SPACE=촬영  n=다음  p=이전  r=마지막 취소  q=종료\n")
+    print(f"\n{total} combos  |  target {args.target_per_combo} images per combo")
+    print("SPACE=capture  n=next  p=prev  r=undo last  q=quit\n")
 
     try:
         while True:
@@ -280,33 +279,33 @@ def run(args: argparse.Namespace) -> None:
             elif key == ord('n'):
                 if combo_idx < total - 1:
                     combo_idx += 1
-                    print(f"→ [{combo_idx+1}/{total}] {COMBOS[combo_idx]['desc']}")
+                    print(f"-> [{combo_idx+1}/{total}] {COMBOS[combo_idx]['desc']}")
                 else:
-                    print("마지막 조합입니다.")
+                    print("Already at last combo.")
 
             elif key == ord('p'):
                 if combo_idx > 0:
                     combo_idx -= 1
-                    print(f"← [{combo_idx+1}/{total}] {COMBOS[combo_idx]['desc']}")
+                    print(f"<- [{combo_idx+1}/{total}] {COMBOS[combo_idx]['desc']}")
                 else:
-                    print("첫 번째 조합입니다.")
+                    print("Already at first combo.")
 
             elif key == ord('r'):
                 imgs = sorted(combo_dir.glob("img_*.png"))
                 if imgs:
                     imgs[-1].unlink()
-                    print(f"  [r] 삭제: {imgs[-1].name}  (남은: {len(imgs)-1}장)")
+                    print(f"  [r] removed: {imgs[-1].name}  (remaining: {len(imgs)-1})")
                 else:
-                    print("  삭제할 이미지가 없습니다.")
+                    print("  No images to remove.")
 
             elif key == ord(' '):
                 idx = _next_img_index(combo_dir)
                 img_path = combo_dir / f"img_{idx:03d}.png"
                 cv2.imwrite(str(img_path), bgr)
-                print(f"  [SPACE] 저장 → {img_path.name}  "
-                      f"(누적: {idx}/{args.target_per_combo})")
+                print(f"  [SPACE] saved -> {img_path.name}  "
+                      f"({idx}/{args.target_per_combo})")
 
-                # meta.json 갱신
+                # update meta.json
                 meta = {
                     "combo_id":          combo["id"],
                     "desc":              combo["desc"],
@@ -322,26 +321,26 @@ def run(args: argparse.Namespace) -> None:
                     json.dump(meta, f, ensure_ascii=False, indent=2)
 
                 if idx >= args.target_per_combo:
-                    print(f"  ✓ 조합 완료! [n]으로 다음 조합으로 이동하세요.\n")
+                    print(f"  Combo complete! Press [n] to move to next combo.\n")
 
     finally:
         zed.release()
         cv2.destroyAllWindows()
 
-    # 완료 요약
+    # summary
     print(f"\n{'='*55}")
-    print(f"  촬영 완료 요약")
+    print(f"  Capture Summary")
     print(f"{'='*55}")
     total_imgs = 0
     for c in COMBOS:
         d = out_root / c["id"]
         count = len(list(d.glob("img_*.png"))) if d.exists() else 0
         total_imgs += count
-        status = "✓" if count >= args.target_per_combo else f"{count}/{args.target_per_combo}"
-        print(f"  {status:>8}  {c['id']}")
+        status = "done" if count >= args.target_per_combo else f"{count}/{args.target_per_combo}"
+        print(f"  {status:>6}  {c['id']}")
     print(f"{'='*55}")
-    print(f"  총 {total_imgs}장  →  {out_root}")
-    print(f"\n다음 단계: annotate_coords.py 로 좌표 annotation")
+    print(f"  Total: {total_imgs} images  ->  {out_root}")
+    print(f"\nNext: annotate coordinates with annotate_coords.py")
     print(f"  python scripts/annotate_coords.py --dir {out_root} \\")
     print(f"      --target-label cup --destination-label box")
 
@@ -350,22 +349,22 @@ def run(args: argparse.Namespace) -> None:
 
 def _parse() -> argparse.Namespace:
     p = argparse.ArgumentParser(
-        description="AmbRes 학습 데이터 촬영 (조합별 씬 안내)",
+        description="AmbRes training data capture (guided scene combos)",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
-조합 목록 (총 14개):
+Combo list (14 total):
   Clear           : cup+redbox, cup+yellowbox, cube+redbox, cube+yellowbox
-  AmbiguousTarget : cup×2+redbox, cup×2+yellowbox, cube×2+redbox, cube×2+yellowbox
+  AmbiguousTarget : cup x2+redbox, cup x2+yellowbox, cube x2+redbox, cube x2+yellowbox
   AmbiguousDest   : cup+twobox, cube+twobox
   Distractor      : cup+redbox+cube, cube+redbox+cup
   InvalidTarget   : noobj+redbox, noobj+yellowbox
         """,
     )
     p.add_argument("--out-dir",           default=str(ROOT / "data-training"),
-                   help="출력 루트 디렉터리 (기본: data-training/)")
+                   help="Output root directory (default: data-training/)")
     p.add_argument("--resolution",        default="VGA", choices=["VGA", "HD720"])
     p.add_argument("--target-per-combo",  type=int, default=10,
-                   help="조합당 목표 촬영 수 (기본: 10)")
+                   help="Target images per combo (default: 10)")
     return p.parse_args()
 
 
