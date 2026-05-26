@@ -38,6 +38,7 @@ from baselines.b3_count_rule import run_b3_count_rule
 from baselines.b4_binary_anomaly import run_b4_binary_anomaly
 from baselines.b5_llm_judge import run_b5_llm_judge
 from baselines.common import BaselineResult
+from baselines.ensemble import run_ensemble
 from extraction.ambres_g0_extractor import _make_handler, extract_g0
 from monitoring.consistency_monitor import Decision
 from pipeline import PipelineResult, run_pipeline
@@ -279,6 +280,7 @@ def run_method(
     llm_client: Callable[..., Any] | None = None,
     llm_model: str = "gpt-4o",
     user_response_fn: Callable[[str, dict], str] | None = None,
+    gdino: Any = None,
 ) -> EvalPrediction:
     method_key = method.lower()
     if method_key == "b1":
@@ -353,6 +355,29 @@ def run_method(
             allow_ambiguous=True,
         )
         return _prediction_from_ours(sample, result)
+    if method_key == "ensemble":
+        if handler is None:
+            raise ValueError("ensemble requires handler")
+        if gdino is None:
+            raise ValueError("ensemble requires gdino (pass --use-dino)")
+        g0 = extract_g0(
+            sample.initial_img,
+            sample.task,
+            handler=handler,
+            session_id=f"{sample.sample_id}_ensemble_g0",
+            allow_ambiguous=True,
+        )
+        result = run_ensemble(
+            g0,
+            sample.initial_img,
+            sample.checkpoint_img,
+            checkpoint=sample.checkpoint,
+            handler=handler,
+            gdino=gdino,
+            threshold=threshold,
+            session_id=f"{sample.sample_id}_ensemble_{sample.checkpoint.lower()}",
+        )
+        return _prediction_from_baseline(sample, result)
     raise ValueError(f"Unknown method {method!r}")
 
 
@@ -729,6 +754,10 @@ def main() -> None:
     parser.add_argument("--model-type", default="fs_prompt", choices=["fs_prompt", "finetune"])
     parser.add_argument("--adapter-ckpt", default="")
     parser.add_argument("--threshold", type=float, default=50.0)
+    parser.add_argument("--use-dino", action="store_true",
+                        help="Load GroundingDINO for ensemble method")
+    parser.add_argument("--dino-box-threshold", type=float, default=0.25)
+    parser.add_argument("--dino-text-threshold", type=float, default=0.25)
     parser.add_argument("--llm-model", default="gpt-4o")
     parser.add_argument("--openai-api-key", default="",
                         help="OpenAI API key for B5 (기본: OPENAI_API_KEY 환경변수 사용)")
@@ -828,11 +857,27 @@ def main() -> None:
         return
 
     # validate-only 통과 후 핸들러 로드 (모델 로딩 지연)
-    needs_handler = any(m in {"b1", "b2", "b3", "b4", "ours"} for m in methods)
+    needs_handler = any(m in {"b1", "b2", "b3", "b4", "ours", "ensemble"} for m in methods)
     handler = (
         _make_handler(args.model_type, args.adapter_ckpt, use_detection=False)
         if needs_handler else None
     )
+
+    # GDino 초기화 (ensemble 메서드 또는 --use-dino 플래그 시)
+    gdino = None
+    needs_gdino = args.use_dino or "ensemble" in methods
+    if needs_gdino:
+        _repo_root = Path(__file__).resolve().parent.parent
+        if str(_repo_root) not in sys.path:
+            sys.path.insert(0, str(_repo_root))
+        from module.models.ambres.gdino import GroundingDINO
+        print(f"[GDino] 로딩 중 … (box_thr={args.dino_box_threshold}, "
+              f"text_thr={args.dino_text_threshold})")
+        gdino = GroundingDINO(
+            box_threshold=args.dino_box_threshold,
+            text_threshold=args.dino_text_threshold,
+        )
+        print("[GDino] 준비 완료")
 
     predictions: list[EvalPrediction] = []
     for sample in samples:
@@ -847,6 +892,7 @@ def main() -> None:
                     threshold=args.threshold,
                     llm_model=args.llm_model,
                     user_response_fn=user_response_fn,
+                    gdino=gdino,
                 )
             )
 
