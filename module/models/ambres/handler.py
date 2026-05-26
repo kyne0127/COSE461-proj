@@ -39,11 +39,11 @@ from module.models.base_handler import BaseHandler, HandlerRegistry
 logger = logging.getLogger(__name__)
 
 # ── 추론 전용 파일 로거 ────────────────────────────────────────────────────────
-_inference_log_path = os.environ.get(
-    "AMBRES_INFERENCE_LOG",
-    "/workspace/COSE461-proj/logs/ambres_inference.log",
+_default_log_path = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "logs", "ambres_inference.log"
 )
-os.makedirs(os.path.dirname(_inference_log_path), exist_ok=True)
+_inference_log_path = os.environ.get("AMBRES_INFERENCE_LOG", _default_log_path)
+os.makedirs(os.path.dirname(os.path.abspath(_inference_log_path)), exist_ok=True)
 
 _inf_logger = logging.getLogger("ambres.inference")
 _inf_logger.setLevel(logging.DEBUG)
