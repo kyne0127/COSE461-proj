@@ -52,20 +52,35 @@ SCENARIO_META: dict[str, dict] = {
         "checkpoint":    "C1",
         "desc":          "No change (clear continuation)",
         "intervention":  "(none — keep the scene as is)",
+        "object_states": {
+            "t0": {"target": 1, "destination": 1},
+            "c1": {"target": 1, "destination": 1},
+            "c2": {"target": 1, "destination": 1},
+        },
     },
     "S2": {
         "gold_state":    "AMBIGUOUS_TARGET",
         "gold_decision": "ASK",
         "checkpoint":    "C1",
         "desc":          "Add identical target",
-        "intervention":  "* Before C1: add an identical cup to the scene",
+        "intervention":  "* Before C1: add an identical target to the scene",
+        "object_states": {
+            "t0": {"target": 1, "destination": 1},
+            "c1": {"target": 2, "destination": 1},
+            "c2": {"target": 2, "destination": 1},
+        },
     },
     "S3": {
         "gold_state":    "INVALID_TARGET",
         "gold_decision": "STOP",
         "checkpoint":    "C1",
         "desc":          "Remove target",
-        "intervention":  "* Before C1: remove the cup from the scene",
+        "intervention":  "* Before C1: remove the target from the scene",
+        "object_states": {
+            "t0": {"target": 1, "destination": 1},
+            "c1": {"target": 0, "destination": 1},
+            "c2": {"target": 0, "destination": 1},
+        },
     },
     "S4": {
         "gold_state":    "AMBIGUOUS_DESTINATION",
@@ -73,6 +88,11 @@ SCENARIO_META: dict[str, dict] = {
         "checkpoint":    "C2",
         "desc":          "Add destination",
         "intervention":  "* Before C2: add an identical box to the scene",
+        "object_states": {
+            "t0": {"target": 1, "destination": 1},
+            "c1": {"target": 1, "destination": 1},
+            "c2": {"target": 1, "destination": 2},
+        },
     },
     "S5": {
         "gold_state":    "CLEAR",
@@ -80,13 +100,23 @@ SCENARIO_META: dict[str, dict] = {
         "checkpoint":    "C1",
         "desc":          "Add distractor object",
         "intervention":  "* Before C1: add an unrelated object to the scene",
+        "object_states": {
+            "t0": {"target": 1, "destination": 1},
+            "c1": {"target": 1, "destination": 1, "distractor": 1},
+            "c2": {"target": 1, "destination": 1, "distractor": 1},
+        },
     },
     "S6": {
         "gold_state":    "AMBIGUOUS_TARGET",
         "gold_decision": "ASK",
         "checkpoint":    "C1",
         "desc":          "Move target to new position",
-        "intervention":  "* Before C1: move the cup to a different position",
+        "intervention":  "* Before C1: move the target to a different position",
+        "object_states": {
+            "t0": {"target": 1, "destination": 1},
+            "c1": {"target": 1, "destination": 1, "note": "target moved"},
+            "c2": {"target": 1, "destination": 1, "note": "target moved"},
+        },
     },
 }
 
@@ -96,6 +126,27 @@ _STATE_HINT = {
     "C1_DONE": ("2",     "Capture C2 checkpoint"),
     "C2_DONE": ("q",     "Save and quit"),
 }
+
+_STATE_TO_TIMESTEP = {
+    "IDLE":    "t0",
+    "T0_DONE": "c1",
+    "C1_DONE": "c2",
+    "C2_DONE": "c2",
+}
+
+
+def _fmt_objects(obj_state: dict, target_label: str, dest_label: str) -> str:
+    parts = []
+    for key, val in obj_state.items():
+        if key == "note":
+            parts.append(f"({val})")
+        elif key == "target":
+            parts.append(f"{target_label}x{val}")
+        elif key == "destination":
+            parts.append(f"{dest_label}x{val}")
+        else:
+            parts.append(f"{key}x{val}")
+    return "  ".join(parts)
 _STATE_COLOR = {
     "IDLE":    (160, 160, 160),
     "T0_DONE": (50,  200, 255),
@@ -111,21 +162,25 @@ def _put(img: np.ndarray, text: str, y: int, color=(255, 255, 255), scale=0.6, t
 
 
 def draw_overlay(bgr: np.ndarray, state: str, scenario: str, trial: int,
-                 meta: dict, stills: set, recording: bool) -> np.ndarray:
+                 meta: dict, stills: set, recording: bool,
+                 target_label: str = "target", dest_label: str = "destination") -> np.ndarray:
     h, w = bgr.shape[:2]
     canvas = bgr.copy()
 
     bar = canvas.copy()
-    cv2.rectangle(bar, (0, 0), (w, 140), (0, 0, 0), -1)
+    cv2.rectangle(bar, (0, 0), (w, 160), (0, 0, 0), -1)
     canvas = cv2.addWeighted(bar, 0.55, canvas, 0.45, 0)
 
     col = _STATE_COLOR.get(state, (255, 255, 255))
     next_key, next_hint = _STATE_HINT.get(state, ("", ""))
+    timestep = _STATE_TO_TIMESTEP.get(state, "t0")
+    obj_state = meta.get("object_states", {}).get(timestep, {})
+    obj_str = _fmt_objects(obj_state, target_label, dest_label)
 
     _put(canvas, f"[{scenario}] Trial {trial:03d}  |  {meta['desc']}", 24, col, 0.65, 2)
-    _put(canvas, meta["intervention"],                                  50, (255, 220, 80), 0.58)
-    _put(canvas, f"State: {state}",                                     76, col, 0.58)
-    _put(canvas, f"Next:  [{next_key}] {next_hint}",                   100, (200, 200, 200), 0.55)
+    _put(canvas, meta["intervention"],                                  48, (255, 220, 80), 0.55)
+    _put(canvas, f"State: {state}  |  Scene: {obj_str}",               72, col, 0.55)
+    _put(canvas, f"Next:  [{next_key}] {next_hint}",                    96, (200, 200, 200), 0.52)
 
     icons = (
         f"t0={'[OK]' if 't0' in stills else '[ ]'}  "
@@ -133,7 +188,12 @@ def draw_overlay(bgr: np.ndarray, state: str, scenario: str, trial: int,
         f"C2={'[OK]' if 'c2' in stills else '[ ]'}"
     )
     rec_str = "  * REC" if recording else ""
-    _put(canvas, icons + rec_str, 124, (180, 255, 180) if recording else (180, 180, 180), 0.52)
+    _put(canvas, icons + rec_str, 120, (180, 255, 180) if recording else (180, 180, 180), 0.52)
+    _put(canvas,
+         f"t0:{_fmt_objects(meta['object_states']['t0'], target_label, dest_label)}"
+         f"  ->  c1:{_fmt_objects(meta['object_states']['c1'], target_label, dest_label)}"
+         f"  ->  c2:{_fmt_objects(meta['object_states']['c2'], target_label, dest_label)}",
+         142, (140, 140, 140), 0.45)
 
     _put(canvas, "[r] restart    [q] save and quit",
          h - 10, (140, 140, 140), 0.48)
@@ -194,7 +254,8 @@ def run(args: argparse.Namespace) -> None:
                 writer.write(bgr)
 
             display = draw_overlay(bgr.copy(), state, args.scenario, trial,
-                                   meta, stills, recording)
+                                   meta, stills, recording,
+                                   args.target_label, args.destination_label)
             cv2.imshow("record_scenario", display)
             key = cv2.waitKey(1) & 0xFF
 
@@ -246,6 +307,7 @@ def run(args: argparse.Namespace) -> None:
         "gold_decision":     meta["gold_decision"],
         "target_label":      args.target_label,
         "destination_label": args.destination_label,
+        "object_states":     meta["object_states"],
         "video":             video_path,
         "notes":             meta["intervention"],
         "recorded_at":       datetime.now().isoformat(timespec="seconds"),
