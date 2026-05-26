@@ -12,15 +12,20 @@ Desktop은 GenericClient를 통해 단일 gRPC 연결로 모호성 해소와 로
     reset         : 세션 대화 기록 초기화
     query         : 이미지 + task_description → 모호성 판단 + 객체 추출
     respond       : 사용자 명확화 답변 → 모호성 해소 + 최종 객체 확정
-    detect        : 이미지 + 객체 목록 → pixel 좌표 검출 (Molmo point 출력)
+    detect        : 이미지 + 객체 목록 → pixel 좌표 검출
+                    (GroundingDINO 우선, 탐지 실패 시 Molmo fallback)
     set_image_sam : SAM2 이미지 사전 세팅
     query_mask    : pixel 좌표 points → 세그멘테이션 마스크
 
 Config keys:
-    model_type    (str):  "fs_prompt" | "finetune"  [default: "fs_prompt"]
-    adapter_ckpt  (str):  finetune 체크포인트 이름 (model_type="finetune" 시 필수)
-    use_detection (bool): query/respond 단계에서 Molmo detect 자동 수행 [default: False]
-    use_sam       (bool): SAM2 로드 여부 [default: False]
+    model_type          (str):   "fs_prompt" | "finetune"  [default: "fs_prompt"]
+    adapter_ckpt        (str):   finetune 체크포인트 이름 (model_type="finetune" 시 필수)
+    use_detection       (bool):  query/respond 단계에서 Molmo detect 자동 수행 [default: False]
+    use_sam             (bool):  SAM2 로드 여부 [default: False]
+    use_gdino           (bool):  GroundingDINO 로드 여부 [default: False]
+    gdino_model_id      (str):   HuggingFace 모델 ID [default: "IDEA-Research/grounding-dino-base"]
+    gdino_box_threshold (float): bounding box confidence 최솟값 [default: 0.30]
+    gdino_text_threshold(float): 텍스트 레이블 매칭 confidence 최솟값 [default: 0.25]
 """
 
 from __future__ import annotations
@@ -139,6 +144,23 @@ class AmbResHandler(BaseHandler):
                 logger.info("AmbResHandler: SAM2 loaded")
             except ImportError as e:
                 logger.warning("SAM2 로드 실패 (sam2 패키지 미설치): %s", e)
+
+        # GroundingDINO (선택) — detect() 메서드의 primary backend
+        self._gdino = None
+        use_gdino = config.get("use_gdino", False)
+        if use_gdino:
+            try:
+                from module.models.ambres.gdino import GroundingDINO
+                self._gdino = GroundingDINO(
+                    model_id=config.get("gdino_model_id", "IDEA-Research/grounding-dino-base"),
+                    device="cuda",
+                    box_threshold=config.get("gdino_box_threshold", 0.30),
+                    text_threshold=config.get("gdino_text_threshold", 0.25),
+                )
+                logger.info("AmbResHandler: GroundingDINO loaded (%s)",
+                            config.get("gdino_model_id", "grounding-dino-base"))
+            except Exception as e:
+                logger.warning("GroundingDINO 로드 실패, detect()는 Molmo만 사용: %s", e)
 
         # 세션 상태: session_id → {"messages": list, "images": list[PIL.Image]}
         self._sessions: Dict[str, Dict] = {}
@@ -393,8 +415,9 @@ class AmbResHandler(BaseHandler):
         # ── detect ─────────────────────────────────────────────────────────
         elif method == "detect":
             """
-            Molmo로 객체별 pixel 좌표를 검출합니다.
-            query/respond와 독립적으로 호출 가능합니다.
+            객체별 pixel 좌표를 검출합니다.
+            GroundingDINO(use_gdino=true)가 로드된 경우 primary backend로 사용하고,
+            탐지 결과가 없거나 실패하면 Molmo로 fallback합니다.
 
             payload:
                 objects (list[str]): 검출할 객체 이름 목록
@@ -402,6 +425,7 @@ class AmbResHandler(BaseHandler):
 
             반환:
                 detections (dict): {객체명: [[x, y], ...]} pixel 좌표
+                backend    (str):  실제 사용된 backend ("gdino" | "molmo")
             """
             objects = payload.get("objects", [])
             if not objects:
@@ -412,20 +436,43 @@ class AmbResHandler(BaseHandler):
             pil_img = self._to_pil(tensors[0], tag=f"detect_{session_id}")
 
             t0 = time.time()
+            backend = "molmo"
+
             with self._lock:
-                # detect_pretty는 self.images[0]만 사용하므로 직접 세팅
-                self._model.images = [pil_img]
-                result = self._model.detect_pretty(objects)
+                if self._gdino is not None:
+                    try:
+                        gdino_result = self._gdino.detect(pil_img, objects)
+                        all_empty = all(len(v) == 0 for v in gdino_result.values())
+                        if not all_empty:
+                            result = gdino_result
+                            backend = "gdino"
+                        else:
+                            logger.debug(
+                                "GroundingDINO: 탐지 결과 없음 (objects=%s), Molmo fallback",
+                                objects,
+                            )
+                            self._model.images = [pil_img]
+                            result = self._model.detect_pretty(objects)
+                    except Exception as _e:
+                        logger.warning("GroundingDINO detect 실패 (%s), Molmo fallback", _e)
+                        self._model.images = [pil_img]
+                        result = self._model.detect_pretty(objects)
+                else:
+                    # detect_pretty는 self.images[0]만 사용하므로 직접 세팅
+                    self._model.images = [pil_img]
+                    result = self._model.detect_pretty(objects)
+
             elapsed = time.time() - t0
 
             _log_inference(
                 session_id, "detect",
+                backend=backend,
                 objects=objects,
                 image_size=f"{pil_img.width}x{pil_img.height}",
                 detections=result,
                 elapsed_s=f"{elapsed:.2f}",
             )
-            return self.ok({"detections": result})
+            return self.ok({"detections": result, "backend": backend})
 
         # ── set_image_sam ──────────────────────────────────────────────────
         elif method == "set_image_sam":

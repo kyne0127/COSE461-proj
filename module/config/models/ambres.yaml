@@ -23,3 +23,20 @@ use_detection: false
 # True: set_image_sam / query_mask 메서드 활성화
 # False: detect 좌표만 사용하는 경우 불필요 (메모리 절약)
 use_sam: false
+
+# ── GroundingDINO 설정 ────────────────────────────────────────────────────────
+# True: detect() 메서드에서 GroundingDINO를 primary backend로 사용
+#       탐지 결과 없음 / 오류 시 Molmo로 자동 fallback
+# False: 기존과 동일하게 Molmo만 사용
+use_gdino: true
+
+# HuggingFace 모델 ID
+#   grounding-dino-tiny : ~0.8 GB VRAM, 빠름
+#   grounding-dino-base : ~1.5 GB VRAM, 정확도 높음 (권장)
+gdino_model_id: "IDEA-Research/grounding-dino-base"
+
+# bounding box confidence 최솟값 (낮추면 더 많이 탐지, 오탐 증가)
+gdino_box_threshold: 0.30
+
+# 텍스트 레이블 매칭 confidence 최솟값
+gdino_text_threshold: 0.25

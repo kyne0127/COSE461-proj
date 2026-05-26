@@ -9,3 +9,12 @@ __pycache__/
 
 # Timestamped pytest logs (keep latest.log and named logs)
 logs/pytest_*.log
+
+# Dataset images (too large for git — only JSON annotations are tracked)
+dataset/cvat_upload/
+dataset/annotated/*.png
+dataset/cvat_urls.txt
+dataset/cvat_urls_local.txt
+
+# Evaluation output images
+eval_outputs/
