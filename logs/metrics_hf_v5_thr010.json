@@ -1,0 +1,62 @@
+{
+  "B1_INITIAL_ONLY": {
+    "n": 60,
+    "correct": 25,
+    "decision_accuracy": 0.4166666666666667,
+    "reason_accuracy": null,
+    "reason_n": 0,
+    "miss_rate": 0.7,
+    "false_alarm_rate": 0.1,
+    "state_accuracy": 0.0,
+    "state_n": 0,
+    "c1_stopped": 0
+  },
+  "B2_NO_MEMORY": {
+    "n": 60,
+    "correct": 29,
+    "decision_accuracy": 0.48333333333333334,
+    "reason_accuracy": null,
+    "reason_n": 0,
+    "miss_rate": 0.6,
+    "false_alarm_rate": 0.25,
+    "state_accuracy": 0.0,
+    "state_n": 0,
+    "c1_stopped": 0
+  },
+  "B3_ATTRIBUTE_AWARE_COUNT": {
+    "n": 60,
+    "correct": 20,
+    "decision_accuracy": 0.3333333333333333,
+    "reason_accuracy": null,
+    "reason_n": 0,
+    "miss_rate": 1.0,
+    "false_alarm_rate": 0.0,
+    "state_accuracy": 0.0,
+    "state_n": 0,
+    "c1_stopped": 0
+  },
+  "B4_BINARY_ANOMALY": {
+    "n": 60,
+    "correct": 32,
+    "decision_accuracy": 0.5333333333333333,
+    "reason_accuracy": null,
+    "reason_n": 0,
+    "miss_rate": 0.075,
+    "false_alarm_rate": 0.85,
+    "state_accuracy": 0.0,
+    "state_n": 0,
+    "c1_stopped": 0
+  },
+  "OURS": {
+    "n": 60,
+    "correct": 29,
+    "decision_accuracy": 0.48333333333333334,
+    "reason_accuracy": 1.0,
+    "reason_n": 21,
+    "miss_rate": 0.25,
+    "false_alarm_rate": 0.6,
+    "state_accuracy": 0.48333333333333334,
+    "state_n": 60,
+    "c1_stopped": 0
+  }
+}
