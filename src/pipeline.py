@@ -62,6 +62,7 @@ class CheckpointOutcome:
     g0_before:      dict[str, Any]    # G₀ used for comparison
     g0_after:       dict[str, Any]    # G₀ after rolling update (== g0_before if no update)
     user_response:  str = ""          # "" if no user interaction
+    question:       str = ""          # clarifying question generated on ASK
 
 
 @dataclass
@@ -84,6 +85,7 @@ class PipelineResult:
                 "checkpoint":    co.checkpoint,
                 "state":         co.state.value,
                 "decision":      co.decision.value,
+                "question":      co.question,
                 "user_response": co.user_response,
                 "g0_after":      co.g0_after,
             }
@@ -237,6 +239,7 @@ def run_pipeline(
 
     g0_after_c1 = g0_current
     c1_user_response = ""
+    c1_question = ""
 
     if c1_decision == Decision.STOP:
         return PipelineResult(
@@ -249,8 +252,8 @@ def run_pipeline(
         )
 
     if c1_decision == Decision.ASK:
-        question = f"[C1 {c1_state.value}] {_clarifying_question(g0_current, 'target')}"
-        c1_user_response = user_response_fn(question, g0_current)
+        c1_question = f"[C1 {c1_state.value}] {_clarifying_question(g0_current, 'target')}"
+        c1_user_response = user_response_fn(c1_question, g0_current)
         if c1_user_response:
             g0_after_c1 = _update_g0(
                 image_c1, task_description, c1_user_response,
@@ -261,6 +264,7 @@ def run_pipeline(
         "C1", c1_state, c1_decision, c1_det,
         g0_before=g0_current, g0_after=g0_after_c1,
         user_response=c1_user_response,
+        question=c1_question,
     )
     g0_current = g0_after_c1
 
@@ -273,6 +277,7 @@ def run_pipeline(
 
     g0_after_c2 = g0_current
     c2_user_response = ""
+    c2_question = ""
 
     if c2_decision == Decision.STOP:
         return PipelineResult(
@@ -285,8 +290,8 @@ def run_pipeline(
         )
 
     if c2_decision == Decision.ASK:
-        question = f"[C2 {c2_state.value}] {_clarifying_question(g0_current, 'destination')}"
-        c2_user_response = user_response_fn(question, g0_current)
+        c2_question = f"[C2 {c2_state.value}] {_clarifying_question(g0_current, 'destination')}"
+        c2_user_response = user_response_fn(c2_question, g0_current)
         if c2_user_response:
             g0_after_c2 = _update_g0(
                 image_c2, task_description, c2_user_response,
@@ -297,6 +302,7 @@ def run_pipeline(
         "C2", c2_state, c2_decision, c2_det,
         g0_before=g0_current, g0_after=g0_after_c2,
         user_response=c2_user_response,
+        question=c2_question,
     )
 
     return PipelineResult(

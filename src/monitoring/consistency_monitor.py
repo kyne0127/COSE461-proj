@@ -84,11 +84,31 @@ def _check_target(
     if not coords:
         return GroundingState.INVALID_TARGET
 
-    # Multiple instances → cannot tell which is the original even with coord memory.
-    # (This is distinct from CLEAR(distractor): when Molmo labels TWO objects with the
-    # same name, the scene is genuinely ambiguous from the robot's perspective.)
+    # Multiple instances: check whether the count was already the same at t₀.
+    # If count is stable AND all instances remain within threshold of their G₀
+    # positions, the scene is unchanged (CLEAR).  A count change or position
+    # shift means a new/moved instance → AMBIGUOUS_TARGET.
     if len(coords) > 1:
+        g0_coords = g0["target"].get("coords")
+        if g0_coords and len(g0_coords) == len(coords):
+            unmatched = list(coords)
+            all_close = True
+            for gc in g0_coords:
+                if not unmatched:
+                    all_close = False
+                    break
+                best = min(unmatched, key=lambda c: _euclidean(gc, c))
+                if _euclidean(gc, best) > threshold:
+                    all_close = False
+                    break
+                unmatched.remove(best)
+            if all_close:
+                return GroundingState.CLEAR
         return GroundingState.AMBIGUOUS_TARGET
+
+    # g0_coord가 None이면 t₀에서 감지 실패 — 위치 비교 불가, 단일 인스턴스 존재 → CLEAR
+    if g0_coord is None:
+        return GroundingState.CLEAR
 
     # Single instance: check absolute distance first (fast path for stationary cameras).
     if _euclidean(g0_coord, coords[0]) <= threshold:
@@ -102,15 +122,16 @@ def _check_target(
     #   Δ = ‖(target_t − dest_t) − (target_0 − dest_0)‖
     # which cancels the shared camera-induced shift.  If the destination is still near
     # its G₀ position the camera has not moved, so any target displacement is genuine.
+    dest_coord = g0["destination"]["coord"]
     dest_raw = detections_t.get(g0["destination"]["label"]) or []
     valid_anchors = [c for c in dest_raw if isinstance(c, (list, tuple)) and len(c) == 2]
-    if valid_anchors:
-        gt_anchor = min(valid_anchors, key=lambda c: _euclidean(g0["destination"]["coord"], c))
-        dest_abs_dist = _euclidean(g0["destination"]["coord"], gt_anchor)
+    if valid_anchors and dest_coord is not None:
+        gt_anchor = min(valid_anchors, key=lambda c: _euclidean(dest_coord, c))
+        dest_abs_dist = _euclidean(dest_coord, gt_anchor)
         if dest_abs_dist > threshold:
             # Destination also displaced → camera moved → camera-normalized check
             _rel = rel_threshold if rel_threshold is not None else threshold * 5.0
-            rel = _relative_dist(g0_coord, g0["destination"]["coord"], coords[0], gt_anchor)
+            rel = _relative_dist(g0_coord, dest_coord, coords[0], gt_anchor)
             if rel <= _rel:
                 return GroundingState.CLEAR
 
@@ -132,23 +153,43 @@ def _check_destination(
     if not coords:
         return GroundingState.INVALID_DESTINATION
 
-    # Multiple candidates → ambiguous which to place into
+    # Multiple candidates: count-stable check (mirrors _check_target logic).
     if len(coords) > 1:
+        g0_coords = g0["destination"].get("coords")
+        if g0_coords and len(g0_coords) == len(coords):
+            unmatched = list(coords)
+            all_close = True
+            for gc in g0_coords:
+                if not unmatched:
+                    all_close = False
+                    break
+                best = min(unmatched, key=lambda c: _euclidean(gc, c))
+                if _euclidean(gc, best) > threshold:
+                    all_close = False
+                    break
+                unmatched.remove(best)
+            if all_close:
+                return GroundingState.CLEAR
         return GroundingState.AMBIGUOUS_DESTINATION
+
+    # g0_coord가 None이면 t₀에서 감지 실패 — 단일 인스턴스 존재 → CLEAR
+    if g0_coord is None:
+        return GroundingState.CLEAR
 
     # Single candidate: absolute distance fast path
     if _euclidean(g0_coord, coords[0]) <= threshold:
         return GroundingState.CLEAR
 
     # Symmetric camera-motion check using target as anchor (same logic as C1 above).
+    tgt_coord = g0["target"]["coord"]
     tgt_raw = detections_t.get(g0["target"]["label"]) or []
     valid_anchors = [c for c in tgt_raw if isinstance(c, (list, tuple)) and len(c) == 2]
-    if valid_anchors:
-        gt_anchor = min(valid_anchors, key=lambda c: _euclidean(g0["target"]["coord"], c))
-        tgt_abs_dist = _euclidean(g0["target"]["coord"], gt_anchor)
+    if valid_anchors and tgt_coord is not None:
+        gt_anchor = min(valid_anchors, key=lambda c: _euclidean(tgt_coord, c))
+        tgt_abs_dist = _euclidean(tgt_coord, gt_anchor)
         if tgt_abs_dist > threshold:
             _rel = rel_threshold if rel_threshold is not None else threshold * 5.0
-            rel = _relative_dist(g0_coord, g0["target"]["coord"], coords[0], gt_anchor)
+            rel = _relative_dist(g0_coord, tgt_coord, coords[0], gt_anchor)
             if rel <= _rel:
                 return GroundingState.CLEAR
 

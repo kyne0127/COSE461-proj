@@ -58,9 +58,14 @@ def _role_valid(
     if len(coords) == 0:
         return False, f"{role} '{label}' not found", detail
     if len(coords) > 1:
-        distances = [_euclidean(g0_coord, c) for c in coords]
-        detail["min_distance"] = min(distances)
+        if g0_coord is not None:
+            distances = [_euclidean(g0_coord, c) for c in coords]
+            detail["min_distance"] = min(distances)
         return False, f"multiple {role} candidates for '{label}'", detail
+
+    # g0_coord가 None이면 t₀ 감지 실패 — 단일 인스턴스 존재하면 유효로 간주
+    if g0_coord is None:
+        return True, "", detail
 
     dist = _euclidean(g0_coord, coords[0])
     detail["min_distance"] = dist

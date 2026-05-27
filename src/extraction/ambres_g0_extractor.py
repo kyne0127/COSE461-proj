@@ -50,17 +50,25 @@ def _ambiguity_from_step(step_output: dict[str, Any]) -> bool:
     raise ValueError(f"AmbRes output does not contain ambiguity flag: {step_output}")
 
 
-def _first_coord(detections: dict[str, Any], label: str) -> list[int]:
-    coords = detections.get(label)
+def _first_coord(detections: dict[str, Any], label: str) -> list[int] | None:
+    raw = detections.get(label) or []
+    coords = [c for c in raw if isinstance(c, (list, tuple)) and len(c) == 2]
     if not coords:
-        raise ValueError(f"No coordinate returned for object {label!r}: {detections}")
+        return None
     first = coords[0]
-    if not isinstance(first, (list, tuple)) or len(first) != 2:
-        raise ValueError(f"Invalid coordinate for object {label!r}: {first}")
     return [int(first[0]), int(first[1])]
 
 
-def _make_handler(model_type: str, adapter_ckpt: str, use_detection: bool):
+def _all_valid_coords(detections: dict[str, Any], label: str) -> list[list[int]]:
+    raw = detections.get(label) or []
+    return [[int(c[0]), int(c[1])] for c in raw
+            if isinstance(c, (list, tuple)) and len(c) == 2]
+
+
+def _make_handler(model_type: str, adapter_ckpt: str, use_detection: bool,
+                  use_dino: bool = False,
+                  dino_box_threshold: float = 0.35,
+                  dino_text_threshold: float = 0.25):
     from module.models.ambres.handler import AmbResHandler
 
     handler = AmbResHandler()
@@ -69,7 +77,10 @@ def _make_handler(model_type: str, adapter_ckpt: str, use_detection: bool):
             "model_type": model_type,
             "adapter_ckpt": adapter_ckpt,
             "use_detection": use_detection,
+            "use_dino": use_dino,
             "use_sam": False,
+            "dino_box_threshold": dino_box_threshold,
+            "dino_text_threshold": dino_text_threshold,
         }
     )
     return handler
@@ -149,10 +160,12 @@ def extract_g0(
         "target": {
             "label": roles["target"],
             "coord": _first_coord(detections, roles["target"]),
+            "coords": _all_valid_coords(detections, roles["target"]),
         },
         "destination": {
             "label": roles["destination"],
             "coord": _first_coord(detections, roles["destination"]),
+            "coords": _all_valid_coords(detections, roles["destination"]),
         },
         "image_shape": image_shape,
     }
