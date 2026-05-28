@@ -50,7 +50,7 @@ SCENARIO_META: dict[str, dict] = {
         "gold_state":    "CLEAR",
         "gold_decision": "CONTINUE",
         "checkpoint":    "C1",
-        "desc":          "No change (clear continuation)",
+        "desc":          "No change",
         "intervention":  "(none — keep the scene as is)",
         "object_states": {
             "t0": {"target": 1, "destination": 1},
@@ -62,7 +62,7 @@ SCENARIO_META: dict[str, dict] = {
         "gold_state":    "AMBIGUOUS_TARGET",
         "gold_decision": "ASK",
         "checkpoint":    "C1",
-        "desc":          "Add identical target",
+        "desc":          "target 1 -> 2 (add identical)",
         "intervention":  "* Before C1: add an identical target to the scene",
         "object_states": {
             "t0": {"target": 1, "destination": 1},
@@ -74,7 +74,7 @@ SCENARIO_META: dict[str, dict] = {
         "gold_state":    "INVALID_TARGET",
         "gold_decision": "STOP",
         "checkpoint":    "C1",
-        "desc":          "Remove target",
+        "desc":          "target 1 -> 0 (removed)",
         "intervention":  "* Before C1: remove the target from the scene",
         "object_states": {
             "t0": {"target": 1, "destination": 1},
@@ -83,39 +83,51 @@ SCENARIO_META: dict[str, dict] = {
         },
     },
     "S4": {
+        "gold_state":    "AMBIGUOUS_TARGET",
+        "gold_decision": "ASK",
+        "checkpoint":    "C1",
+        "desc":          "target moved to new position",
+        "intervention":  "* Before C1: move the target to a different position",
+        "object_states": {
+            "t0": {"target": 1, "destination": 1},
+            "c1": {"target": 1, "destination": 1, "note": "target moved"},
+            "c2": {"target": 1, "destination": 1, "note": "target moved"},
+        },
+    },
+    "S5": {
         "gold_state":    "AMBIGUOUS_DESTINATION",
         "gold_decision": "ASK",
         "checkpoint":    "C2",
-        "desc":          "Add destination",
-        "intervention":  "* Before C2: add an identical box to the scene",
+        "desc":          "destination 1 -> 2 (add identical)",
+        "intervention":  "* Before C2: add an identical destination to the scene",
         "object_states": {
             "t0": {"target": 1, "destination": 1},
             "c1": {"target": 1, "destination": 1},
             "c2": {"target": 1, "destination": 2},
         },
     },
-    "S5": {
-        "gold_state":    "CLEAR",
-        "gold_decision": "CONTINUE",
-        "checkpoint":    "C1",
-        "desc":          "Add distractor object",
-        "intervention":  "* Before C1: add an unrelated object to the scene",
+    "S6": {
+        "gold_state":    "INVALID_DESTINATION",
+        "gold_decision": "STOP",
+        "checkpoint":    "C2",
+        "desc":          "destination 1 -> 0 (removed)",
+        "intervention":  "* Before C2: remove the destination from the scene",
         "object_states": {
             "t0": {"target": 1, "destination": 1},
-            "c1": {"target": 1, "destination": 1, "distractor": 1},
-            "c2": {"target": 1, "destination": 1, "distractor": 1},
+            "c1": {"target": 1, "destination": 1},
+            "c2": {"target": 1, "destination": 0},
         },
     },
-    "S6": {
-        "gold_state":    "AMBIGUOUS_TARGET",
+    "S7": {
+        "gold_state":    "AMBIGUOUS_DESTINATION",
         "gold_decision": "ASK",
-        "checkpoint":    "C1",
-        "desc":          "Move target to new position",
-        "intervention":  "* Before C1: move the target to a different position",
+        "checkpoint":    "C2",
+        "desc":          "destination moved to new position",
+        "intervention":  "* Before C2: move the destination to a different position",
         "object_states": {
             "t0": {"target": 1, "destination": 1},
-            "c1": {"target": 1, "destination": 1, "note": "target moved"},
-            "c2": {"target": 1, "destination": 1, "note": "target moved"},
+            "c1": {"target": 1, "destination": 1},
+            "c2": {"target": 1, "destination": 1, "note": "destination moved"},
         },
     },
 }
@@ -341,11 +353,12 @@ def _parse() -> argparse.Namespace:
         epilog="""
 Intervention guide:
   S1  no change
-  S2  before C1: add identical cup
-  S3  before C1: remove cup
-  S4  before C2: add identical box
-  S5  before C1: add unrelated object
-  S6  before C1: move cup to different position
+  S2  before C1: add identical target
+  S3  before C1: remove target
+  S4  before C1: move target to different position
+  S5  before C2: add identical destination
+  S6  before C2: remove destination
+  S7  before C2: move destination to different position
 
 Example:
   python scripts/record_scenario.py \\
@@ -355,7 +368,8 @@ Example:
       --append-manifest
         """,
     )
-    p.add_argument("--scenario",          required=True, choices=list(SCENARIO_META))
+    p.add_argument("--scenario",          required=True, choices=list(SCENARIO_META),
+                   metavar="{" + ",".join(SCENARIO_META) + "}")
     p.add_argument("--task",              required=True)
     p.add_argument("--target-label",      default="cup")
     p.add_argument("--destination-label", default="box")
