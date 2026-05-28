@@ -376,8 +376,8 @@ Example:
     p.add_argument("--trial",             type=int, default=None,
                    help="Trial number (auto-increments if omitted)")
     p.add_argument("--resolution",        default="VGA", choices=["VGA", "HD720"])
-    p.add_argument("--out-dir",           default=str(ROOT / "data-evaluation"),
-                   help="Output root directory (default: data-evaluation/)")
+    p.add_argument("--out-dir",           default=str(ROOT / "data-evaluation-v3"),
+                   help="Output root directory (default: data-evaluation-v3/)")
     p.add_argument("--manifest-path",     default=str(ROOT / "dataset" / "manifest.jsonl"),
                    help="Manifest file to append to (default: dataset/manifest.jsonl)")
     p.add_argument("--append-manifest",   action="store_true",

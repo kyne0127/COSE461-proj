@@ -24,8 +24,8 @@ python scripts/record_scenario.py \
     --task "<task description>" \
     --target-label <cup|cube> \
     --destination-label <"red box"|"yellow box"|box> \
-    --out-dir data-evaluation \
-    --manifest-path dataset/manifest_eval.jsonl \
+    --out-dir data-evaluation-v3 \
+    --manifest-path dataset/manifest_eval_v2.jsonl \
     --append-manifest
 ```
 
@@ -65,8 +65,8 @@ C2  cup x1 + red box x1  (identical)
 python scripts/record_scenario.py \
     --scenario S1 --task "pick the cup and put it in the red box" \
     --target-label cup --destination-label "red box" \
-    --out-dir data-evaluation \
-    --manifest-path dataset/manifest_eval.jsonl --append-manifest
+    --out-dir data-evaluation-v3 \
+    --manifest-path dataset/manifest_eval_v2.jsonl --append-manifest
 ```
 
 **Cube (5 trials)**
@@ -74,8 +74,8 @@ python scripts/record_scenario.py \
 python scripts/record_scenario.py \
     --scenario S1 --task "pick the cube and put it in the red box" \
     --target-label cube --destination-label "red box" \
-    --out-dir data-evaluation \
-    --manifest-path dataset/manifest_eval.jsonl --append-manifest
+    --out-dir data-evaluation-v3 \
+    --manifest-path dataset/manifest_eval_v2.jsonl --append-manifest
 ```
 
 ---
@@ -99,8 +99,8 @@ C2  cup x2 + red box x1
 python scripts/record_scenario.py \
     --scenario S2 --task "pick the cup and put it in the red box" \
     --target-label cup --destination-label "red box" \
-    --out-dir data-evaluation \
-    --manifest-path dataset/manifest_eval.jsonl --append-manifest
+    --out-dir data-evaluation-v3 \
+    --manifest-path dataset/manifest_eval_v2.jsonl --append-manifest
 ```
 
 **Cube (5 trials)**
@@ -108,8 +108,8 @@ python scripts/record_scenario.py \
 python scripts/record_scenario.py \
     --scenario S2 --task "pick the cube and put it in the red box" \
     --target-label cube --destination-label "red box" \
-    --out-dir data-evaluation \
-    --manifest-path dataset/manifest_eval.jsonl --append-manifest
+    --out-dir data-evaluation-v3 \
+    --manifest-path dataset/manifest_eval_v2.jsonl --append-manifest
 ```
 
 ---
@@ -131,8 +131,8 @@ C2  cup x0 + red box x1  ← same scene as C1
 python scripts/record_scenario.py \
     --scenario S3 --task "pick the cup and put it in the red box" \
     --target-label cup --destination-label "red box" \
-    --out-dir data-evaluation \
-    --manifest-path dataset/manifest_eval.jsonl --append-manifest
+    --out-dir data-evaluation-v3 \
+    --manifest-path dataset/manifest_eval_v2.jsonl --append-manifest
 ```
 
 **Cube (5 trials)**
@@ -140,8 +140,8 @@ python scripts/record_scenario.py \
 python scripts/record_scenario.py \
     --scenario S3 --task "pick the cube and put it in the red box" \
     --target-label cube --destination-label "red box" \
-    --out-dir data-evaluation \
-    --manifest-path dataset/manifest_eval.jsonl --append-manifest
+    --out-dir data-evaluation-v3 \
+    --manifest-path dataset/manifest_eval_v2.jsonl --append-manifest
 ```
 
 ---
@@ -165,8 +165,8 @@ C2  cup x1 (pos B) + red box x1
 python scripts/record_scenario.py \
     --scenario S4 --task "pick the cup and put it in the red box" \
     --target-label cup --destination-label "red box" \
-    --out-dir data-evaluation \
-    --manifest-path dataset/manifest_eval.jsonl --append-manifest
+    --out-dir data-evaluation-v3 \
+    --manifest-path dataset/manifest_eval_v2.jsonl --append-manifest
 ```
 
 **Cube (5 trials)**
@@ -174,8 +174,8 @@ python scripts/record_scenario.py \
 python scripts/record_scenario.py \
     --scenario S4 --task "pick the cube and put it in the red box" \
     --target-label cube --destination-label "red box" \
-    --out-dir data-evaluation \
-    --manifest-path dataset/manifest_eval.jsonl --append-manifest
+    --out-dir data-evaluation-v3 \
+    --manifest-path dataset/manifest_eval_v2.jsonl --append-manifest
 ```
 
 ---
@@ -199,8 +199,8 @@ C2  cup x1 + red box x1 + yellow box x1
 python scripts/record_scenario.py \
     --scenario S5 --task "pick the cup and put it in the box" \
     --target-label cup --destination-label box \
-    --out-dir data-evaluation \
-    --manifest-path dataset/manifest_eval.jsonl --append-manifest
+    --out-dir data-evaluation-v3 \
+    --manifest-path dataset/manifest_eval_v2.jsonl --append-manifest
 ```
 
 **Cube (5 trials)**
@@ -208,8 +208,8 @@ python scripts/record_scenario.py \
 python scripts/record_scenario.py \
     --scenario S5 --task "pick the cube and put it in the box" \
     --target-label cube --destination-label box \
-    --out-dir data-evaluation \
-    --manifest-path dataset/manifest_eval.jsonl --append-manifest
+    --out-dir data-evaluation-v3 \
+    --manifest-path dataset/manifest_eval_v2.jsonl --append-manifest
 ```
 
 ---
@@ -231,8 +231,8 @@ C2  cup x1 + red box x0
 python scripts/record_scenario.py \
     --scenario S6 --task "pick the cup and put it in the red box" \
     --target-label cup --destination-label "red box" \
-    --out-dir data-evaluation \
-    --manifest-path dataset/manifest_eval.jsonl --append-manifest
+    --out-dir data-evaluation-v3 \
+    --manifest-path dataset/manifest_eval_v2.jsonl --append-manifest
 ```
 
 **Cube (5 trials)**
@@ -240,8 +240,8 @@ python scripts/record_scenario.py \
 python scripts/record_scenario.py \
     --scenario S6 --task "pick the cube and put it in the red box" \
     --target-label cube --destination-label "red box" \
-    --out-dir data-evaluation \
-    --manifest-path dataset/manifest_eval.jsonl --append-manifest
+    --out-dir data-evaluation-v3 \
+    --manifest-path dataset/manifest_eval_v2.jsonl --append-manifest
 ```
 
 ---
@@ -265,8 +265,8 @@ C2  cup x1 + red box x1 (pos B)
 python scripts/record_scenario.py \
     --scenario S7 --task "pick the cup and put it in the red box" \
     --target-label cup --destination-label "red box" \
-    --out-dir data-evaluation \
-    --manifest-path dataset/manifest_eval.jsonl --append-manifest
+    --out-dir data-evaluation-v3 \
+    --manifest-path dataset/manifest_eval_v2.jsonl --append-manifest
 ```
 
 **Cube (5 trials)**
@@ -274,8 +274,8 @@ python scripts/record_scenario.py \
 python scripts/record_scenario.py \
     --scenario S7 --task "pick the cube and put it in the red box" \
     --target-label cube --destination-label "red box" \
-    --out-dir data-evaluation \
-    --manifest-path dataset/manifest_eval.jsonl --append-manifest
+    --out-dir data-evaluation-v3 \
+    --manifest-path dataset/manifest_eval_v2.jsonl --append-manifest
 ```
 
 ---
@@ -313,10 +313,10 @@ python scripts/record_scenario.py \
 
 ```bash
 # Validate manifest
-python src/evaluate.py dataset/manifest_eval.jsonl --validate-only --check-images
+python src/evaluate.py dataset/manifest_eval_v2.jsonl --validate-only --check-images
 
 # Run full evaluation
-python src/evaluate.py dataset/manifest_eval.jsonl \
+python src/evaluate.py dataset/manifest_eval_v2.jsonl \
     --methods b1 b2 b3 b4 ours \
     --model-type finetune \
     --adapter-ckpt nFwD6qtf9T8dkJaQXU9vkW \
