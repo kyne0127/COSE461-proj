@@ -149,13 +149,13 @@ class GroundingDINO:
                 label_str, matched, original, score,
             )
 
-        # 레이블 내 NMS → cross-label NMS → 좌표만 반환
-        nms_buckets = {
-            obj: _nms(sorted(dets, key=lambda d: d["score"], reverse=True))
+        # confidence 내림차순 정렬 → NMS → 좌표만 반환
+        return {
+            obj: [d["coord"] for d in _nms(
+                sorted(dets, key=lambda d: d["score"], reverse=True)
+            )]
             for obj, dets in buckets.items()
         }
-        nms_buckets = _cross_label_nms(nms_buckets)
-        return {obj: [d["coord"] for d in dets] for obj, dets in nms_buckets.items()}
 
     def detect_with_scores(
         self,
@@ -216,11 +216,10 @@ class GroundingDINO:
                 "score": float(score),
             })
 
-        nms_buckets = {
+        return {
             obj: _nms(sorted(items, key=lambda d: d["score"], reverse=True))
             for obj, items in buckets.items()
         }
-        return _cross_label_nms(nms_buckets)
 
 
 # ------------------------------------------------------------------ #
@@ -239,23 +238,6 @@ def _iou(box1: List[float], box2: List[float]) -> float:
     return inter / union if union > 0 else 0.0
 
 
-def _containment(box1: List[float], box2: List[float]) -> float:
-    """Intersection area / area of the smaller box.
-
-    Catches the case where a small 'cube' bbox is fully inside a large 'red box'
-    bbox (IoU ≈ 0.06 but containment ≈ 1.0 → correctly suppressed as false positive).
-    """
-    x1 = max(box1[0], box2[0])
-    y1 = max(box1[1], box2[1])
-    x2 = min(box1[2], box2[2])
-    y2 = min(box1[3], box2[3])
-    inter = max(0.0, x2 - x1) * max(0.0, y2 - y1)
-    a1 = (box1[2] - box1[0]) * (box1[3] - box1[1])
-    a2 = (box2[2] - box2[0]) * (box2[3] - box2[1])
-    min_area = min(a1, a2)
-    return inter / min_area if min_area > 0 else 0.0
-
-
 def _nms(detections: list, iou_thr: float = 0.5) -> list:
     """confidence 내림차순 기준 greedy NMS. 같은 레이블 내 겹치는 박스 제거."""
     keep: list = []
@@ -263,47 +245,6 @@ def _nms(detections: list, iou_thr: float = 0.5) -> list:
         if not any(_iou(d["box"], k["box"]) > iou_thr for k in keep):
             keep.append(d)
     return keep
-
-
-def _cross_label_nms(
-    buckets: Dict[str, list],
-    iou_thr: float = 0.5,
-) -> Dict[str, list]:
-    """
-    서로 다른 레이블 간 겹치는 박스를 제거합니다.
-
-    overlap 기준: max(IoU, containment) > iou_thr
-    - IoU: 두 박스가 비슷한 크기일 때 (예: cube vs cube)
-    - containment: 작은 박스가 큰 박스 안에 포함될 때 (예: cube bbox ⊂ red_box bbox)
-      이 경우 IoU는 매우 작지만 containment ≈ 1.0 → false positive 억제
-
-    낮은 score 쪽 제거. 같은 레이블 내 박스는 대상이 아님 (_nms에서 처리).
-    """
-    # 모든 탐지를 (label, det) 쌍으로 수집, score 내림차순
-    all_dets = [
-        (label, det)
-        for label, dets in buckets.items()
-        for det in dets
-    ]
-    all_dets.sort(key=lambda x: x[1]["score"], reverse=True)
-
-    kept: list = []  # (label, det) 유지 목록
-    for label, det in all_dets:
-        # 이미 유지된 다른 레이블 박스와 IoU 또는 containment 기준으로 겹치면 제거
-        dominated = any(
-            kept_label != label and
-            max(_iou(det["box"], kept_det["box"]),
-                _containment(det["box"], kept_det["box"])) > iou_thr
-            for kept_label, kept_det in kept
-        )
-        if not dominated:
-            kept.append((label, det))
-
-    # 다시 레이블별로 재구성
-    result: Dict[str, list] = {label: [] for label in buckets}
-    for label, det in kept:
-        result[label].append(det)
-    return result
 
 
 # ------------------------------------------------------------------ #

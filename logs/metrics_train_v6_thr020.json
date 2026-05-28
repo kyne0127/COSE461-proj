@@ -1,0 +1,62 @@
+{
+  "B1_INITIAL_ONLY": {
+    "n": 61,
+    "correct": 24,
+    "decision_accuracy": 0.39344262295081966,
+    "reason_accuracy": null,
+    "reason_n": 0,
+    "miss_rate": 0.7317073170731707,
+    "false_alarm_rate": 0.2,
+    "state_accuracy": 0.0,
+    "state_n": 0,
+    "c1_stopped": 0
+  },
+  "B2_NO_MEMORY": {
+    "n": 61,
+    "correct": 24,
+    "decision_accuracy": 0.39344262295081966,
+    "reason_accuracy": null,
+    "reason_n": 0,
+    "miss_rate": 0.7804878048780488,
+    "false_alarm_rate": 0.1,
+    "state_accuracy": 0.0,
+    "state_n": 0,
+    "c1_stopped": 0
+  },
+  "B3_ATTRIBUTE_AWARE_COUNT": {
+    "n": 61,
+    "correct": 20,
+    "decision_accuracy": 0.32786885245901637,
+    "reason_accuracy": null,
+    "reason_n": 0,
+    "miss_rate": 1.0,
+    "false_alarm_rate": 0.0,
+    "state_accuracy": 0.0,
+    "state_n": 0,
+    "c1_stopped": 0
+  },
+  "B4_BINARY_ANOMALY": {
+    "n": 61,
+    "correct": 40,
+    "decision_accuracy": 0.6557377049180327,
+    "reason_accuracy": null,
+    "reason_n": 0,
+    "miss_rate": 0.1951219512195122,
+    "false_alarm_rate": 0.2,
+    "state_accuracy": 0.0,
+    "state_n": 0,
+    "c1_stopped": 0
+  },
+  "OURS": {
+    "n": 61,
+    "correct": 53,
+    "decision_accuracy": 0.8688524590163934,
+    "reason_accuracy": 1.0,
+    "reason_n": 35,
+    "miss_rate": 0.024390243902439025,
+    "false_alarm_rate": 0.1,
+    "state_accuracy": 0.8688524590163934,
+    "state_n": 61,
+    "c1_stopped": 0
+  }
+}

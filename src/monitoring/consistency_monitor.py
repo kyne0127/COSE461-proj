@@ -84,11 +84,31 @@ def _check_target(
     if not coords:
         return GroundingState.INVALID_TARGET
 
-    # Multiple instances → cannot tell which is the original even with coord memory.
-    # (This is distinct from CLEAR(distractor): when Molmo labels TWO objects with the
-    # same name, the scene is genuinely ambiguous from the robot's perspective.)
+    # Multiple instances: check whether the count was already the same at t₀.
+    # If count is stable AND all instances remain within threshold of their G₀
+    # positions, the scene is unchanged (CLEAR).  A count change or position
+    # shift means a new/moved instance → AMBIGUOUS_TARGET.
     if len(coords) > 1:
+        g0_coords = g0["target"].get("coords")
+        if g0_coords and len(g0_coords) == len(coords):
+            unmatched = list(coords)
+            all_close = True
+            for gc in g0_coords:
+                if not unmatched:
+                    all_close = False
+                    break
+                best = min(unmatched, key=lambda c: _euclidean(gc, c))
+                if _euclidean(gc, best) > threshold:
+                    all_close = False
+                    break
+                unmatched.remove(best)
+            if all_close:
+                return GroundingState.CLEAR
         return GroundingState.AMBIGUOUS_TARGET
+
+    # g0_coord가 None이면 t₀에서 감지 실패 — 위치 비교 불가, 단일 인스턴스 존재 → CLEAR
+    if g0_coord is None:
+        return GroundingState.CLEAR
 
     # Single instance: check absolute distance first (fast path for stationary cameras).
     if _euclidean(g0_coord, coords[0]) <= threshold:
@@ -102,15 +122,16 @@ def _check_target(
     #   Δ = ‖(target_t − dest_t) − (target_0 − dest_0)‖
     # which cancels the shared camera-induced shift.  If the destination is still near
     # its G₀ position the camera has not moved, so any target displacement is genuine.
+    dest_coord = g0["destination"]["coord"]
     dest_raw = detections_t.get(g0["destination"]["label"]) or []
     valid_anchors = [c for c in dest_raw if isinstance(c, (list, tuple)) and len(c) == 2]
-    if valid_anchors:
-        gt_anchor = min(valid_anchors, key=lambda c: _euclidean(g0["destination"]["coord"], c))
-        dest_abs_dist = _euclidean(g0["destination"]["coord"], gt_anchor)
+    if valid_anchors and dest_coord is not None:
+        gt_anchor = min(valid_anchors, key=lambda c: _euclidean(dest_coord, c))
+        dest_abs_dist = _euclidean(dest_coord, gt_anchor)
         if dest_abs_dist > threshold:
             # Destination also displaced → camera moved → camera-normalized check
             _rel = rel_threshold if rel_threshold is not None else threshold * 5.0
-            rel = _relative_dist(g0_coord, g0["destination"]["coord"], coords[0], gt_anchor)
+            rel = _relative_dist(g0_coord, dest_coord, coords[0], gt_anchor)
             if rel <= _rel:
                 return GroundingState.CLEAR
 
@@ -132,23 +153,43 @@ def _check_destination(
     if not coords:
         return GroundingState.INVALID_DESTINATION
 
-    # Multiple candidates → ambiguous which to place into
+    # Multiple candidates: count-stable check (mirrors _check_target logic).
     if len(coords) > 1:
+        g0_coords = g0["destination"].get("coords")
+        if g0_coords and len(g0_coords) == len(coords):
+            unmatched = list(coords)
+            all_close = True
+            for gc in g0_coords:
+                if not unmatched:
+                    all_close = False
+                    break
+                best = min(unmatched, key=lambda c: _euclidean(gc, c))
+                if _euclidean(gc, best) > threshold:
+                    all_close = False
+                    break
+                unmatched.remove(best)
+            if all_close:
+                return GroundingState.CLEAR
         return GroundingState.AMBIGUOUS_DESTINATION
+
+    # g0_coord가 None이면 t₀에서 감지 실패 — 단일 인스턴스 존재 → CLEAR
+    if g0_coord is None:
+        return GroundingState.CLEAR
 
     # Single candidate: absolute distance fast path
     if _euclidean(g0_coord, coords[0]) <= threshold:
         return GroundingState.CLEAR
 
     # Symmetric camera-motion check using target as anchor (same logic as C1 above).
+    tgt_coord = g0["target"]["coord"]
     tgt_raw = detections_t.get(g0["target"]["label"]) or []
     valid_anchors = [c for c in tgt_raw if isinstance(c, (list, tuple)) and len(c) == 2]
-    if valid_anchors:
-        gt_anchor = min(valid_anchors, key=lambda c: _euclidean(g0["target"]["coord"], c))
-        tgt_abs_dist = _euclidean(g0["target"]["coord"], gt_anchor)
+    if valid_anchors and tgt_coord is not None:
+        gt_anchor = min(valid_anchors, key=lambda c: _euclidean(tgt_coord, c))
+        tgt_abs_dist = _euclidean(tgt_coord, gt_anchor)
         if tgt_abs_dist > threshold:
             _rel = rel_threshold if rel_threshold is not None else threshold * 5.0
-            rel = _relative_dist(g0_coord, g0["target"]["coord"], coords[0], gt_anchor)
+            rel = _relative_dist(g0_coord, tgt_coord, coords[0], gt_anchor)
             if rel <= _rel:
                 return GroundingState.CLEAR
 
@@ -236,6 +277,108 @@ def get_checkpoint_detections(
         "detect",
     )
     return result["detections"]
+
+
+# ---------------------------------------------------------------------------
+# Ensemble API  (GDino + Molmo B+A hybrid)
+# ---------------------------------------------------------------------------
+
+def check_grounding_ensemble(
+    g0: dict[str, Any],
+    molmo_detections_ck: dict[str, list[list[int]]],
+    gdino_detections_t0: dict[str, list[list[float]]],
+    gdino_detections_ck: dict[str, list[list[float]]],
+    checkpoint: str,
+    threshold: float = 50.0,
+    rel_threshold: float | None = None,
+) -> tuple[GroundingState, Decision]:
+    """B+A hybrid ensemble: GDino(역할 분담) + delta 기반 Molmo 보정.
+
+    알고리즘:
+      1. GDino t0 탐지 실패(count=0) → Molmo 단독 판단으로 fallback (force_map 방지)
+      2. GDino Ck 탐지 0 + Molmo Ck 탐지 0 → INVALID (high-confidence disappear)
+      3. GDino Ck 탐지 0 + Molmo Ck 탐지 >0 → AMBIGUOUS (conflict → ASK)
+      4. GDino Ck count=1 + Molmo AMBIGUOUS → GDino 좌표로 재판단 (과잉탐지 보정)
+      5. 그 외 → Molmo 좌표 기반 판단 그대로 사용
+
+    Args:
+        g0: extract_g0 결과.
+        molmo_detections_ck: Molmo checkpoint 탐지 결과 {label: [[x,y], ...]}.
+        gdino_detections_t0: GDino t0 탐지 결과 {label: [[cx,cy], ...]}.
+        gdino_detections_ck: GDino checkpoint 탐지 결과 {label: [[cx,cy], ...]}.
+        checkpoint: "C1" or "C2".
+        threshold: 절대 픽셀 거리 임계값.
+        rel_threshold: 카메라 이동 보정 상대 임계값.
+    """
+    if checkpoint not in ("C1", "C2"):
+        raise ValueError(f"checkpoint must be 'C1' or 'C2', got {checkpoint!r}")
+
+    role = "target" if checkpoint == "C1" else "destination"
+    label = g0[role]["label"]
+
+    gdino_t0_count = len(gdino_detections_t0.get(label) or [])
+    gdino_ck_coords = [
+        c for c in (gdino_detections_ck.get(label) or [])
+        if isinstance(c, (list, tuple)) and len(c) == 2
+    ]
+    gdino_ck_count = len(gdino_ck_coords)
+    molmo_ck_count = len([
+        c for c in (molmo_detections_ck.get(label) or [])
+        if isinstance(c, (list, tuple)) and len(c) == 2
+    ])
+
+    # ── 1. GDino t0 실패 → Molmo fallback ─────────────────────────────────
+    if gdino_t0_count == 0:
+        return check_grounding(g0, molmo_detections_ck, checkpoint, threshold, rel_threshold)
+
+    # ── 2 & 3. GDino disappear 판단 ────────────────────────────────────────
+    if gdino_ck_count == 0:
+        if molmo_ck_count == 0:
+            # 두 탐지기 모두 사라짐 → INVALID (high confidence)
+            state = (
+                GroundingState.INVALID_TARGET
+                if checkpoint == "C1"
+                else GroundingState.INVALID_DESTINATION
+            )
+        else:
+            # GDino 사라졌지만 Molmo는 탐지 → 불일치 → AMBIGUOUS
+            state = (
+                GroundingState.AMBIGUOUS_TARGET
+                if checkpoint == "C1"
+                else GroundingState.AMBIGUOUS_DESTINATION
+            )
+        return state, _STATE_TO_DECISION[state]
+
+    # ── 4 & 5. GDino 존재 확인됨 → Molmo 좌표 기반 판단 ─────────────────────
+    molmo_state, molmo_decision = check_grounding(
+        g0, molmo_detections_ck, checkpoint, threshold, rel_threshold
+    )
+
+    ambiguous_states = (GroundingState.AMBIGUOUS_TARGET, GroundingState.AMBIGUOUS_DESTINATION)
+    if molmo_state in ambiguous_states and gdino_ck_count == 1:
+        # Molmo 과잉탐지 보정: GDino가 정확히 1개만 탐지 → GDino 좌표로 CLEAR 판단
+        g0_coord = g0[role]["coord"]
+        nearest = min(gdino_ck_coords, key=lambda c: _euclidean(g0_coord, c))
+        if _euclidean(g0_coord, nearest) <= threshold:
+            return GroundingState.CLEAR, Decision.CONTINUE
+        # 거리 초과 시에도 GDino count=1이므로 AMBIGUOUS보다 완화된 판단
+        # anchor 기반 카메라 보정 시도
+        other_role = "destination" if role == "target" else "target"
+        other_label = g0[other_role]["label"]
+        gdino_other = [
+            c for c in (gdino_detections_ck.get(other_label) or [])
+            if isinstance(c, (list, tuple)) and len(c) == 2
+        ]
+        if gdino_other:
+            gt_anchor = min(gdino_other, key=lambda c: _euclidean(g0[other_role]["coord"], c))
+            anchor_dist = _euclidean(g0[other_role]["coord"], gt_anchor)
+            if anchor_dist > threshold:
+                _rel = rel_threshold if rel_threshold is not None else threshold * 5.0
+                rel = _relative_dist(g0_coord, g0[other_role]["coord"], nearest, gt_anchor)
+                if rel <= _rel:
+                    return GroundingState.CLEAR, Decision.CONTINUE
+
+    return molmo_state, molmo_decision
 
 
 # ---------------------------------------------------------------------------

@@ -1,0 +1,52 @@
+{
+  "B1_INITIAL_ONLY": {
+    "n": 60,
+    "correct": 25,
+    "decision_accuracy": 0.4166666666666667,
+    "miss_rate": 0.725,
+    "false_alarm_rate": 0.25,
+    "state_accuracy": 0.0,
+    "state_n": 0,
+    "c1_stopped": 0
+  },
+  "B2_NO_MEMORY": {
+    "n": 60,
+    "correct": 26,
+    "decision_accuracy": 0.43333333333333335,
+    "miss_rate": 0.7,
+    "false_alarm_rate": 0.15,
+    "state_accuracy": 0.0,
+    "state_n": 0,
+    "c1_stopped": 0
+  },
+  "B3_ATTRIBUTE_AWARE_COUNT": {
+    "n": 60,
+    "correct": 20,
+    "decision_accuracy": 0.3333333333333333,
+    "miss_rate": 1.0,
+    "false_alarm_rate": 0.0,
+    "state_accuracy": 0.0,
+    "state_n": 0,
+    "c1_stopped": 0
+  },
+  "B4_BINARY_ANOMALY": {
+    "n": 60,
+    "correct": 38,
+    "decision_accuracy": 0.6333333333333333,
+    "miss_rate": 0.125,
+    "false_alarm_rate": 0.45,
+    "state_accuracy": 0.0,
+    "state_n": 0,
+    "c1_stopped": 0
+  },
+  "OURS": {
+    "n": 60,
+    "correct": 43,
+    "decision_accuracy": 0.7166666666666667,
+    "miss_rate": 0.25,
+    "false_alarm_rate": 0.2,
+    "state_accuracy": 0.7166666666666667,
+    "state_n": 60,
+    "c1_stopped": 0
+  }
+}
