@@ -1,8 +1,8 @@
-﻿"""Image-based evaluation runner for B1~B5 and Ours.
+"""Image-based evaluation runner for B1~B5 and Ours.
 
 Dataset manifest formats:
   JSONL: one sample object per line
-  JSON:  either a list of sample objects or {"samples": [...]}.
+  JSON:  either a list of sample objects or {"samples": [...]}. 
 
 Required sample fields:
   id, scenario, task, initial_img, c1_img, c2_img, checkpoint,
@@ -32,19 +32,20 @@ _SRC_ROOT = Path(__file__).resolve().parent
 if str(_SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(_SRC_ROOT))
 
-from baselines.b1_initial_only import run_b1_initial_only
-from baselines.b2_no_memory import run_b2_no_memory
-from baselines.b3_count_rule import run_b3_count_rule
-from baselines.b4_binary_anomaly import run_b4_binary_anomaly
-from baselines.b5_llm_judge import run_b5_llm_judge
-from baselines.common import BaselineResult
-from baselines.ensemble import run_ensemble
+from checkpoint_monitors.b1_initial_only import run_b1_initial_only
+from checkpoint_monitors.b2_no_memory import run_b2_no_memory
+from checkpoint_monitors.b3_count_rule import run_b3_count_rule
+from checkpoint_monitors.b4_binary_anomaly import run_b4_binary_anomaly
+from checkpoint_monitors.b5_llm_judge import run_b5_llm_judge
+from checkpoint_monitors.common import BaselineResult
+from checkpoint_monitors.ensemble import run_ensemble
+from checkpoint_monitors.trigger_based import run_trigger_based
 from extraction.ambres_g0_extractor import _make_handler, extract_g0
 from monitoring.consistency_monitor import Decision
 from pipeline import PipelineResult, run_pipeline
 
 
-DEFAULT_METHODS = ["b1", "b2", "b3", "b4", "b5", "ours"]
+DEFAULT_METHODS = ["b1", "b2", "b3", "b4", "b5", "ours", "trigger"]
 DECISION_VALUES = {d.value for d in Decision}
 
 
@@ -281,6 +282,8 @@ def run_method(
     llm_model: str = "gpt-4o",
     user_response_fn: Callable[[str, dict], str] | None = None,
     gdino: Any = None,
+    dinov2_encoder: Any = None,
+    dinov2_threshold: float = 0.15,
 ) -> EvalPrediction:
     method_key = method.lower()
     if method_key == "b1":
@@ -376,6 +379,30 @@ def run_method(
             gdino=gdino,
             threshold=threshold,
             session_id=f"{sample.sample_id}_ensemble_{sample.checkpoint.lower()}",
+        )
+        return _prediction_from_baseline(sample, result)
+    if method_key == "trigger":
+        if handler is None:
+            raise ValueError("trigger requires handler")
+        if dinov2_encoder is None:
+            raise ValueError("trigger requires dinov2_encoder (pass --use-dinov2)")
+        g0 = extract_g0(
+            sample.initial_img,
+            sample.task,
+            handler=handler,
+            session_id=f"{sample.sample_id}_trigger_g0",
+            allow_ambiguous=True,
+        )
+        result = run_trigger_based(
+            g0,
+            sample.initial_img,
+            sample.checkpoint_img,
+            checkpoint=sample.checkpoint,
+            handler=handler,
+            dinov2_encoder=dinov2_encoder,
+            threshold=threshold,
+            dinov2_threshold=dinov2_threshold,
+            session_id=f"{sample.sample_id}_trigger_{sample.checkpoint.lower()}",
         )
         return _prediction_from_baseline(sample, result)
     raise ValueError(f"Unknown method {method!r}")
@@ -758,6 +785,12 @@ def main() -> None:
                         help="Load GroundingDINO for ensemble method")
     parser.add_argument("--dino-box-threshold", type=float, default=0.25)
     parser.add_argument("--dino-text-threshold", type=float, default=0.25)
+    parser.add_argument("--use-dinov2", action="store_true",
+                        help="Load DINOv2 feature extractor for trigger method")
+    parser.add_argument("--dinov2-model", default="vit_s", choices=["vit_s", "vit_b"],
+                        help="DINOv2 model size (default: vit_s)")
+    parser.add_argument("--dinov2-threshold", type=float, default=0.15,
+                        help="Scene-change score threshold θ for trigger method (default: 0.15)")
     parser.add_argument("--llm-model", default="gpt-4o")
     parser.add_argument("--openai-api-key", default="",
                         help="OpenAI API key for B5 (기본: OPENAI_API_KEY 환경변수 사용)")
@@ -808,6 +841,9 @@ def main() -> None:
         else None
     )
 
+    if "trigger" in methods and args.source in ("zed", "usb"):
+        parser.error("trigger 메서드는 manifest 모드에서만 지원합니다.")
+
     # ── 카메라 모드 ────────────────────────────────────────────────────────────
     if args.source in ("zed", "usb"):
         if not args.task:
@@ -857,7 +893,7 @@ def main() -> None:
         return
 
     # validate-only 통과 후 핸들러 로드 (모델 로딩 지연)
-    needs_handler = any(m in {"b1", "b2", "b3", "b4", "ours", "ensemble"} for m in methods)
+    needs_handler = any(m in {"b1", "b2", "b3", "b4", "ours", "ensemble", "trigger"} for m in methods)
     handler = (
         _make_handler(args.model_type, args.adapter_ckpt, use_detection=False)
         if needs_handler else None
@@ -879,6 +915,15 @@ def main() -> None:
         )
         print("[GDino] 준비 완료")
 
+    # DINOv2 초기화 (trigger 메서드 또는 --use-dinov2 플래그 시)
+    dinov2_encoder = None
+    needs_dinov2 = args.use_dinov2 or "trigger" in methods
+    if needs_dinov2:
+        from trigger.dinov2_monitor import load_dinov2
+        print(f"[DINOv2] 로딩 중 … (model={args.dinov2_model})")
+        dinov2_encoder = load_dinov2(model_name=args.dinov2_model)
+        print("[DINOv2] 준비 완료")
+
     predictions: list[EvalPrediction] = []
     for sample in samples:
         for method in methods:
@@ -893,6 +938,8 @@ def main() -> None:
                     llm_model=args.llm_model,
                     user_response_fn=user_response_fn,
                     gdino=gdino,
+                    dinov2_encoder=dinov2_encoder,
+                    dinov2_threshold=args.dinov2_threshold,
                 )
             )
 

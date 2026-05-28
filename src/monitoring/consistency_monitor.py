@@ -104,6 +104,19 @@ def _check_target(
                 unmatched.remove(best)
             if all_close:
                 return GroundingState.CLEAR
+
+        # Distinguish AMBIGUOUS from INVALID when count increased:
+        #   AMBIGUOUS: original instance is still present + new ones appeared → ASK
+        #   INVALID:   original instance is GONE, only distractors remain → STOP
+        # When t0 had a single instance, check whether any current detection is
+        # near the original g0 coordinate.  If none are → the original target
+        # has been removed (INVALID), not merely accompanied by new objects.
+        if g0_coord is not None:
+            t0_had_single = not g0_coords or len(g0_coords) == 1
+            nearest = min(coords, key=lambda c: _euclidean(g0_coord, c))
+            if t0_had_single and _euclidean(g0_coord, nearest) > threshold:
+                return GroundingState.INVALID_TARGET
+
         return GroundingState.AMBIGUOUS_TARGET
 
     # g0_coord가 None이면 t₀에서 감지 실패 — 위치 비교 불가, 단일 인스턴스 존재 → CLEAR
@@ -170,6 +183,15 @@ def _check_destination(
                 unmatched.remove(best)
             if all_close:
                 return GroundingState.CLEAR
+
+        # Same INVALID vs AMBIGUOUS distinction as _check_target:
+        # if the original destination is gone and only distractors remain → INVALID.
+        if g0_coord is not None:
+            t0_had_single = not g0_coords or len(g0_coords) == 1
+            nearest = min(coords, key=lambda c: _euclidean(g0_coord, c))
+            if t0_had_single and _euclidean(g0_coord, nearest) > threshold:
+                return GroundingState.INVALID_DESTINATION
+
         return GroundingState.AMBIGUOUS_DESTINATION
 
     # g0_coord가 None이면 t₀에서 감지 실패 — 단일 인스턴스 존재 → CLEAR
@@ -355,6 +377,24 @@ def check_grounding_ensemble(
     )
 
     ambiguous_states = (GroundingState.AMBIGUOUS_TARGET, GroundingState.AMBIGUOUS_DESTINATION)
+    invalid_states = (GroundingState.INVALID_TARGET, GroundingState.INVALID_DESTINATION)
+
+    # Molmo가 INVALID를 반환했지만 GDino가 객체 존재를 확인한 경우:
+    # Molmo의 다중 포인트 탐지(격자형 좌표)가 이동된 객체에 대해 모두 g0에서 멀어
+    # 잘못된 INVALID를 유발할 수 있음. GDino 좌표로 재판단.
+    if molmo_state in invalid_states and gdino_ck_count >= 1:
+        g0_coord = g0[role]["coord"]
+        nearest = min(gdino_ck_coords, key=lambda c: _euclidean(g0_coord, c))
+        if _euclidean(g0_coord, nearest) <= threshold:
+            return GroundingState.CLEAR, Decision.CONTINUE
+        # GDino가 객체를 확인했으나 변위됨 → AMBIGUOUS → ASK
+        ambig_state = (
+            GroundingState.AMBIGUOUS_TARGET
+            if checkpoint == "C1"
+            else GroundingState.AMBIGUOUS_DESTINATION
+        )
+        return ambig_state, _STATE_TO_DECISION[ambig_state]
+
     if molmo_state in ambiguous_states and gdino_ck_count == 1:
         # Molmo 과잉탐지 보정: GDino가 정확히 1개만 탐지 → GDino 좌표로 CLEAR 판단
         g0_coord = g0[role]["coord"]
