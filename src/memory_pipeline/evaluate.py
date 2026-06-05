@@ -58,7 +58,7 @@ from monitoring.consistency_monitor import Decision
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_METHODS: list[str] = ["static", "memory", "fsm"]
+DEFAULT_METHODS: list[str] = ["static", "memory", "memory_vlm", "memory_vlm_judge", "memory_qwen", "memory_qwen_gate", "memory_qwen_detect", "memory_finetuned", "memory_ensemble", "fsm"]
 
 
 # ---------------------------------------------------------------------------
@@ -107,6 +107,7 @@ class Prediction:
     predicted_state:    str = ""
     reason:             str = ""
     question:           str = ""
+    explanation:        str = ""
     raw:                dict[str, Any] = field(default_factory=dict)
 
     @property
@@ -125,6 +126,7 @@ class Prediction:
             "predicted_state":    self.predicted_state,
             "reason":             self.reason,
             "question":           self.question,
+            "explanation":        self.explanation,
             "correct":            self.correct,
         }
 
@@ -196,6 +198,7 @@ def _prediction_from_memory(
         predicted_state=state,
         reason=reason,
         question=co.question if co else "",
+        explanation=co.explanation if co else "",
         raw=result.to_dict(),
     )
 
@@ -275,9 +278,143 @@ def run_sample(
             gdino=gdino,
             threshold=threshold,
             use_memory_context=True,
+            use_vlm_gate=False,
             session_prefix=sid,
         )
         return _prediction_from_memory(sample, result)
+
+    if m == "memory_vlm":
+        result = run_memory_pipeline(
+            sample["initial_img"],
+            sample["c1_img"],
+            sample["c2_img"],
+            sample["task"],
+            sample["target_label"],
+            sample["destination_label"],
+            handler=handler,
+            gdino=gdino,
+            threshold=threshold,
+            use_memory_context=True,
+            use_vlm_gate=True,
+            session_prefix=sid,
+        )
+        pred = _prediction_from_memory(sample, result)
+        pred.method = "MEMORY_VLM"
+        return pred
+
+    if m == "memory_vlm_judge":
+        result = run_memory_pipeline(
+            sample["initial_img"],
+            sample["c1_img"],
+            sample["c2_img"],
+            sample["task"],
+            sample["target_label"],
+            sample["destination_label"],
+            handler=handler,
+            gdino=gdino,
+            threshold=threshold,
+            use_memory_context=True,
+            use_vlm_judge=True,
+            session_prefix=sid,
+        )
+        pred = _prediction_from_memory(sample, result)
+        pred.method = "MEMORY_VLM_JUDGE"
+        return pred
+
+    if m == "memory_qwen":
+        result = run_memory_pipeline(
+            sample["initial_img"],
+            sample["c1_img"],
+            sample["c2_img"],
+            sample["task"],
+            sample["target_label"],
+            sample["destination_label"],
+            handler=handler,
+            gdino=gdino,
+            threshold=threshold,
+            use_memory_context=True,
+            use_qwen_judge=True,
+            session_prefix=sid,
+        )
+        pred = _prediction_from_memory(sample, result)
+        pred.method = "MEMORY_QWEN"
+        return pred
+
+    if m == "memory_qwen_detect":
+        result = run_memory_pipeline(
+            sample["initial_img"],
+            sample["c1_img"],
+            sample["c2_img"],
+            sample["task"],
+            sample["target_label"],
+            sample["destination_label"],
+            handler=handler,
+            gdino=gdino,
+            threshold=threshold,
+            use_memory_context=True,
+            use_qwen_detect=True,
+            session_prefix=sid,
+        )
+        pred = _prediction_from_memory(sample, result)
+        pred.method = "MEMORY_QWEN_DETECT"
+        return pred
+
+    if m == "memory_finetuned":
+        result = run_memory_pipeline(
+            sample["initial_img"],
+            sample["c1_img"],
+            sample["c2_img"],
+            sample["task"],
+            sample["target_label"],
+            sample["destination_label"],
+            handler=handler,
+            gdino=gdino,
+            threshold=threshold,
+            use_memory_context=True,
+            use_finetuned_judge=True,
+            session_prefix=sid,
+        )
+        pred = _prediction_from_memory(sample, result)
+        pred.method = "MEMORY_FINETUNED"
+        return pred
+
+    if m == "memory_ensemble":
+        result = run_memory_pipeline(
+            sample["initial_img"],
+            sample["c1_img"],
+            sample["c2_img"],
+            sample["task"],
+            sample["target_label"],
+            sample["destination_label"],
+            handler=handler,
+            gdino=gdino,
+            threshold=threshold,
+            use_memory_context=True,
+            use_ensemble_judge=True,
+            session_prefix=sid,
+        )
+        pred = _prediction_from_memory(sample, result)
+        pred.method = "MEMORY_ENSEMBLE"
+        return pred
+
+    if m == "memory_qwen_gate":
+        result = run_memory_pipeline(
+            sample["initial_img"],
+            sample["c1_img"],
+            sample["c2_img"],
+            sample["task"],
+            sample["target_label"],
+            sample["destination_label"],
+            handler=handler,
+            gdino=gdino,
+            threshold=threshold,
+            use_memory_context=True,
+            use_qwen_gate=True,
+            session_prefix=sid,
+        )
+        pred = _prediction_from_memory(sample, result)
+        pred.method = "MEMORY_QWEN_GATE"
+        return pred
 
     if m == "fsm":
         fsm = MemoryFSM(
@@ -358,7 +495,7 @@ _CSV_FIELDS = [
     "sample_id", "scenario", "method", "checkpoint",
     "gold_state", "gold_decision",
     "predicted_decision", "predicted_state",
-    "reason", "question", "correct",
+    "reason", "question", "explanation", "correct",
 ]
 
 
@@ -390,7 +527,7 @@ def main() -> None:
     parser.add_argument(
         "--methods", nargs="+", default=DEFAULT_METHODS,
         choices=DEFAULT_METHODS,
-        help="Methods to evaluate (default: static memory fsm)",
+        help="Methods to evaluate (default: static memory memory_vlm memory_vlm_judge memory_qwen fsm)",
     )
     parser.add_argument("--model-type", default="fs_prompt",
                         choices=["fs_prompt", "finetune"])

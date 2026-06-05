@@ -1,0 +1,21 @@
+sample_id,scenario,method,checkpoint,gold_state,gold_decision,predicted_decision,predicted_state,reason,question,explanation,correct
+s4_trial_001,S4,MEMORY,C1,AMBIGUOUS_TARGET,ASK,ASK,AMBIGUOUS_TARGET,,[C1] Can you please direct my attention to the target cup?,The target is not clearly visible,True
+s4_trial_001,S4,MEMORY_QWEN_DETECT,C1,AMBIGUOUS_TARGET,ASK,ASK,AMBIGUOUS_TARGET,,[C1] Where exactly do you want me to put the cup?,Multiple possible cup positions,True
+s4_trial_002,S4,MEMORY,C1,AMBIGUOUS_TARGET,ASK,ASK,AMBIGUOUS_TARGET,,[C1] What exactly do you want me to do?,The destination is not clearly defined,True
+s4_trial_002,S4,MEMORY_QWEN_DETECT,C1,AMBIGUOUS_TARGET,ASK,ASK,AMBIGUOUS_TARGET,,"[C1 AMBIGUOUS_TARGET] 씬 변화(target 'cup' moved 218px ([121, 76] → [312, 181]))가 감지됐습니다. 어떤 'cup'을(를) 집어야 하나요?",All objects are clearly visible,True
+s4_trial_003,S4,MEMORY,C1,AMBIGUOUS_TARGET,ASK,ASK,AMBIGUOUS_TARGET,,"[C1] Do you want me to pick up the cup and put it in the red box, or would you prefer me to place the cup on top of the red box?",Multiple tasks are possible,True
+s4_trial_003,S4,MEMORY_QWEN_DETECT,C1,AMBIGUOUS_TARGET,ASK,ASK,AMBIGUOUS_TARGET,,[C1] Which red box do you mean?,There are multiple red boxes,True
+s4_trial_004,S4,MEMORY,C1,AMBIGUOUS_TARGET,ASK,ASK,AMBIGUOUS_TARGET,,[C1] Partially inside the red box?,The cup may be partially inside the red box,True
+s4_trial_004,S4,MEMORY_QWEN_DETECT,C1,AMBIGUOUS_TARGET,ASK,ASK,AMBIGUOUS_TARGET,,[C1] Where is the 'cup' that needs to be picked and put in the red box?,No prior location provided for the cup,True
+s4_trial_005,S4,MEMORY,C1,AMBIGUOUS_TARGET,ASK,CONTINUE,CLEAR,,,More than one object matches the label 'cup',False
+s4_trial_005,S4,MEMORY_QWEN_DETECT,C1,AMBIGUOUS_TARGET,ASK,ASK,AMBIGUOUS_TARGET,,[C1] In which drawer?,"There are two possible actions: putting the cup in the drawer or storing it in the red box. Without more context, it's unclear which drawer is being referred to.",True
+s4_trial_006,S4,MEMORY,C1,AMBIGUOUS_TARGET,ASK,ASK,AMBIGUOUS_TARGET,,[C1] What side of the cube should go into the red box?,The cube has multiple visible sides with different colors,True
+s4_trial_006,S4,MEMORY_QWEN_DETECT,C1,AMBIGUOUS_TARGET,ASK,ASK,AMBIGUOUS_TARGET,,"[C1 AMBIGUOUS_TARGET] 씬 변화(target 'cube' moved 216px ([388, 182] → [602, 214]))가 감지됐습니다. 어떤 'cube'을(를) 집어야 하나요?",The cube and red box are clearly visible and uniquely identified within the frame of the image.,True
+s4_trial_007,S4,MEMORY,C1,AMBIGUOUS_TARGET,ASK,ASK,AMBIGUOUS_TARGET,,[C1] Which red box do you mean?,"The cube is a single object, but there are multiple red boxes",True
+s4_trial_007,S4,MEMORY_QWEN_DETECT,C1,AMBIGUOUS_TARGET,ASK,ASK,AMBIGUOUS_TARGET,,[C1] Which cube do you want me to pick?,More than one cube,True
+s4_trial_008,S4,MEMORY,C1,AMBIGUOUS_TARGET,ASK,ASK,AMBIGUOUS_TARGET,,[C1] Which object do you want me to pick? Which box do you want it in?,Multiple objects could be the cube and multiple locations could be the red box. We need more instructions. A specific object and destination are needed.,True
+s4_trial_008,S4,MEMORY_QWEN_DETECT,C1,AMBIGUOUS_TARGET,ASK,ASK,AMBIGUOUS_TARGET,,[C1] Which object and destination do you want me to put the cube in?,There are two different objects and one destination,True
+s4_trial_009,S4,MEMORY,C1,AMBIGUOUS_TARGET,ASK,ASK,AMBIGUOUS_TARGET,,[C1] Which drawer do you mean?,There are two drawers,True
+s4_trial_009,S4,MEMORY_QWEN_DETECT,C1,AMBIGUOUS_TARGET,ASK,ASK,AMBIGUOUS_TARGET,,[C1] Which cube do you mean?,There are multiple similar-looking cube objects,True
+s4_trial_010,S4,MEMORY,C1,AMBIGUOUS_TARGET,ASK,ASK,AMBIGUOUS_TARGET,,[C1] Which cube and in which orientation will be put into the box?,Multiple cube positions and orientations are possible,True
+s4_trial_010,S4,MEMORY_QWEN_DETECT,C1,AMBIGUOUS_TARGET,ASK,ASK,AMBIGUOUS_TARGET,,[C1] Which cube and red box do you mean?,Multiple objects are part of the task,True

@@ -1,0 +1,168 @@
+/usr/local/lib/python3.11/dist-packages/torch/utils/cpp_extension.py:1965: UserWarning: TORCH_CUDA_ARCH_LIST is not set, all archs for visible cards are included for compilation. 
+If this is not desired, please set os.environ['TORCH_CUDA_ARCH_LIST'].
+  warnings.warn(
+Holdout 샘플: 70개
+시나리오: {'S1': 10, 'S2': 10, 'S3': 10, 'S4': 10, 'S5': 10, 'S6': 10, 'S7': 10}
+[DINO] 로딩...
+Using a slow image processor as `use_fast` is unset and a slow processor was saved with this model. `use_fast=True` will be the default behavior in v4.48, even if the model was saved with a slow processor. This will result in minor differences in outputs. You'll still be able to use a slow processor with `use_fast=False`.
+[DINO] 완료
+
+[DINO] 70개 trial 탐지 중...
+  [ 1/70] s1_trial_001                 ck=C1 tgt_n=1 dst_n=1
+  [ 2/70] s1_trial_002                 ck=C1 tgt_n=1 dst_n=1
+  [ 3/70] s1_trial_003                 ck=C1 tgt_n=1 dst_n=1
+  [ 4/70] s1_trial_004                 ck=C1 tgt_n=1 dst_n=1
+  [ 5/70] s1_trial_005                 ck=C1 tgt_n=1 dst_n=1
+  [ 6/70] s1_trial_006                 ck=C1 tgt_n=1 dst_n=1
+  [ 7/70] s1_trial_007                 ck=C1 tgt_n=1 dst_n=1
+  [ 8/70] s1_trial_008                 ck=C1 tgt_n=1 dst_n=1
+  [ 9/70] s1_trial_009                 ck=C1 tgt_n=1 dst_n=1
+  [10/70] s1_trial_010                 ck=C1 tgt_n=1 dst_n=1
+  [11/70] s2_trial_001                 ck=C1 tgt_n=2 dst_n=1
+  [12/70] s2_trial_002                 ck=C1 tgt_n=2 dst_n=1
+  [13/70] s2_trial_003                 ck=C1 tgt_n=2 dst_n=1
+  [14/70] s2_trial_004                 ck=C1 tgt_n=2 dst_n=1
+  [15/70] s2_trial_005                 ck=C1 tgt_n=2 dst_n=1
+  [16/70] s2_trial_006                 ck=C1 tgt_n=2 dst_n=1
+  [17/70] s2_trial_007                 ck=C1 tgt_n=2 dst_n=1
+  [18/70] s2_trial_008                 ck=C1 tgt_n=2 dst_n=1
+  [19/70] s2_trial_009                 ck=C1 tgt_n=2 dst_n=1
+  [20/70] s2_trial_010                 ck=C1 tgt_n=2 dst_n=1
+  [21/70] s3_trial_001                 ck=C1 tgt_n=1 dst_n=1
+  [22/70] s3_trial_002                 ck=C1 tgt_n=1 dst_n=1
+  [23/70] s3_trial_003                 ck=C1 tgt_n=1 dst_n=1
+  [24/70] s3_trial_004                 ck=C1 tgt_n=1 dst_n=1
+  [25/70] s3_trial_005                 ck=C1 tgt_n=1 dst_n=1
+  [26/70] s3_trial_006                 ck=C1 tgt_n=2 dst_n=0
+  [27/70] s3_trial_007                 ck=C1 tgt_n=2 dst_n=0
+  [28/70] s3_trial_008                 ck=C1 tgt_n=2 dst_n=0
+  [29/70] s3_trial_009                 ck=C1 tgt_n=2 dst_n=0
+  [30/70] s3_trial_010                 ck=C1 tgt_n=2 dst_n=0
+  [31/70] s4_trial_001                 ck=C1 tgt_n=1 dst_n=1
+  [32/70] s4_trial_002                 ck=C1 tgt_n=1 dst_n=1
+  [33/70] s4_trial_003                 ck=C1 tgt_n=1 dst_n=1
+  [34/70] s4_trial_004                 ck=C1 tgt_n=1 dst_n=1
+  [35/70] s4_trial_005                 ck=C1 tgt_n=1 dst_n=1
+  [36/70] s4_trial_006                 ck=C1 tgt_n=1 dst_n=1
+  [37/70] s4_trial_007                 ck=C1 tgt_n=1 dst_n=1
+  [38/70] s4_trial_008                 ck=C1 tgt_n=1 dst_n=1
+  [39/70] s4_trial_009                 ck=C1 tgt_n=1 dst_n=1
+  [40/70] s4_trial_010                 ck=C1 tgt_n=1 dst_n=1
+  [41/70] s5_trial_001                 ck=C2 tgt_n=1 dst_n=1
+  [42/70] s5_trial_002                 ck=C2 tgt_n=1 dst_n=2
+  [43/70] s5_trial_003                 ck=C2 tgt_n=1 dst_n=2
+  [44/70] s5_trial_004                 ck=C2 tgt_n=1 dst_n=1
+  [45/70] s5_trial_005                 ck=C2 tgt_n=1 dst_n=2
+  [46/70] s5_trial_006                 ck=C2 tgt_n=3 dst_n=0
+  [47/70] s5_trial_007                 ck=C2 tgt_n=3 dst_n=0
+  [48/70] s5_trial_008                 ck=C2 tgt_n=3 dst_n=0
+  [49/70] s5_trial_009                 ck=C2 tgt_n=3 dst_n=0
+  [50/70] s5_trial_010                 ck=C2 tgt_n=3 dst_n=0
+  [51/70] s6_trial_001                 ck=C2 tgt_n=1 dst_n=1
+  [52/70] s6_trial_002                 ck=C2 tgt_n=1 dst_n=1
+  [53/70] s6_trial_003                 ck=C2 tgt_n=1 dst_n=0
+  [54/70] s6_trial_004                 ck=C2 tgt_n=1 dst_n=1
+  [55/70] s6_trial_005                 ck=C2 tgt_n=1 dst_n=1
+  [56/70] s6_trial_006                 ck=C2 tgt_n=2 dst_n=0
+  [57/70] s6_trial_007                 ck=C2 tgt_n=1 dst_n=0
+  [58/70] s6_trial_008                 ck=C2 tgt_n=1 dst_n=0
+  [59/70] s6_trial_009                 ck=C2 tgt_n=2 dst_n=0
+  [60/70] s6_trial_010                 ck=C2 tgt_n=1 dst_n=0
+  [61/70] s7_trial_001                 ck=C2 tgt_n=1 dst_n=1
+  [62/70] s7_trial_002                 ck=C2 tgt_n=1 dst_n=1
+  [63/70] s7_trial_003                 ck=C2 tgt_n=1 dst_n=1
+  [64/70] s7_trial_004                 ck=C2 tgt_n=1 dst_n=1
+  [65/70] s7_trial_005                 ck=C2 tgt_n=1 dst_n=1
+  [66/70] s7_trial_006                 ck=C2 tgt_n=1 dst_n=1
+  [67/70] s7_trial_007                 ck=C2 tgt_n=1 dst_n=1
+  [68/70] s7_trial_008                 ck=C2 tgt_n=1 dst_n=1
+  [69/70] s7_trial_009                 ck=C2 tgt_n=1 dst_n=1
+  [70/70] s7_trial_010                 ck=C2 tgt_n=1 dst_n=1
+
+[DINO 완료, VRAM 정리]
+
+Eligible trials (count=1 at ck): 41/70
+  by scenario: {'S1': 10, 'S3': 5, 'S4': 10, 'S5': 2, 'S6': 4, 'S7': 10}
+  by gold_state: {'CLEAR': 10, 'INVALID_TARGET': 5, 'AMBIGUOUS_TARGET': 10, 'AMBIGUOUS_DESTINATION': 12, 'INVALID_DESTINATION': 4}
+
+
+████████████████████████████████████████████████████████████████
+  모델: BvFsfsf4
+  ckpt: ckpt/grounding_ft/BvFsfsf4/checkpoint-162
+████████████████████████████████████████████████████████████████
+  [1/2] Loading Molmo-7B...
+Loading checkpoint shards:   0%|          | 0/7 [00:00<?, ?it/s]Loading checkpoint shards:  14%|█▍        | 1/7 [00:02<00:12,  2.08s/it]Loading checkpoint shards:  29%|██▊       | 2/7 [00:04<00:12,  2.44s/it]Loading checkpoint shards:  43%|████▎     | 3/7 [00:07<00:10,  2.54s/it]Loading checkpoint shards:  57%|█████▋    | 4/7 [00:10<00:07,  2.59s/it]Loading checkpoint shards:  71%|███████▏  | 5/7 [00:12<00:05,  2.69s/it]Loading checkpoint shards:  86%|████████▌ | 6/7 [00:15<00:02,  2.71s/it]Loading checkpoint shards: 100%|██████████| 7/7 [00:19<00:00,  3.14s/it]Loading checkpoint shards: 100%|██████████| 7/7 [00:19<00:00,  2.82s/it]
+  [2/2] Merging AmbRes LoRA...
+  [3/3] Loading FT LoRA: ckpt/grounding_ft/BvFsfsf4/checkpoint-162
+
+▶ Counterfactual diagnostic (shift=200px)
+
+  Eligible (count=1): 41개  Ineligible (count≠1): 29개
+  Skip 시나리오: {'S2': 10, 'S3': 5, 'S5': 8, 'S6': 6}
+  [ 1/41] ✓ s1_trial_001                 same=✓CONTINUE  shifted=✓ASK   scenario=S1
+  [ 2/41] ✗ s1_trial_002                 same=✓CONTINUE  shifted=✗CONTINUE scenario=S1
+  [ 3/41] ✗ s1_trial_003                 same=✓CONTINUE  shifted=✗CONTINUE scenario=S1
+  [ 4/41] ✓ s1_trial_004                 same=✓CONTINUE  shifted=✓ASK   scenario=S1
+  [ 5/41] ✓ s1_trial_005                 same=✓CONTINUE  shifted=✓ASK   scenario=S1
+  [ 6/41] ✗ s1_trial_006                 same=✓CONTINUE  shifted=✗CONTINUE scenario=S1
+  [ 7/41] ✓ s1_trial_007                 same=✓CONTINUE  shifted=✓ASK   scenario=S1
+  [ 8/41] ✓ s1_trial_008                 same=✓CONTINUE  shifted=✓ASK   scenario=S1
+  [ 9/41] ✓ s1_trial_009                 same=✓CONTINUE  shifted=✓ASK   scenario=S1
+  [10/41] ✓ s1_trial_010                 same=✓CONTINUE  shifted=✓ASK   scenario=S1
+  [11/41] ✗ s3_trial_001                 same=✓CONTINUE  shifted=✗CONTINUE scenario=S3
+  [12/41] ✗ s3_trial_002                 same=✓CONTINUE  shifted=✗CONTINUE scenario=S3
+  [13/41] ✗ s3_trial_003                 same=✓CONTINUE  shifted=✗CONTINUE scenario=S3
+  [14/41] ✗ s3_trial_004                 same=✓CONTINUE  shifted=✗CONTINUE scenario=S3
+  [15/41] ✗ s3_trial_005                 same=✓CONTINUE  shifted=✗CONTINUE scenario=S3
+  [16/41] ✗ s4_trial_001                 same=✓CONTINUE  shifted=✗CONTINUE scenario=S4
+  [17/41] ✓ s4_trial_002                 same=✓CONTINUE  shifted=✓ASK   scenario=S4
+  [18/41] ✓ s4_trial_003                 same=✓CONTINUE  shifted=✓ASK   scenario=S4
+  [19/41] ✓ s4_trial_004                 same=✓CONTINUE  shifted=✓ASK   scenario=S4
+  [20/41] ✓ s4_trial_005                 same=✓CONTINUE  shifted=✓ASK   scenario=S4
+  [21/41] ✓ s4_trial_006                 same=✓CONTINUE  shifted=✓ASK   scenario=S4
+  [22/41] ✓ s4_trial_007                 same=✓CONTINUE  shifted=✓ASK   scenario=S4
+  [23/41] ✓ s4_trial_008                 same=✓CONTINUE  shifted=✓ASK   scenario=S4
+  [24/41] ✓ s4_trial_009                 same=✓CONTINUE  shifted=✓ASK   scenario=S4
+  [25/41] ✓ s4_trial_010                 same=✓CONTINUE  shifted=✓ASK   scenario=S4
+  [26/41] ✓ s5_trial_001                 same=✓CONTINUE  shifted=✓ASK   scenario=S5
+  [27/41] ✓ s5_trial_004                 same=✓CONTINUE  shifted=✓ASK   scenario=S5
+  [28/41] ✓ s6_trial_001                 same=✓CONTINUE  shifted=✓ASK   scenario=S6
+  [29/41] ✗ s6_trial_002                 same=✓CONTINUE  shifted=✗CONTINUE scenario=S6
+  [30/41] ✓ s6_trial_004                 same=✓CONTINUE  shifted=✓ASK   scenario=S6
+  [31/41] ✗ s6_trial_005                 same=✓CONTINUE  shifted=✗CONTINUE scenario=S6
+  [32/41] ✓ s7_trial_001                 same=✓CONTINUE  shifted=✓ASK   scenario=S7
+  [33/41] ✓ s7_trial_002                 same=✓CONTINUE  shifted=✓ASK   scenario=S7
+  [34/41] ✓ s7_trial_003                 same=✓CONTINUE  shifted=✓ASK   scenario=S7
+  [35/41] ✓ s7_trial_004                 same=✓CONTINUE  shifted=✓ASK   scenario=S7
+  [36/41] ✓ s7_trial_005                 same=✓CONTINUE  shifted=✓ASK   scenario=S7
+  [37/41] ✓ s7_trial_006                 same=✓CONTINUE  shifted=✓ASK   scenario=S7
+  [38/41] ✓ s7_trial_007                 same=✓CONTINUE  shifted=✓ASK   scenario=S7
+  [39/41] ✓ s7_trial_008                 same=✓CONTINUE  shifted=✓ASK   scenario=S7
+  [40/41] ✓ s7_trial_009                 same=✓CONTINUE  shifted=✓ASK   scenario=S7
+  [41/41] ✓ s7_trial_010                 same=✓CONTINUE  shifted=✓ASK   scenario=S7
+
+════════════════════════════════════════════════════════════════
+  Counterfactual Diagnostic — BvFsfsf4
+════════════════════════════════════════════════════════════════
+  Memory Reliance Rate (MRR) : 73.2%  (30/41)
+    G₀_same    → CONTINUE   : 100.0%
+    G₀_shifted → ASK        : 73.2%
+
+  by scenario:
+    S1  7/10
+    S3  0/5
+    S4  9/10
+    S5  2/2
+    S6  2/4
+    S7  10/10
+
+  by gold state:
+    AMBIGUOUS_DESTINATION               12/12
+    AMBIGUOUS_TARGET                    9/10
+    CLEAR                               7/10
+    INVALID_DESTINATION                 2/4
+    INVALID_TARGET                      0/5
+
+[VRAM 정리]
+
+저장: /workspace/COSE461-proj/logs/eval_counterfactual_v1.json

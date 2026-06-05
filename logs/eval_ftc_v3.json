@@ -1,0 +1,16 @@
+{
+  "FT-C + memory context": {
+    "decision_accuracy": 0.8286,
+    "miss_rate": 0.0833,
+    "false_alarm_rate": 0.0,
+    "correct": 58,
+    "total": 70,
+    "per_state": {
+      "AMBIGUOUS_DESTINATION": "20/20",
+      "AMBIGUOUS_TARGET": "20/20",
+      "CLEAR": "10/10",
+      "INVALID_DESTINATION": "8/10",
+      "INVALID_TARGET": "0/10"
+    }
+  }
+}

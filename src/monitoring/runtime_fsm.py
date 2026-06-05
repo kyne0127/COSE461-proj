@@ -264,7 +264,6 @@ class MemoryFSM:
         user_response_fn: Callable[[str, dict], str] | None = None,
         session_prefix: str = "fsm",
         min_frames_gap: int = 1,
-        ft_ckpt: str | None = None,
     ) -> None:
         self._task    = task_description
         self._target  = target_label
@@ -283,12 +282,6 @@ class MemoryFSM:
         self._monitor = SceneMonitor(gdino, move_threshold_px=threshold)
         self._memory  = EpisodeMemory(task_description)
 
-        # Optional FT-B model for Stage 2 decision making
-        self._ft_model = None
-        self._ft_processor = None
-        if ft_ckpt:
-            self._load_ft_model(ft_ckpt)
-
         # Parallel FSM states
         self._decision = DecisionState.MONITORING
         self._phase    = PhaseState.STOP     # STOP until initialize() called
@@ -301,112 +294,6 @@ class MemoryFSM:
         self._last_trigger  = -999
         self._trigger_count = 0
         self._triggered_steps: list[FSMStepResult] = []
-
-    # ------------------------------------------------------------------ #
-    # FT model helpers
-    # ------------------------------------------------------------------ #
-
-    _TAXONOMY = (
-        "Use the following grounding state taxonomy:\n"
-        "  CLEAR             — uniquely identifiable, robot continues.\n"
-        "  AMBIGUOUS_TARGET  — multiple targets or unexpected movement; ask user.\n"
-        "  INVALID_TARGET    — target absent; robot must stop.\n"
-        "  AMBIGUOUS_DESTINATION — multiple destinations or movement; ask user.\n"
-        "  INVALID_DESTINATION   — destination absent; robot must stop.\n"
-        "Decision mapping: CLEAR→CONTINUE | INVALID→stop_bool=True | other→ask user"
-    )
-
-    def _load_ft_model(self, ft_ckpt: str) -> None:
-        import os, torch
-        from peft import PeftModel
-        from transformers import AutoModelForCausalLM, AutoProcessor, GenerationConfig
-        MODEL_ID = "allenai/Molmo-7B-D-0924"
-        logger.info("FSM: loading FT model from %s", ft_ckpt)
-        self._ft_processor = AutoProcessor.from_pretrained(
-            MODEL_ID, trust_remote_code=True, torch_dtype=torch.bfloat16,
-        )
-        base = AutoModelForCausalLM.from_pretrained(
-            MODEL_ID, trust_remote_code=True, torch_dtype=torch.bfloat16, device_map="cuda",
-        )
-        self._ft_model = PeftModel.from_pretrained(base, ft_ckpt)
-        self._ft_model.eval()
-        self._ft_gen_cfg = GenerationConfig(
-            do_sample=False, max_new_tokens=128, stop_strings="<|endoftext|>"
-        )
-        logger.info("FSM: FT model ready.")
-
-    def _ft_infer(
-        self,
-        pil_img: "Image.Image",
-        ck_coords: dict[str, list],
-        ck_type: str,
-    ) -> tuple[Decision, GroundingState, str]:
-        """Run FT-B model for Stage 2 decision. Returns (decision, state, question)."""
-        import re, json as _json, torch
-
-        _SRC_AMBRES = Path(__file__).resolve().parents[3] / "AmbRes"
-        if str(_SRC_AMBRES) not in sys.path:
-            sys.path.insert(0, str(_SRC_AMBRES))
-        from ambres.training.data import process_msg_list
-
-        def _f(c): return f"({int(c[0])},{int(c[1])})" if c else "unknown"
-        def _fl(cs): return ", ".join(f"({int(c[0])},{int(c[1])})" for c in cs[:3]) if cs else "none"
-
-        g0t = self._g0["target"]["coord"] if self._g0 else None
-        g0d = self._g0["destination"]["coord"] if self._g0 else None
-        ckt = [[int(c[0]), int(c[1])] for c in (ck_coords.get(self._target) or []) if len(c) == 2]
-        ckd = [[int(c[0]), int(c[1])] for c in (ck_coords.get(self._dest) or []) if len(c) == 2]
-
-        prompt = "\n".join([
-            f"Original robot task: {self._task}", "",
-            "Initial scene (t0):",
-            f'  Target "{self._target}" at pixel {_f(g0t)}',
-            f'  Destination "{self._dest}" at pixel {_f(g0d)}', "",
-            f"Checkpoint {ck_type} — GDino detections:",
-            f'  "{self._target}": {len(ckt)} detection(s) at [{_fl(ckt)}]',
-            f'  "{self._dest}": {len(ckd)} detection(s) at [{_fl(ckd)}]', "",
-            "Based on above, assess grounding.", "", self._TAXONOMY,
-        ])
-
-        msgs = [{"role": "user", "content": f"<image>\nTASK DESCRIPTION: {prompt}"}]
-        inputs = process_msg_list(msgs, [pil_img], self._ft_processor)
-        inputs = {k: v.to(self._ft_model.device).unsqueeze(0) for k, v in inputs.items()}
-        inputs["images"]      = inputs["images"].to(self._ft_model.dtype)
-        inputs["image_masks"] = inputs["image_masks"].to(self._ft_model.dtype)
-
-        with torch.no_grad():
-            out = self._ft_model.generate_from_batch(
-                inputs, self._ft_gen_cfg,
-                tokenizer=self._ft_processor.tokenizer,
-                return_dict_in_generate=True,
-            )
-        tokens = out.sequences[0, inputs["input_ids"].size(1):]
-        text = self._ft_processor.tokenizer.decode(tokens, skip_special_tokens=True)
-
-        try:
-            m = re.search(r"\{.*\}", text, re.DOTALL)
-            d = _json.loads(m.group() if m else text)
-        except Exception:
-            d = {"task_ambiguous": False, "stop_bool": False, "clarifying_question": text[:80]}
-
-        ambig = bool(d.get("task_ambiguous", d.get("ambiguity_bool", False)))
-        stop  = bool(d.get("stop_bool", False))
-        question = d.get("clarifying_question", "")
-
-        if not ambig:
-            decision = Decision.CONTINUE
-            state = GroundingState.CLEAR
-        elif stop:
-            decision = Decision.STOP
-            state = (GroundingState.INVALID_TARGET if ck_type == "C1"
-                     else GroundingState.INVALID_DESTINATION)
-        else:
-            decision = Decision.ASK
-            state = (GroundingState.AMBIGUOUS_TARGET if ck_type == "C1"
-                     else GroundingState.AMBIGUOUS_DESTINATION)
-
-        logger.info("FSM FT %s: decision=%s state=%s q=%r", ck_type, decision.value, state.value, question[:50])
-        return decision, state, question
 
     # ------------------------------------------------------------------ #
     # Public API
@@ -628,37 +515,27 @@ class MemoryFSM:
         if tgt != self._target or dst != self._dest:
             curr_det = self._gdino.detect(pil, [tgt, dst])
 
-        # ── Grounding check (Stage 2: FT model or ensemble) ──────────────────
-        pil = _to_pil(frame_arr)
-        if self._ft_model is not None:
-            # FT-B path: GDino coords + G₀ → FT model → decision
-            decision, state, vlm_question = self._ft_infer(pil, curr_det, ck_type)
-            logger.info(
-                "FSM trigger%d (f%d, %s) FT: state=%s decision=%s changes=%s",
-                self._trigger_count, frame_idx, ck_type,
-                state.value, decision.value, changes,
+        # ── Grounding check (heavy — trigger fired, worth calling Molmo) ──────
+        # Molmo detection on the triggered frame (on-demand, not every frame).
+        # Then run ensemble: GDino(t0) + GDino(ck) + Molmo(ck) → decision.
+        try:
+            molmo_det = get_checkpoint_detections_from_frame(
+                frame_arr, self._g0, self._handler,
+                session_id + "_det",
             )
-        else:
-            # Fallback: Molmo detection + check_grounding_ensemble
-            try:
-                molmo_det = get_checkpoint_detections_from_frame(
-                    frame_arr, self._g0, self._handler,
-                    session_id + "_det",
-                )
-            except Exception as exc:
-                logger.warning("FSM trigger%d: Molmo detect failed (%s) — GDino only", self._trigger_count, exc)
-                molmo_det = curr_det
+        except Exception as exc:
+            logger.warning("FSM trigger%d: Molmo detect failed (%s) — falling back to GDino only", self._trigger_count, exc)
+            molmo_det = curr_det
 
-            state, decision = check_grounding_ensemble(
-                self._g0, molmo_det, self._gdino_t0_det, curr_det,
-                ck_type, self._threshold,
-            )
-            vlm_question = ""  # ensemble path has no VLM question
-            logger.info(
-                "FSM trigger%d (f%d, %s) ensemble: state=%s decision=%s changes=%s",
-                self._trigger_count, frame_idx, ck_type,
-                state.value, decision.value, changes,
-            )
+        state, decision = check_grounding_ensemble(
+            self._g0, molmo_det, self._gdino_t0_det, curr_det,
+            ck_type, self._threshold,
+        )
+        logger.info(
+            "FSM trigger%d (f%d, %s): state=%s  decision=%s  changes=%s",
+            self._trigger_count, frame_idx, ck_type,
+            state.value, decision.value, changes,
+        )
 
         # ── ASK path ───────────────────────────────────────────────────────
         question = ""

@@ -1,4 +1,4 @@
-﻿"""Image-based evaluation runner for B1~B5 and Ours.
+"""Image-based evaluation runner for B1~B5 and Ours.
 
 Dataset manifest formats:
   JSONL: one sample object per line
@@ -37,6 +37,8 @@ from baselines.b2_no_memory import run_b2_no_memory
 from baselines.b3_count_rule import run_b3_count_rule
 from baselines.b4_binary_anomaly import run_b4_binary_anomaly
 from baselines.b5_llm_judge import run_b5_llm_judge
+from baselines.b_vlm_judge import run_vlm_judge
+from baselines.bundle import DetectionBundle, compute_detection_bundle
 from baselines.common import BaselineResult
 from baselines.ensemble import run_ensemble
 from extraction.ambres_g0_extractor import _make_handler, extract_g0
@@ -276,6 +278,7 @@ def run_method(
     method: str,
     *,
     handler: Any = None,
+    bundle: "DetectionBundle | None" = None,
     threshold: float = 50.0,
     llm_client: Callable[..., Any] | None = None,
     llm_model: str = "gpt-4o",
@@ -378,6 +381,27 @@ def run_method(
             session_id=f"{sample.sample_id}_ensemble_{sample.checkpoint.lower()}",
         )
         return _prediction_from_baseline(sample, result)
+
+    _VLM_METHODS = {"vlm_img_only", "vlm_tax", "vlm_tax_dino", "vlm_blank_dino"}
+    if method_key in _VLM_METHODS:
+        if handler is None:
+            raise ValueError(f"{method_key} requires handler")
+        if bundle is None:
+            raise ValueError(f"{method_key} requires DetectionBundle (pass bundle=)")
+        result = run_vlm_judge(
+            bundle,
+            sample.checkpoint_img,
+            sample.task,
+            handler,
+            checkpoint=sample.checkpoint,
+            use_taxonomy=True,
+            dino_grounded=(method_key in ("vlm_tax_dino", "vlm_blank_dino")),
+            img_only=(method_key == "vlm_img_only"),
+            use_blank_image=(method_key == "vlm_blank_dino"),
+            session_id=f"{sample.sample_id}_{method_key}_{sample.checkpoint.lower()}",
+        )
+        return _prediction_from_baseline(sample, result)
+
     raise ValueError(f"Unknown method {method!r}")
 
 
@@ -856,16 +880,21 @@ def main() -> None:
         print(json.dumps(summary, ensure_ascii=False, indent=2))
         return
 
-    # validate-only 통과 후 핸들러 로드 (모델 로딩 지연)
-    needs_handler = any(m in {"b1", "b2", "b3", "b4", "ours", "ensemble"} for m in methods)
+    _VLM_SET  = {"vlm_img_only", "vlm_tax", "vlm_tax_dino", "vlm_blank_dino"}
+    _DINO_VLM = {"vlm_tax_dino", "vlm_blank_dino"}
+
+    needs_handler = any(
+        m in {"b1", "b2", "b3", "b4", "ours", "ensemble"} | _VLM_SET
+        for m in methods
+    )
     handler = (
         _make_handler(args.model_type, args.adapter_ckpt, use_detection=False)
         if needs_handler else None
     )
 
-    # GDino 초기화 (ensemble 메서드 또는 --use-dino 플래그 시)
+    # GDino 초기화
     gdino = None
-    needs_gdino = args.use_dino or "ensemble" in methods
+    needs_gdino = args.use_dino or any(m in {"ensemble"} | _DINO_VLM for m in methods)
     if needs_gdino:
         _repo_root = Path(__file__).resolve().parent.parent
         if str(_repo_root) not in sys.path:
@@ -879,22 +908,55 @@ def main() -> None:
         )
         print("[GDino] 준비 완료")
 
+    needs_bundle = any(m in {"b1", "b2", "b3", "b4"} | _VLM_SET for m in methods)
+
     predictions: list[EvalPrediction] = []
-    for sample in samples:
+    n_total = len(samples)
+    t_start = time.time()
+
+    for i, sample in enumerate(samples, 1):
+        elapsed = time.time() - t_start
+        eta_str = ""
+        if i > 1:
+            eta_str = f"  ETA {(elapsed / (i-1)) * (n_total - i + 1) / 60:.1f}min"
+        print(f"[{i:3d}/{n_total}] {sample.sample_id} ({sample.scenario} {sample.checkpoint}){eta_str}", flush=True)
+
+        bundle: DetectionBundle | None = None
+        if needs_bundle and handler is not None:
+            bundle_gdino = gdino if any(m in _DINO_VLM for m in methods) else None
+            try:
+                bundle = compute_detection_bundle(
+                    sample.initial_img, sample.c1_img, sample.c2_img,
+                    sample.task, handler,
+                    sample_id=sample.sample_id,
+                    gdino=bundle_gdino,
+                )
+            except Exception as exc:
+                print(f"  [WARN] bundle failed — {exc}", flush=True)
+
         for method in methods:
-            if args.interactive:
-                print(f"\n[{sample.sample_id}] {method.upper()} 실행 중...")
-            predictions.append(
-                run_method(
-                    sample,
-                    method,
+            try:
+                pred = run_method(
+                    sample, method,
                     handler=handler,
+                    bundle=bundle,
                     threshold=args.threshold,
                     llm_model=args.llm_model,
                     user_response_fn=user_response_fn,
                     gdino=gdino,
                 )
-            )
+                predictions.append(pred)
+                mark = "✓" if pred.predicted_decision == pred.gold_decision else "✗"
+                print(f"  {method.upper():<16} {pred.predicted_decision.value:<10}"
+                      f"(gold={pred.gold_decision.value}) {mark}", flush=True)
+            except Exception as exc:
+                print(f"  {method.upper():<16} ERROR — {exc}", flush=True)
+
+        if args.predictions_csv and predictions:
+            write_predictions_csv(args.predictions_csv, predictions)
+
+    total_elapsed = time.time() - t_start
+    print(f"\n완료: {n_total}개 샘플, {total_elapsed/60:.1f}분 소요", flush=True)
 
     metrics = compute_metrics(predictions)
     print(json.dumps(metrics, ensure_ascii=False, indent=2))

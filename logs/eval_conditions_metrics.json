@@ -1,0 +1,72 @@
+{
+  "cond1: FT + DINO coords": {
+    "decision_accuracy": 1.0,
+    "miss_rate": 0.0,
+    "false_alarm_rate": 0.0,
+    "correct": 48,
+    "total": 48,
+    "per_state": {
+      "AMBIGUOUS_DESTINATION": "9/9",
+      "AMBIGUOUS_TARGET": "8/8",
+      "CLEAR": "13/13",
+      "INVALID_DESTINATION": "12/12",
+      "INVALID_TARGET": "6/6"
+    }
+  },
+  "cond2: FT - DINO (image only)": {
+    "decision_accuracy": 0.3541666666666667,
+    "miss_rate": 0.0,
+    "false_alarm_rate": 1.0,
+    "correct": 17,
+    "total": 48,
+    "per_state": {
+      "AMBIGUOUS_DESTINATION": "9/9",
+      "AMBIGUOUS_TARGET": "8/8",
+      "CLEAR": "0/13",
+      "INVALID_DESTINATION": "0/12",
+      "INVALID_TARGET": "0/6"
+    }
+  },
+  "cond4: FT + DINO, no G0": {
+    "decision_accuracy": 0.7291666666666666,
+    "miss_rate": 0.0,
+    "false_alarm_rate": 1.0,
+    "correct": 35,
+    "total": 48,
+    "per_state": {
+      "AMBIGUOUS_DESTINATION": "9/9",
+      "AMBIGUOUS_TARGET": "8/8",
+      "CLEAR": "0/13",
+      "INVALID_DESTINATION": "12/12",
+      "INVALID_TARGET": "6/6"
+    }
+  },
+  "cond5: FT + DINO, no taxonomy": {
+    "decision_accuracy": 1.0,
+    "miss_rate": 0.0,
+    "false_alarm_rate": 0.0,
+    "correct": 48,
+    "total": 48,
+    "per_state": {
+      "AMBIGUOUS_DESTINATION": "9/9",
+      "AMBIGUOUS_TARGET": "8/8",
+      "CLEAR": "13/13",
+      "INVALID_DESTINATION": "12/12",
+      "INVALID_TARGET": "6/6"
+    }
+  },
+  "cond3: pre-FT + DINO coords": {
+    "decision_accuracy": 0.2708333333333333,
+    "miss_rate": 1.0,
+    "false_alarm_rate": 0.0,
+    "correct": 13,
+    "total": 48,
+    "per_state": {
+      "AMBIGUOUS_DESTINATION": "0/9",
+      "AMBIGUOUS_TARGET": "0/8",
+      "CLEAR": "13/13",
+      "INVALID_DESTINATION": "0/12",
+      "INVALID_TARGET": "0/6"
+    }
+  }
+}

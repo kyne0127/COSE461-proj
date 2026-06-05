@@ -1,0 +1,100 @@
+/usr/local/lib/python3.11/dist-packages/torch/utils/cpp_extension.py:1965: UserWarning: TORCH_CUDA_ARCH_LIST is not set, all archs for visible cards are included for compilation. 
+If this is not desired, please set os.environ['TORCH_CUDA_ARCH_LIST'].
+  warnings.warn(
+[Manual] 80개 trial annotation 로드: /workspace/COSE461-proj/dataset/manual_annotations.json
+[DINO] 로딩 중...
+[DINO] 준비 완료
+
+1개 manifest 사용: ['manifest_train_v3.jsonl']
+  Loaded 80 samples from manifest_train_v3.jsonl
+    [1/80] s1_trial_001 DINO... C1:CLEAR 
+    [2/80] s1_trial_002 DINO... C1:CLEAR 
+    [3/80] s1_trial_003 DINO... C1:CLEAR 
+    [4/80] s1_trial_004 DINO... C1:CLEAR 
+    [5/80] s1_trial_005 DINO... C1:CLEAR 
+    [6/80] s1_trial_006 DINO... C1:CLEAR 
+    [7/80] s1_trial_007 DINO... C1:CLEAR 
+    [8/80] s1_trial_008 DINO... C1:CLEAR 
+    [9/80] s1_trial_009 DINO... C1:CLEAR 
+    [10/80] s1_trial_010 DINO... C1:CLEAR 
+    [11/80] s2_trial_001 DINO... C1:AMBIGUOUS_TARGET 
+    [12/80] s2_trial_002 DINO... C1:AMBIGUOUS_TARGET 
+    [13/80] s2_trial_003 DINO... C1:AMBIGUOUS_TARGET 
+    [14/80] s2_trial_004 DINO... C1:AMBIGUOUS_TARGET 
+    [15/80] s2_trial_005 DINO... C1:AMBIGUOUS_TARGET 
+    [16/80] s2_trial_006 DINO... C1:AMBIGUOUS_TARGET 
+    [17/80] s2_trial_007 DINO... C1:AMBIGUOUS_TARGET 
+    [18/80] s2_trial_008 DINO... C1:AMBIGUOUS_TARGET 
+    [19/80] s2_trial_009 DINO... C1:AMBIGUOUS_TARGET 
+    [20/80] s2_trial_010 DINO... C1:AMBIGUOUS_TARGET 
+    [21/80] s3_trial_001 DINO... C1:INVALID_TARGET 
+    [22/80] s3_trial_002 DINO... C1:INVALID_TARGET 
+    [23/80] s3_trial_003 DINO... C1:INVALID_TARGET 
+    [24/80] s3_trial_004 DINO... C1:INVALID_TARGET 
+    [25/80] s3_trial_005 DINO... C1:INVALID_TARGET 
+    [26/80] s3_trial_006 DINO... C1:INVALID_TARGET 
+    [27/80] s3_trial_007 DINO... C1:INVALID_TARGET 
+    [28/80] s3_trial_008 DINO... C1:INVALID_TARGET 
+    [29/80] s3_trial_009 DINO... C1:INVALID_TARGET 
+    [30/80] s3_trial_010 DINO... C1:INVALID_TARGET 
+    [31/80] s4_trial_001 DINO... C1:AMBIGUOUS_TARGET 
+    [32/80] s4_trial_002 DINO... C1:AMBIGUOUS_TARGET 
+    [33/80] s4_trial_003 DINO... C1:AMBIGUOUS_TARGET 
+    [34/80] s4_trial_004 DINO... C1:AMBIGUOUS_TARGET 
+    [35/80] s4_trial_005 DINO... C1:AMBIGUOUS_TARGET 
+    [36/80] s4_trial_006 DINO... C1:AMBIGUOUS_TARGET 
+    [37/80] s4_trial_007 DINO... C1:AMBIGUOUS_TARGET 
+    [38/80] s4_trial_008 DINO... C1:AMBIGUOUS_TARGET 
+    [39/80] s4_trial_009 DINO... C1:AMBIGUOUS_TARGET 
+    [40/80] s4_trial_010 DINO... C1:AMBIGUOUS_TARGET 
+    [41/80] s5_trial_001 DINO... C2:AMBIGUOUS_DESTINATION 
+    [42/80] s5_trial_002 DINO... C2:AMBIGUOUS_DESTINATION 
+    [43/80] s5_trial_003 DINO... C2:AMBIGUOUS_DESTINATION 
+    [44/80] s5_trial_004 DINO... C2:AMBIGUOUS_DESTINATION 
+    [45/80] s5_trial_005 DINO... C2:AMBIGUOUS_DESTINATION 
+    [46/80] s5_trial_006 DINO... C2:AMBIGUOUS_DESTINATION 
+    [47/80] s5_trial_007 DINO... C2:AMBIGUOUS_DESTINATION 
+    [48/80] s5_trial_008 DINO... C2:AMBIGUOUS_DESTINATION 
+    [49/80] s5_trial_009 DINO... C2:AMBIGUOUS_DESTINATION 
+    [50/80] s5_trial_010 DINO... C2:AMBIGUOUS_DESTINATION 
+    [51/80] s6_trial_001 DINO... C2:INVALID_DESTINATION 
+    [52/80] s6_trial_002 DINO... C2:INVALID_DESTINATION 
+    [53/80] s6_trial_003 DINO... C2:INVALID_DESTINATION 
+    [54/80] s6_trial_004 DINO... C2:INVALID_DESTINATION 
+    [55/80] s6_trial_005 DINO... C2:INVALID_DESTINATION 
+    [56/80] s6_trial_006 DINO... C2:INVALID_DESTINATION 
+    [57/80] s6_trial_007 DINO... C2:INVALID_DESTINATION 
+    [58/80] s6_trial_008 DINO... C2:INVALID_DESTINATION 
+    [59/80] s6_trial_009 DINO... C2:INVALID_DESTINATION 
+    [60/80] s6_trial_010 DINO... C2:INVALID_DESTINATION 
+    [61/80] s7_trial_001 DINO... C2:AMBIGUOUS_DESTINATION 
+    [62/80] s7_trial_002 DINO... C2:AMBIGUOUS_DESTINATION 
+    [63/80] s7_trial_003 DINO... C2:AMBIGUOUS_DESTINATION 
+    [64/80] s7_trial_004 DINO... C2:AMBIGUOUS_DESTINATION 
+    [65/80] s7_trial_005 DINO... C2:AMBIGUOUS_DESTINATION 
+    [66/80] s7_trial_006 DINO... C2:AMBIGUOUS_DESTINATION 
+    [67/80] s7_trial_007 DINO... C2:AMBIGUOUS_DESTINATION 
+    [68/80] s7_trial_008 DINO... C2:AMBIGUOUS_DESTINATION 
+    [69/80] s7_trial_009 DINO... C2:AMBIGUOUS_DESTINATION 
+    [70/80] s7_trial_010 DINO... C2:AMBIGUOUS_DESTINATION 
+    [71/80] old_s1_trial_001 DINO... C1:CLEAR 
+    [72/80] old_s1_trial_002 DINO... C1:CLEAR 
+    [73/80] old_s1_trial_003 DINO... C1:CLEAR 
+    [74/80] old_s1_trial_004 DINO... C1:CLEAR 
+    [75/80] old_s1_trial_005 DINO... C1:CLEAR 
+    [76/80] old_s1_trial_006 DINO... C1:CLEAR 
+    [77/80] old_s1_trial_007 DINO... C1:CLEAR 
+    [78/80] old_s1_trial_008 DINO... C1:CLEAR 
+    [79/80] old_s1_trial_009 DINO... C1:CLEAR 
+    [80/80] old_s1_trial_010 DINO... C1:CLEAR 
+
+총 480개 examples:
+  train: 432 → dataset/finetune/train.jsonl
+  val:   48  → dataset/finetune/val.jsonl
+
+Gold state distribution:
+  AMBIGUOUS_DESTINATION          120
+  AMBIGUOUS_TARGET               120
+  CLEAR                          120
+  INVALID_DESTINATION            60
+  INVALID_TARGET                 60

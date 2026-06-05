@@ -1,0 +1,8 @@
+sample_id,scenario,method,checkpoint,gold_state,gold_decision,predicted_decision,predicted_state,reason,question,explanation,correct
+s1_trial_001,S1,MEMORY_QWEN_GATE,C1,CLEAR,CONTINUE,CONTINUE,CLEAR,,,All objects are uniquely identified and everything is clearly visible,True
+s2_trial_001,S2,MEMORY_QWEN_GATE,C1,AMBIGUOUS_TARGET,ASK,CONTINUE,CLEAR,,,"The task specifies to pick a 'cup' and put it in the 'red box'. The prior observation shows that there are two cups, and the task does not specify which one to pick. However, the memory context indicates that the 'cup' and 'red box' are the only objects in the scene, making it clear which 'cup' to pick.",False
+s3_trial_001,S3,MEMORY_QWEN_GATE,C1,INVALID_TARGET,STOP,ASK,AMBIGUOUS_TARGET,,[C1] What container should the cup be placed in?,The target red box is already open,False
+s4_trial_001,S4,MEMORY_QWEN_GATE,C1,AMBIGUOUS_TARGET,ASK,CONTINUE,CLEAR,,,"The task specifies to pick the 'cup' and put it in the 'red box', and the prior observation memory shows a unique 'cup' at a specific position.",False
+s5_trial_001,S5,MEMORY_QWEN_GATE,C2,AMBIGUOUS_DESTINATION,ASK,ASK,AMBIGUOUS_DESTINATION,,[C2] Which cup and which box?,There could be multiple cups or multiple boxes,True
+s6_trial_001,S6,MEMORY_QWEN_GATE,C2,INVALID_DESTINATION,STOP,ASK,AMBIGUOUS_DESTINATION,,[C2] Which cup do you want me to pick?,Two objects are labeled 'cup' in the scene,False
+s7_trial_001,S7,MEMORY_QWEN_GATE,C2,AMBIGUOUS_DESTINATION,ASK,CONTINUE,CLEAR,,,The task description and memory context uniquely identify the 'red box' as the one to use.,False

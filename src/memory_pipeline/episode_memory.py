@@ -61,6 +61,7 @@ class CheckpointRecord:
     destination:     ObjectState         # specific-label detections
     decision:        str = ""            # "CONTINUE" | "ASK" | "STOP" | "" (t0)
     grounding_state: str = ""            # GroundingState.value
+    explanation:     str = ""            # AmbRes STEP2 ambiguity reasoning
     user_response:   str = ""            # clarification from user (ASK path)
     trigger_score:   float = 0.0         # change score that fired the trigger
     changes:         list[str] = field(default_factory=list)
@@ -78,6 +79,7 @@ class CheckpointRecord:
             "destination":     self.destination.to_dict(),
             "decision":        self.decision,
             "grounding_state": self.grounding_state,
+            "explanation":     self.explanation,
             "user_response":   self.user_response,
             "trigger_score":   self.trigger_score,
             "changes":         self.changes,

@@ -1,0 +1,8 @@
+sample_id,scenario,method,checkpoint,gold_state,gold_decision,predicted_decision,predicted_state,reason,question,explanation,correct
+s1_trial_001,S1,MEMORY_QWEN,C1,CLEAR,CONTINUE,CONTINUE,CLEAR,,,The target 'cup' is clearly identified with 1 instance detected at the start and now.,True
+s2_trial_001,S2,MEMORY_QWEN,C1,AMBIGUOUS_TARGET,ASK,CONTINUE,CLEAR,,,"There are now 2 instances of the target 'cup' detected, but the task requires picking one and placing it in the red box. The robot can proceed to pick one of the cups and place it in the red box.",False
+s3_trial_001,S3,MEMORY_QWEN,C1,INVALID_TARGET,STOP,CONTINUE,CLEAR,,,The target 'cup' is clearly identified and moved to the correct position relative to the 'red box'.,False
+s4_trial_001,S4,MEMORY_QWEN,C1,AMBIGUOUS_TARGET,ASK,CONTINUE,CLEAR,,,The target 'cup' is clearly identified and moved to the starting position for the next step.,False
+s5_trial_001,S5,MEMORY_QWEN,C2,AMBIGUOUS_DESTINATION,ASK,CONTINUE,CLEAR,,,"The target 'cup' is clearly identified with one instance detected at the start and one now, allowing the robot to proceed with the task.",False
+s6_trial_001,S6,MEMORY_QWEN,C2,INVALID_DESTINATION,STOP,CONTINUE,CLEAR,,,The target 'cup' is clearly identified with one instance detected at the start and still present now.,False
+s7_trial_001,S7,MEMORY_QWEN,C2,AMBIGUOUS_DESTINATION,ASK,CONTINUE,CLEAR,,,The target 'cup' is clearly identified with one instance detected at the start and still present now.,False

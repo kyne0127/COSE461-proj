@@ -18,3 +18,17 @@ dataset/cvat_urls_local.txt
 
 # Evaluation output images
 eval_outputs/
+
+# Model checkpoints (too large for git)
+ckpt/
+
+# Large dataset image directories
+dataset/images/
+dataset/vla-evaluation/
+dataset/vla-evaluation-v3/
+dataset/vla-evaluation-v4/
+dataset/finetune/
+dataset/finetune_v2/
+dataset/finetune_preview/
+dataset/ambres/
+dataset/ambres-training/

@@ -44,6 +44,9 @@ def _format_record(rec: CheckpointRecord) -> str:
             line += f"  (state: {rec.grounding_state})"
         lines.append(line)
 
+    if rec.explanation:
+        lines.append(f"  ambiguity reason: {rec.explanation}")
+
     if rec.user_response:
         lines.append(f'  user clarified: "{rec.user_response}"')
 

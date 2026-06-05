@@ -1,0 +1,162 @@
+{
+  "cond1: FT + DINO coords": {
+    "n": 70,
+    "decision_accuracy": 0.8,
+    "strict_accuracy": 0.8,
+    "per_state": {
+      "CLEAR": {
+        "dec": 10,
+        "strict": 10,
+        "n": 10
+      },
+      "AMBIGUOUS_TARGET": {
+        "dec": 20,
+        "strict": 20,
+        "n": 20
+      },
+      "INVALID_TARGET": {
+        "dec": 5,
+        "strict": 5,
+        "n": 10
+      },
+      "AMBIGUOUS_DESTINATION": {
+        "dec": 15,
+        "strict": 15,
+        "n": 20
+      },
+      "INVALID_DESTINATION": {
+        "dec": 6,
+        "strict": 6,
+        "n": 10
+      }
+    }
+  },
+  "cond2: FT - DINO (image only)": {
+    "n": 70,
+    "decision_accuracy": 0.5714,
+    "strict_accuracy": 0.4286,
+    "per_state": {
+      "CLEAR": {
+        "dec": 0,
+        "strict": 0,
+        "n": 10
+      },
+      "AMBIGUOUS_TARGET": {
+        "dec": 20,
+        "strict": 10,
+        "n": 20
+      },
+      "INVALID_TARGET": {
+        "dec": 0,
+        "strict": 0,
+        "n": 10
+      },
+      "AMBIGUOUS_DESTINATION": {
+        "dec": 20,
+        "strict": 20,
+        "n": 20
+      },
+      "INVALID_DESTINATION": {
+        "dec": 0,
+        "strict": 0,
+        "n": 10
+      }
+    }
+  },
+  "cond4: FT + DINO, no G0": {
+    "n": 70,
+    "decision_accuracy": 0.6571,
+    "strict_accuracy": 0.6571,
+    "per_state": {
+      "CLEAR": {
+        "dec": 0,
+        "strict": 0,
+        "n": 10
+      },
+      "AMBIGUOUS_TARGET": {
+        "dec": 20,
+        "strict": 20,
+        "n": 20
+      },
+      "INVALID_TARGET": {
+        "dec": 5,
+        "strict": 5,
+        "n": 10
+      },
+      "AMBIGUOUS_DESTINATION": {
+        "dec": 15,
+        "strict": 15,
+        "n": 20
+      },
+      "INVALID_DESTINATION": {
+        "dec": 6,
+        "strict": 6,
+        "n": 10
+      }
+    }
+  },
+  "cond5: FT + DINO, no taxonomy": {
+    "n": 70,
+    "decision_accuracy": 0.8,
+    "strict_accuracy": 0.7429,
+    "per_state": {
+      "CLEAR": {
+        "dec": 10,
+        "strict": 10,
+        "n": 10
+      },
+      "AMBIGUOUS_TARGET": {
+        "dec": 20,
+        "strict": 20,
+        "n": 20
+      },
+      "INVALID_TARGET": {
+        "dec": 5,
+        "strict": 4,
+        "n": 10
+      },
+      "AMBIGUOUS_DESTINATION": {
+        "dec": 15,
+        "strict": 15,
+        "n": 20
+      },
+      "INVALID_DESTINATION": {
+        "dec": 6,
+        "strict": 3,
+        "n": 10
+      }
+    }
+  },
+  "cond3: pre-FT native (visual only, no STOP)": {
+    "n": 70,
+    "decision_accuracy": 0.3143,
+    "strict_accuracy": 0.2714,
+    "per_state": {
+      "CLEAR": {
+        "dec": 10,
+        "strict": 10,
+        "n": 10
+      },
+      "AMBIGUOUS_TARGET": {
+        "dec": 5,
+        "strict": 4,
+        "n": 20
+      },
+      "INVALID_TARGET": {
+        "dec": 0,
+        "strict": 0,
+        "n": 10
+      },
+      "AMBIGUOUS_DESTINATION": {
+        "dec": 7,
+        "strict": 5,
+        "n": 20
+      },
+      "INVALID_DESTINATION": {
+        "dec": 0,
+        "strict": 0,
+        "n": 10
+      }
+    }
+  }
+}

@@ -1,0 +1,215 @@
+{
+  "cond1: FT + DINO + G0": {
+    "decision_acc": 0.8,
+    "strict_acc": 0.7285714285714285,
+    "dec_correct": 56,
+    "strict_pass": 51,
+    "total": 70,
+    "per_state": {
+      "AMBIGUOUS_DESTINATION": {
+        "dec": 15,
+        "strict": 15,
+        "total": 20
+      },
+      "AMBIGUOUS_TARGET": {
+        "dec": 20,
+        "strict": 20,
+        "total": 20
+      },
+      "CLEAR": {
+        "dec": 10,
+        "strict": 10,
+        "total": 10
+      },
+      "INVALID_DESTINATION": {
+        "dec": 6,
+        "strict": 6,
+        "total": 10
+      },
+      "INVALID_TARGET": {
+        "dec": 5,
+        "strict": 0,
+        "total": 10
+      }
+    },
+    "per_scenario": {
+      "S1": {
+        "dec": 10,
+        "strict": 10,
+        "total": 10
+      },
+      "S2": {
+        "dec": 10,
+        "strict": 10,
+        "total": 10
+      },
+      "S3": {
+        "dec": 5,
+        "strict": 0,
+        "total": 10
+      },
+      "S4": {
+        "dec": 10,
+        "strict": 10,
+        "total": 10
+      },
+      "S5": {
+        "dec": 5,
+        "strict": 5,
+        "total": 10
+      },
+      "S6": {
+        "dec": 6,
+        "strict": 6,
+        "total": 10
+      },
+      "S7": {
+        "dec": 10,
+        "strict": 10,
+        "total": 10
+      }
+    }
+  },
+  "cond2: FT image only": {
+    "decision_acc": 0.5714285714285714,
+    "strict_acc": 0.4142857142857143,
+    "dec_correct": 40,
+    "strict_pass": 29,
+    "total": 70,
+    "per_state": {
+      "AMBIGUOUS_DESTINATION": {
+        "dec": 20,
+        "strict": 9,
+        "total": 20
+      },
+      "AMBIGUOUS_TARGET": {
+        "dec": 20,
+        "strict": 20,
+        "total": 20
+      },
+      "CLEAR": {
+        "dec": 0,
+        "strict": 0,
+        "total": 10
+      },
+      "INVALID_DESTINATION": {
+        "dec": 0,
+        "strict": 0,
+        "total": 10
+      },
+      "INVALID_TARGET": {
+        "dec": 0,
+        "strict": 0,
+        "total": 10
+      }
+    },
+    "per_scenario": {
+      "S1": {
+        "dec": 0,
+        "strict": 0,
+        "total": 10
+      },
+      "S2": {
+        "dec": 10,
+        "strict": 10,
+        "total": 10
+      },
+      "S3": {
+        "dec": 0,
+        "strict": 0,
+        "total": 10
+      },
+      "S4": {
+        "dec": 10,
+        "strict": 10,
+        "total": 10
+      },
+      "S5": {
+        "dec": 10,
+        "strict": 9,
+        "total": 10
+      },
+      "S6": {
+        "dec": 0,
+        "strict": 0,
+        "total": 10
+      },
+      "S7": {
+        "dec": 10,
+        "strict": 0,
+        "total": 10
+      }
+    }
+  },
+  "cond4: FT + DINO, no G0": {
+    "decision_acc": 0.4857142857142857,
+    "strict_acc": 0.4142857142857143,
+    "dec_correct": 34,
+    "strict_pass": 29,
+    "total": 70,
+    "per_state": {
+      "AMBIGUOUS_DESTINATION": {
+        "dec": 3,
+        "strict": 3,
+        "total": 20
+      },
+      "AMBIGUOUS_TARGET": {
+        "dec": 10,
+        "strict": 10,
+        "total": 20
+      },
+      "CLEAR": {
+        "dec": 10,
+        "strict": 10,
+        "total": 10
+      },
+      "INVALID_DESTINATION": {
+        "dec": 6,
+        "strict": 6,
+        "total": 10
+      },
+      "INVALID_TARGET": {
+        "dec": 5,
+        "strict": 0,
+        "total": 10
+      }
+    },
+    "per_scenario": {
+      "S1": {
+        "dec": 10,
+        "strict": 10,
+        "total": 10
+      },
+      "S2": {
+        "dec": 10,
+        "strict": 10,
+        "total": 10
+      },
+      "S3": {
+        "dec": 5,
+        "strict": 0,
+        "total": 10
+      },
+      "S4": {
+        "dec": 0,
+        "strict": 0,
+        "total": 10
+      },
+      "S5": {
+        "dec": 3,
+        "strict": 3,
+        "total": 10
+      },
+      "S6": {
+        "dec": 6,
+        "strict": 6,
+        "total": 10
+      },
+      "S7": {
+        "dec": 0,
+        "strict": 0,
+        "total": 10
+      }
+    }
+  }
+}
