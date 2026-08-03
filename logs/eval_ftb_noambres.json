@@ -1,0 +1,16 @@
+{
+  "cond1: FT + DINO + G0": {
+    "decision_accuracy": 0.9714285714285714,
+    "miss_rate": 0.03333333333333333,
+    "false_alarm_rate": 0.0,
+    "correct": 68,
+    "total": 70,
+    "per_state": {
+      "AMBIGUOUS_DESTINATION": "20/20",
+      "AMBIGUOUS_TARGET": "20/20",
+      "CLEAR": "10/10",
+      "INVALID_DESTINATION": "10/10",
+      "INVALID_TARGET": "8/10"
+    }
+  }
+}

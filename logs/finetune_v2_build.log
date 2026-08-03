@@ -1,0 +1,104 @@
+/usr/local/lib/python3.11/dist-packages/torch/utils/cpp_extension.py:1965: UserWarning: TORCH_CUDA_ARCH_LIST is not set, all archs for visible cards are included for compilation. 
+If this is not desired, please set os.environ['TORCH_CUDA_ARCH_LIST'].
+  warnings.warn(
+[Manual] 80개 trial annotation 로드: /workspace/COSE461-proj/dataset/manual_annotations.json
+[DINO] 로딩 중...
+[DINO] 준비 완료
+
+1개 manifest 사용: ['manifest_train_v3.jsonl']
+  Loaded 80 samples from manifest_train_v3.jsonl
+
+  Trial split: train=64, val=16
+  [1/80] s1_trial_001 (train) DINO... C1:CLEAR nog0:CLEAR cf×2 
+  [2/80] s1_trial_002 (train) DINO... C1:CLEAR nog0:CLEAR cf×2 
+  [3/80] s1_trial_003 (train) DINO... C1:CLEAR nog0:CLEAR cf×2 
+  [4/80] s1_trial_004 (val) DINO... C1:CLEAR 
+  [5/80] s1_trial_005 (val) DINO... C1:CLEAR 
+  [6/80] s1_trial_006 (train) DINO... C1:CLEAR nog0:CLEAR cf×2 
+  [7/80] s1_trial_007 (train) DINO... C1:CLEAR nog0:CLEAR cf×2 
+  [8/80] s1_trial_008 (train) DINO... C1:CLEAR nog0:CLEAR cf×2 
+  [9/80] s1_trial_009 (train) DINO... C1:CLEAR nog0:CLEAR cf×2 
+  [10/80] s1_trial_010 (train) DINO... C1:CLEAR nog0:CLEAR cf×2 
+  [11/80] s2_trial_001 (train) DINO... C1:AMBIGUOUS_TARGET nog0:AMBIGUOUS_TARGET 
+  [12/80] s2_trial_002 (val) DINO... C1:AMBIGUOUS_TARGET 
+  [13/80] s2_trial_003 (train) DINO... C1:AMBIGUOUS_TARGET nog0:AMBIGUOUS_TARGET 
+  [14/80] s2_trial_004 (val) DINO... C1:AMBIGUOUS_TARGET 
+  [15/80] s2_trial_005 (val) DINO... C1:AMBIGUOUS_TARGET 
+  [16/80] s2_trial_006 (train) DINO... C1:AMBIGUOUS_TARGET nog0:AMBIGUOUS_TARGET 
+  [17/80] s2_trial_007 (train) DINO... C1:AMBIGUOUS_TARGET nog0:AMBIGUOUS_TARGET 
+  [18/80] s2_trial_008 (val) DINO... C1:AMBIGUOUS_TARGET 
+  [19/80] s2_trial_009 (train) DINO... C1:AMBIGUOUS_TARGET nog0:AMBIGUOUS_TARGET 
+  [20/80] s2_trial_010 (train) DINO... C1:AMBIGUOUS_TARGET nog0:AMBIGUOUS_TARGET 
+  [21/80] s3_trial_001 (train) DINO... C1:INVALID_TARGET nog0:INVALID_TARGET 
+  [22/80] s3_trial_002 (train) DINO... C1:INVALID_TARGET nog0:INVALID_TARGET 
+  [23/80] s3_trial_003 (train) DINO... C1:INVALID_TARGET nog0:INVALID_TARGET 
+  [24/80] s3_trial_004 (train) DINO... C1:INVALID_TARGET nog0:INVALID_TARGET 
+  [25/80] s3_trial_005 (train) DINO... C1:INVALID_TARGET nog0:INVALID_TARGET 
+  [26/80] s3_trial_006 (train) DINO... C1:INVALID_TARGET nog0:INVALID_TARGET 
+  [27/80] s3_trial_007 (train) DINO... C1:INVALID_TARGET nog0:INVALID_TARGET 
+  [28/80] s3_trial_008 (val) DINO... C1:INVALID_TARGET 
+  [29/80] s3_trial_009 (val) DINO... C1:INVALID_TARGET 
+  [30/80] s3_trial_010 (val) DINO... C1:INVALID_TARGET 
+  [31/80] s4_trial_001 (train) DINO... C1:AMBIGUOUS_TARGET nog0:CLEAR cf×2 
+  [32/80] s4_trial_002 (val) DINO... C1:AMBIGUOUS_TARGET 
+  [33/80] s4_trial_003 (train) DINO... C1:AMBIGUOUS_TARGET nog0:CLEAR cf×2 
+  [34/80] s4_trial_004 (train) DINO... C1:AMBIGUOUS_TARGET nog0:CLEAR cf×2 
+  [35/80] s4_trial_005 (train) DINO... C1:AMBIGUOUS_TARGET nog0:CLEAR cf×2 
+  [36/80] s4_trial_006 (val) DINO... C1:AMBIGUOUS_TARGET 
+  [37/80] s4_trial_007 (train) DINO... C1:AMBIGUOUS_TARGET nog0:CLEAR cf×2 
+  [38/80] s4_trial_008 (train) DINO... C1:AMBIGUOUS_TARGET nog0:CLEAR cf×2 
+  [39/80] s4_trial_009 (train) DINO... C1:AMBIGUOUS_TARGET nog0:CLEAR cf×2 
+  [40/80] s4_trial_010 (train) DINO... C1:AMBIGUOUS_TARGET nog0:CLEAR cf×2 
+  [41/80] s5_trial_001 (train) DINO... C2:AMBIGUOUS_DESTINATION nog0:AMBIGUOUS_DESTINATION 
+  [42/80] s5_trial_002 (train) DINO... C2:AMBIGUOUS_DESTINATION nog0:AMBIGUOUS_DESTINATION 
+  [43/80] s5_trial_003 (train) DINO... C2:AMBIGUOUS_DESTINATION nog0:AMBIGUOUS_DESTINATION 
+  [44/80] s5_trial_004 (train) DINO... C2:AMBIGUOUS_DESTINATION nog0:AMBIGUOUS_DESTINATION 
+  [45/80] s5_trial_005 (train) DINO... C2:AMBIGUOUS_DESTINATION nog0:AMBIGUOUS_DESTINATION 
+  [46/80] s5_trial_006 (train) DINO... C2:AMBIGUOUS_DESTINATION nog0:AMBIGUOUS_DESTINATION 
+  [47/80] s5_trial_007 (train) DINO... C2:AMBIGUOUS_DESTINATION nog0:AMBIGUOUS_DESTINATION 
+  [48/80] s5_trial_008 (train) DINO... C2:AMBIGUOUS_DESTINATION nog0:AMBIGUOUS_DESTINATION 
+  [49/80] s5_trial_009 (train) DINO... C2:AMBIGUOUS_DESTINATION nog0:AMBIGUOUS_DESTINATION 
+  [50/80] s5_trial_010 (train) DINO... C2:AMBIGUOUS_DESTINATION nog0:AMBIGUOUS_DESTINATION 
+  [51/80] s6_trial_001 (train) DINO... C2:INVALID_DESTINATION nog0:INVALID_DESTINATION 
+  [52/80] s6_trial_002 (train) DINO... C2:INVALID_DESTINATION nog0:INVALID_DESTINATION 
+  [53/80] s6_trial_003 (train) DINO... C2:INVALID_DESTINATION nog0:INVALID_DESTINATION 
+  [54/80] s6_trial_004 (train) DINO... C2:INVALID_DESTINATION nog0:INVALID_DESTINATION 
+  [55/80] s6_trial_005 (val) DINO... C2:INVALID_DESTINATION 
+  [56/80] s6_trial_006 (train) DINO... C2:INVALID_DESTINATION nog0:INVALID_DESTINATION 
+  [57/80] s6_trial_007 (train) DINO... C2:INVALID_DESTINATION nog0:INVALID_DESTINATION 
+  [58/80] s6_trial_008 (train) DINO... C2:INVALID_DESTINATION nog0:INVALID_DESTINATION 
+  [59/80] s6_trial_009 (train) DINO... C2:INVALID_DESTINATION nog0:INVALID_DESTINATION 
+  [60/80] s6_trial_010 (train) DINO... C2:INVALID_DESTINATION nog0:INVALID_DESTINATION 
+  [61/80] s7_trial_001 (train) DINO... C2:AMBIGUOUS_DESTINATION nog0:CLEAR cf×2 
+  [62/80] s7_trial_002 (train) DINO... C2:AMBIGUOUS_DESTINATION nog0:CLEAR cf×2 
+  [63/80] s7_trial_003 (train) DINO... C2:AMBIGUOUS_DESTINATION nog0:CLEAR cf×2 
+  [64/80] s7_trial_004 (train) DINO... C2:AMBIGUOUS_DESTINATION nog0:CLEAR cf×2 
+  [65/80] s7_trial_005 (val) DINO... C2:AMBIGUOUS_DESTINATION 
+  [66/80] s7_trial_006 (train) DINO... C2:AMBIGUOUS_DESTINATION nog0:CLEAR cf×2 
+  [67/80] s7_trial_007 (train) DINO... C2:AMBIGUOUS_DESTINATION nog0:CLEAR cf×2 
+  [68/80] s7_trial_008 (train) DINO... C2:AMBIGUOUS_DESTINATION nog0:CLEAR cf×2 
+  [69/80] s7_trial_009 (train) DINO... C2:AMBIGUOUS_DESTINATION nog0:CLEAR cf×2 
+  [70/80] s7_trial_010 (val) DINO... C2:AMBIGUOUS_DESTINATION 
+  [71/80] old_s1_trial_001 (train) DINO... C1:CLEAR nog0:CLEAR cf×2 
+  [72/80] old_s1_trial_002 (val) DINO... C1:CLEAR 
+  [73/80] old_s1_trial_003 (train) DINO... C1:CLEAR nog0:CLEAR cf×2 
+  [74/80] old_s1_trial_004 (train) DINO... C1:CLEAR nog0:CLEAR cf×2 
+  [75/80] old_s1_trial_005 (train) DINO... C1:CLEAR nog0:CLEAR cf×2 
+  [76/80] old_s1_trial_006 (train) DINO... C1:CLEAR nog0:CLEAR cf×2 
+  [77/80] old_s1_trial_007 (train) DINO... C1:CLEAR nog0:CLEAR cf×2 
+  [78/80] old_s1_trial_008 (train) DINO... C1:CLEAR nog0:CLEAR cf×2 
+  [79/80] old_s1_trial_009 (val) DINO... C1:CLEAR 
+  [80/80] old_s1_trial_010 (train) DINO... C1:CLEAR nog0:CLEAR cf×2 
+
+총 528개 examples:
+  train: 512 (64 trials) → dataset/finetune_v2/train.jsonl
+  val:   16 (16 trials, base only) → dataset/finetune_v2/val.jsonl
+
+Gold state distribution (train+val):
+  AMBIGUOUS_DESTINATION          128
+  AMBIGUOUS_TARGET               120
+  CLEAR                          164
+  INVALID_DESTINATION            64
+  INVALID_TARGET                 52
+
+[OK] train/val trial overlap 없음

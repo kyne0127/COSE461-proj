@@ -1,0 +1,270 @@
+/usr/local/lib/python3.11/dist-packages/torch/utils/cpp_extension.py:1965: UserWarning: TORCH_CUDA_ARCH_LIST is not set, all archs for visible cards are included for compilation. 
+If this is not desired, please set os.environ['TORCH_CUDA_ARCH_LIST'].
+  warnings.warn(
+Holdout 샘플: 70개
+시나리오: {'S1': 10, 'S2': 10, 'S3': 10, 'S4': 10, 'S5': 10, 'S6': 10, 'S7': 10}
+gold_state: {'CLEAR': 10, 'AMBIGUOUS_TARGET': 20, 'INVALID_TARGET': 10, 'AMBIGUOUS_DESTINATION': 20, 'INVALID_DESTINATION': 10}
+[DINO] 로딩...
+Using a slow image processor as `use_fast` is unset and a slow processor was saved with this model. `use_fast=True` will be the default behavior in v4.48, even if the model was saved with a slow processor. This will result in minor differences in outputs. You'll still be able to use a slow processor with `use_fast=False`.
+[DINO] 완료
+
+[DINO] 70개 trial 탐지 중...
+  [ 1/70] s1_trial_001                   g0_tgt=[581, 151]  ck_tgt=1개  ck_dst=1개
+  [ 2/70] s1_trial_002                   g0_tgt=[495, 144]  ck_tgt=1개  ck_dst=1개
+  [ 3/70] s1_trial_003                   g0_tgt=[301, 124]  ck_tgt=1개  ck_dst=1개
+  [ 4/70] s1_trial_004                   g0_tgt=[320, 171]  ck_tgt=1개  ck_dst=1개
+  [ 5/70] s1_trial_005                   g0_tgt=[260, 135]  ck_tgt=1개  ck_dst=1개
+  [ 6/70] s1_trial_006                   g0_tgt=[493, 190]  ck_tgt=1개  ck_dst=1개
+  [ 7/70] s1_trial_007                   g0_tgt=[508, 199]  ck_tgt=1개  ck_dst=1개
+  [ 8/70] s1_trial_008                   g0_tgt=[312, 171]  ck_tgt=1개  ck_dst=1개
+  [ 9/70] s1_trial_009                   g0_tgt=[264, 109]  ck_tgt=1개  ck_dst=1개
+  [10/70] s1_trial_010                   g0_tgt=[172, 142]  ck_tgt=1개  ck_dst=1개
+  [11/70] s2_trial_001                   g0_tgt=[282, 160]  ck_tgt=2개  ck_dst=1개
+  [12/70] s2_trial_002                   g0_tgt=[268, 109]  ck_tgt=2개  ck_dst=1개
+  [13/70] s2_trial_003                   g0_tgt=[233, 132]  ck_tgt=2개  ck_dst=1개
+  [14/70] s2_trial_004                   g0_tgt=[511, 153]  ck_tgt=2개  ck_dst=1개
+  [15/70] s2_trial_005                   g0_tgt=[461, 154]  ck_tgt=2개  ck_dst=1개
+  [16/70] s2_trial_006                   g0_tgt=[519, 201]  ck_tgt=2개  ck_dst=1개
+  [17/70] s2_trial_007                   g0_tgt=[514, 146]  ck_tgt=2개  ck_dst=1개
+  [18/70] s2_trial_008                   g0_tgt=[602, 145]  ck_tgt=2개  ck_dst=1개
+  [19/70] s2_trial_009                   g0_tgt=[382, 177]  ck_tgt=2개  ck_dst=1개
+  [20/70] s2_trial_010                   g0_tgt=[338, 138]  ck_tgt=2개  ck_dst=1개
+  [21/70] s3_trial_001                   g0_tgt=[268, 147]  ck_tgt=1개  ck_dst=1개
+  [22/70] s3_trial_002                   g0_tgt=[165, 69]  ck_tgt=1개  ck_dst=1개
+  [23/70] s3_trial_003                   g0_tgt=[272, 175]  ck_tgt=1개  ck_dst=1개
+  [24/70] s3_trial_004                   g0_tgt=[484, 204]  ck_tgt=1개  ck_dst=1개
+  [25/70] s3_trial_005                   g0_tgt=[416, 178]  ck_tgt=1개  ck_dst=1개
+  [26/70] s3_trial_006                   g0_tgt=[290, 141]  ck_tgt=2개  ck_dst=0개
+  [27/70] s3_trial_007                   g0_tgt=[184, 154]  ck_tgt=2개  ck_dst=0개
+  [28/70] s3_trial_008                   g0_tgt=[376, 180]  ck_tgt=2개  ck_dst=0개
+  [29/70] s3_trial_009                   g0_tgt=[462, 188]  ck_tgt=2개  ck_dst=0개
+  [30/70] s3_trial_010                   g0_tgt=[274, 156]  ck_tgt=2개  ck_dst=0개
+  [31/70] s4_trial_001                   g0_tgt=[361, 187]  ck_tgt=1개  ck_dst=1개
+  [32/70] s4_trial_002                   g0_tgt=[121, 76]  ck_tgt=1개  ck_dst=1개
+  [33/70] s4_trial_003                   g0_tgt=[176, 160]  ck_tgt=1개  ck_dst=1개
+  [34/70] s4_trial_004                   g0_tgt=[539, 213]  ck_tgt=1개  ck_dst=1개
+  [35/70] s4_trial_005                   g0_tgt=[342, 182]  ck_tgt=1개  ck_dst=1개
+  [36/70] s4_trial_006                   g0_tgt=[388, 182]  ck_tgt=1개  ck_dst=1개
+  [37/70] s4_trial_007                   g0_tgt=[523, 203]  ck_tgt=1개  ck_dst=1개
+  [38/70] s4_trial_008                   g0_tgt=[583, 178]  ck_tgt=1개  ck_dst=1개
+  [39/70] s4_trial_009                   g0_tgt=[591, 199]  ck_tgt=1개  ck_dst=1개
+  [40/70] s4_trial_010                   g0_tgt=[404, 183]  ck_tgt=1개  ck_dst=1개
+  [41/70] s5_trial_001                   g0_tgt=[195, 157]  ck_tgt=1개  ck_dst=1개
+  [42/70] s5_trial_002                   g0_tgt=[573, 219]  ck_tgt=1개  ck_dst=2개
+  [43/70] s5_trial_003                   g0_tgt=[381, 190]  ck_tgt=1개  ck_dst=2개
+  [44/70] s5_trial_004                   g0_tgt=[440, 167]  ck_tgt=1개  ck_dst=1개
+  [45/70] s5_trial_005                   g0_tgt=[309, 176]  ck_tgt=1개  ck_dst=2개
+  [46/70] s5_trial_006                   g0_tgt=[369, 175]  ck_tgt=3개  ck_dst=0개
+  [47/70] s5_trial_007                   g0_tgt=[354, 177]  ck_tgt=3개  ck_dst=0개
+  [48/70] s5_trial_008                   g0_tgt=[548, 203]  ck_tgt=3개  ck_dst=0개
+  [49/70] s5_trial_009                   g0_tgt=[402, 173]  ck_tgt=3개  ck_dst=0개
+  [50/70] s5_trial_010                   g0_tgt=[240, 160]  ck_tgt=3개  ck_dst=0개
+  [51/70] s6_trial_001                   g0_tgt=[274, 170]  ck_tgt=1개  ck_dst=1개
+  [52/70] s6_trial_002                   g0_tgt=[538, 173]  ck_tgt=1개  ck_dst=1개
+  [53/70] s6_trial_003                   g0_tgt=[579, 219]  ck_tgt=1개  ck_dst=0개
+  [54/70] s6_trial_004                   g0_tgt=[160, 155]  ck_tgt=1개  ck_dst=1개
+  [55/70] s6_trial_005                   g0_tgt=[272, 175]  ck_tgt=1개  ck_dst=1개
+  [56/70] s6_trial_006                   g0_tgt=[497, 194]  ck_tgt=2개  ck_dst=0개
+  [57/70] s6_trial_007                   g0_tgt=[397, 186]  ck_tgt=1개  ck_dst=0개
+  [58/70] s6_trial_008                   g0_tgt=[563, 210]  ck_tgt=1개  ck_dst=0개
+  [59/70] s6_trial_009                   g0_tgt=[530, 204]  ck_tgt=2개  ck_dst=0개
+  [60/70] s6_trial_010                   g0_tgt=[231, 151]  ck_tgt=1개  ck_dst=0개
+  [61/70] s7_trial_001                   g0_tgt=[566, 211]  ck_tgt=1개  ck_dst=1개
+  [62/70] s7_trial_002                   g0_tgt=[181, 159]  ck_tgt=1개  ck_dst=1개
+  [63/70] s7_trial_003                   g0_tgt=[368, 186]  ck_tgt=1개  ck_dst=1개
+  [64/70] s7_trial_004                   g0_tgt=[311, 178]  ck_tgt=1개  ck_dst=1개
+  [65/70] s7_trial_005                   g0_tgt=[151, 155]  ck_tgt=1개  ck_dst=1개
+  [66/70] s7_trial_006                   g0_tgt=[157, 149]  ck_tgt=1개  ck_dst=1개
+  [67/70] s7_trial_007                   g0_tgt=[225, 158]  ck_tgt=1개  ck_dst=1개
+  [68/70] s7_trial_008                   g0_tgt=[371, 180]  ck_tgt=1개  ck_dst=1개
+  [69/70] s7_trial_009                   g0_tgt=[394, 186]  ck_tgt=1개  ck_dst=1개
+  [70/70] s7_trial_010                   g0_tgt=[549, 207]  ck_tgt=1개  ck_dst=1개
+
+[DINO 완료, VRAM 정리]
+
+[FT 모델 로드] /workspace/COSE461-proj/ckpt/grounding_ft_v2/7wzpjiVc/checkpoint-192
+  [1/2] Loading Molmo-7B...
+Loading checkpoint shards:   0%|          | 0/7 [00:00<?, ?it/s]Loading checkpoint shards:  14%|█▍        | 1/7 [00:12<01:14, 12.43s/it]Loading checkpoint shards:  29%|██▊       | 2/7 [00:25<01:02, 12.56s/it]Loading checkpoint shards:  43%|████▎     | 3/7 [00:38<00:51, 12.95s/it]Loading checkpoint shards:  57%|█████▋    | 4/7 [00:50<00:37, 12.65s/it]Loading checkpoint shards:  71%|███████▏  | 5/7 [01:03<00:25, 12.58s/it]Loading checkpoint shards:  86%|████████▌ | 6/7 [01:15<00:12, 12.42s/it]Loading checkpoint shards: 100%|██████████| 7/7 [01:35<00:00, 15.02s/it]Loading checkpoint shards: 100%|██████████| 7/7 [01:35<00:00, 13.66s/it]
+  [2/2] Merging AmbRes LoRA: /workspace/AmbRes/ckpt/AB5siP8DA78aA78wR5Y8Mw/checkpoint-390
+  [+LoRA] /workspace/COSE461-proj/ckpt/grounding_ft_v2/7wzpjiVc/checkpoint-192
+
+▶ cond2: FT image only
+  [ 1/70] ✗ s1_trial_001                 gold=CONTINUE pred=ASK       q="The cup has moved. Continue with the moved target?"
+  [ 2/70] ✗ s1_trial_002                 gold=CONTINUE pred=ASK       q="The red box has moved. Continue with the moved des"
+  [ 3/70] ✗ s1_trial_003                 gold=CONTINUE pred=ASK       q="The cup has moved. Continue with the moved target?"
+  [ 4/70] ✗ s1_trial_004                 gold=CONTINUE pred=ASK       q="The red box has moved. Continue with the moved des"
+  [ 5/70] ✗ s1_trial_005                 gold=CONTINUE pred=ASK       q="The cup has moved. Continue with the moved target?"
+  [ 6/70] ✗ s1_trial_006                 gold=CONTINUE pred=ASK       q="Which cube would you like me to pick?"
+  [ 7/70] ✗ s1_trial_007                 gold=CONTINUE pred=ASK       q="Which cube would you like me to pick?"
+  [ 8/70] ✗ s1_trial_008                 gold=CONTINUE pred=ASK       q="Which cube would you like me to pick?"
+  [ 9/70] ✗ s1_trial_009                 gold=CONTINUE pred=ASK       q="Which cube would you like me to pick?"
+  [10/70] ✗ s1_trial_010                 gold=CONTINUE pred=ASK       q="Which cube would you like me to pick?"
+  [11/70] ✓ s2_trial_001                 gold=ASK      pred=ASK       q="Which cup would you like me to pick?"
+  [12/70] ✓ s2_trial_002                 gold=ASK      pred=ASK       q="Which cup would you like me to pick?"
+  [13/70] ✓ s2_trial_003                 gold=ASK      pred=ASK       q="Which cup would you like me to pick?"
+  [14/70] ✓ s2_trial_004                 gold=ASK      pred=ASK       q="Which cup would you like me to pick?"
+  [15/70] ✓ s2_trial_005                 gold=ASK      pred=ASK       q="Which cup would you like me to pick?"
+  [16/70] ✓ s2_trial_006                 gold=ASK      pred=ASK       q="Which cube would you like me to pick?"
+  [17/70] ✓ s2_trial_007                 gold=ASK      pred=ASK       q="Which cube would you like me to pick?"
+  [18/70] ✓ s2_trial_008                 gold=ASK      pred=ASK       q="Which cube would you like me to pick?"
+  [19/70] ✓ s2_trial_009                 gold=ASK      pred=ASK       q="Which cube would you like me to pick?"
+  [20/70] ✓ s2_trial_010                 gold=ASK      pred=ASK       q="Which cube would you like me to pick?"
+  [21/70] ✗ s3_trial_001                 gold=STOP     pred=ASK       q="The cup cannot be found in the scene."
+  [22/70] ✗ s3_trial_002                 gold=STOP     pred=ASK       q="The cup cannot be found in the scene."
+  [23/70] ✗ s3_trial_003                 gold=STOP     pred=ASK       q="The cup cannot be found in the scene."
+  [24/70] ✗ s3_trial_004                 gold=STOP     pred=ASK       q="The cup cannot be found in the scene."
+  [25/70] ✗ s3_trial_005                 gold=STOP     pred=ASK       q="The cup cannot be found in the scene."
+  [26/70] ✗ s3_trial_006                 gold=STOP     pred=ASK       q="The cube has moved. Continue with the moved target"
+  [27/70] ✗ s3_trial_007                 gold=STOP     pred=ASK       q="The cube cannot be found in the scene."
+  [28/70] ✗ s3_trial_008                 gold=STOP     pred=ASK       q="The cube cannot be found in the scene."
+  [29/70] ✗ s3_trial_009                 gold=STOP     pred=ASK       q="The cube has moved. Continue with the moved target"
+  [30/70] ✗ s3_trial_010                 gold=STOP     pred=ASK       q="The cube has moved. Continue with the moved target"
+  [31/70] ✓ s4_trial_001                 gold=ASK      pred=ASK       q="The cup has moved. Continue with the moved target?"
+  [32/70] ✓ s4_trial_002                 gold=ASK      pred=ASK       q="The cup is on its side. Should I pick it up and pl"
+  [33/70] ✓ s4_trial_003                 gold=ASK      pred=ASK       q="The cup is tipped over. Continue with this movemen"
+  [34/70] ✓ s4_trial_004                 gold=ASK      pred=ASK       q="The cup is on its side. Should I pick it up and pl"
+  [35/70] ✓ s4_trial_005                 gold=ASK      pred=ASK       q="The cup has moved. Continue with the moved target?"
+  [36/70] ✓ s4_trial_006                 gold=ASK      pred=ASK       q="Which cube would you like me to pick?"
+  [37/70] ✓ s4_trial_007                 gold=ASK      pred=ASK       q="Which cube would you like me to pick?"
+  [38/70] ✓ s4_trial_008                 gold=ASK      pred=ASK       q="Which cube would you like me to pick?"
+  [39/70] ✓ s4_trial_009                 gold=ASK      pred=ASK       q="Which cube would you like me to pick?"
+  [40/70] ✓ s4_trial_010                 gold=ASK      pred=ASK       q="Which cube would you like me to pick?"
+  [41/70] ✓ s5_trial_001                 gold=ASK      pred=ASK       q="Which box should I place it on?"
+  [42/70] ✓ s5_trial_002                 gold=ASK      pred=ASK       q="Which box should I place it on?"
+  [43/70] ✓ s5_trial_003                 gold=ASK      pred=ASK       q="Which box should I place it on?"
+  [44/70] ✓ s5_trial_004                 gold=ASK      pred=ASK       q="Which box should I place it on?"
+  [45/70] ✓ s5_trial_005                 gold=ASK      pred=ASK       q="Which box should I place it on?"
+  [46/70] ✓ s5_trial_006                 gold=ASK      pred=ASK       q="Which box should I place it on?"
+  [47/70] ✓ s5_trial_007                 gold=ASK      pred=ASK       q="Which box should I place it on?"
+  [48/70] ✓ s5_trial_008                 gold=ASK      pred=ASK       q="Which box should I place it on?"
+  [49/70] ✓ s5_trial_009                 gold=ASK      pred=ASK       q="Which box should I place it on?"
+  [50/70] ✓ s5_trial_010                 gold=ASK      pred=ASK       q="Which cube would you like me to pick?"
+  [51/70] ✗ s6_trial_001                 gold=STOP     pred=ASK       q="The red box cannot be found in the scene."
+  [52/70] ✗ s6_trial_002                 gold=STOP     pred=ASK       q="The red box cannot be found in the scene."
+  [53/70] ✗ s6_trial_003                 gold=STOP     pred=ASK       q="The red box cannot be found in the scene."
+  [54/70] ✗ s6_trial_004                 gold=STOP     pred=ASK       q="The red box cannot be found in the scene."
+  [55/70] ✗ s6_trial_005                 gold=STOP     pred=ASK       q="The red box cannot be found in the scene."
+  [56/70] ✗ s6_trial_006                 gold=STOP     pred=ASK       q="The red box cannot be found in the scene."
+  [57/70] ✗ s6_trial_007                 gold=STOP     pred=ASK       q="The red box cannot be found in the scene."
+  [58/70] ✗ s6_trial_008                 gold=STOP     pred=ASK       q="The red box cannot be found in the scene."
+  [59/70] ✗ s6_trial_009                 gold=STOP     pred=ASK       q="Which cube would you like me to pick?"
+  [60/70] ✗ s6_trial_010                 gold=STOP     pred=ASK       q="The red box cannot be found in the scene."
+  [61/70] ✓ s7_trial_001                 gold=ASK      pred=ASK       q="The cup has moved. Continue with the moved target?"
+  [62/70] ✓ s7_trial_002                 gold=ASK      pred=ASK       q="The cup has moved. Continue with the moved target?"
+  [63/70] ✓ s7_trial_003                 gold=ASK      pred=ASK       q="The cup has moved. Continue with the moved target?"
+  [64/70] ✓ s7_trial_004                 gold=ASK      pred=ASK       q="The cup is missing. Continue with the missing targ"
+  [65/70] ✓ s7_trial_005                 gold=ASK      pred=ASK       q="The cup is missing. Continue with the missing targ"
+  [66/70] ✓ s7_trial_006                 gold=ASK      pred=ASK       q="Which cube would you like me to pick?"
+  [67/70] ✓ s7_trial_007                 gold=ASK      pred=ASK       q="Which cube would you like me to pick?"
+  [68/70] ✓ s7_trial_008                 gold=ASK      pred=ASK       q="The cube has moved. Continue with the moved target"
+  [69/70] ✓ s7_trial_009                 gold=ASK      pred=ASK       q="The cube has moved. Continue with the moved target"
+  [70/70] ✓ s7_trial_010                 gold=ASK      pred=ASK       q="Which cube would you like me to pick?"
+
+────────────────────────────────────────────────────────────────
+  cond2: FT image only
+────────────────────────────────────────────────────────────────
+  Accuracy : 57.1%  (40/70)
+  Miss     : 0.0%
+  FAR      : 100.0%
+    AMBIGUOUS_DESTINATION               20/20
+    AMBIGUOUS_TARGET                    20/20
+    CLEAR                               0/10
+    INVALID_DESTINATION                 0/10
+    INVALID_TARGET                      0/10
+
+▶ cond4: FT + DINO, no G0
+  [ 1/70] ✓ s1_trial_001                 gold=CONTINUE pred=CONTINUE  q=""
+  [ 2/70] ✓ s1_trial_002                 gold=CONTINUE pred=CONTINUE  q=""
+  [ 3/70] ✓ s1_trial_003                 gold=CONTINUE pred=CONTINUE  q=""
+  [ 4/70] ✓ s1_trial_004                 gold=CONTINUE pred=CONTINUE  q=""
+  [ 5/70] ✓ s1_trial_005                 gold=CONTINUE pred=CONTINUE  q=""
+  [ 6/70] ✓ s1_trial_006                 gold=CONTINUE pred=CONTINUE  q=""
+  [ 7/70] ✓ s1_trial_007                 gold=CONTINUE pred=CONTINUE  q=""
+  [ 8/70] ✓ s1_trial_008                 gold=CONTINUE pred=CONTINUE  q=""
+  [ 9/70] ✓ s1_trial_009                 gold=CONTINUE pred=CONTINUE  q=""
+  [10/70] ✓ s1_trial_010                 gold=CONTINUE pred=CONTINUE  q=""
+  [11/70] ✓ s2_trial_001                 gold=ASK      pred=ASK       q="Which cup would you like me to pick?"
+  [12/70] ✓ s2_trial_002                 gold=ASK      pred=ASK       q="Which cup would you like me to pick?"
+  [13/70] ✓ s2_trial_003                 gold=ASK      pred=ASK       q="Which cup would you like me to pick?"
+  [14/70] ✓ s2_trial_004                 gold=ASK      pred=ASK       q="Which cup would you like me to pick?"
+  [15/70] ✓ s2_trial_005                 gold=ASK      pred=ASK       q="Which cup would you like me to pick?"
+  [16/70] ✓ s2_trial_006                 gold=ASK      pred=ASK       q="Which cube would you like me to pick?"
+  [17/70] ✓ s2_trial_007                 gold=ASK      pred=ASK       q="Which cube would you like me to pick?"
+  [18/70] ✓ s2_trial_008                 gold=ASK      pred=ASK       q="Which cube would you like me to pick?"
+  [19/70] ✓ s2_trial_009                 gold=ASK      pred=ASK       q="Which cube would you like me to pick?"
+  [20/70] ✓ s2_trial_010                 gold=ASK      pred=ASK       q="Which cube would you like me to pick?"
+  [21/70] ✗ s3_trial_001                 gold=STOP     pred=CONTINUE  q=""
+  [22/70] ✗ s3_trial_002                 gold=STOP     pred=CONTINUE  q=""
+  [23/70] ✗ s3_trial_003                 gold=STOP     pred=CONTINUE  q=""
+  [24/70] ✗ s3_trial_004                 gold=STOP     pred=CONTINUE  q=""
+  [25/70] ✗ s3_trial_005                 gold=STOP     pred=CONTINUE  q=""
+  [26/70] ✓ s3_trial_006                 gold=STOP     pred=STOP      q="The red box cannot be found in the scene."
+  [27/70] ✓ s3_trial_007                 gold=STOP     pred=STOP      q="The red box cannot be found in the scene."
+  [28/70] ✓ s3_trial_008                 gold=STOP     pred=STOP      q="The red box cannot be found in the scene."
+  [29/70] ✓ s3_trial_009                 gold=STOP     pred=STOP      q="The red box cannot be found in the scene."
+  [30/70] ✓ s3_trial_010                 gold=STOP     pred=STOP      q="The red box cannot be found in the scene."
+  [31/70] ✗ s4_trial_001                 gold=ASK      pred=CONTINUE  q=""
+  [32/70] ✗ s4_trial_002                 gold=ASK      pred=CONTINUE  q=""
+  [33/70] ✗ s4_trial_003                 gold=ASK      pred=CONTINUE  q=""
+  [34/70] ✗ s4_trial_004                 gold=ASK      pred=CONTINUE  q=""
+  [35/70] ✗ s4_trial_005                 gold=ASK      pred=CONTINUE  q=""
+  [36/70] ✗ s4_trial_006                 gold=ASK      pred=CONTINUE  q=""
+  [37/70] ✗ s4_trial_007                 gold=ASK      pred=CONTINUE  q=""
+  [38/70] ✗ s4_trial_008                 gold=ASK      pred=CONTINUE  q=""
+  [39/70] ✗ s4_trial_009                 gold=ASK      pred=CONTINUE  q=""
+  [40/70] ✗ s4_trial_010                 gold=ASK      pred=CONTINUE  q=""
+  [41/70] ✗ s5_trial_001                 gold=ASK      pred=CONTINUE  q=""
+  [42/70] ✓ s5_trial_002                 gold=ASK      pred=ASK       q="Which box should I place it on?"
+  [43/70] ✓ s5_trial_003                 gold=ASK      pred=ASK       q="Which box should I place it on?"
+  [44/70] ✗ s5_trial_004                 gold=ASK      pred=CONTINUE  q=""
+  [45/70] ✓ s5_trial_005                 gold=ASK      pred=ASK       q="Which box should I place it on?"
+  [46/70] ✗ s5_trial_006                 gold=ASK      pred=STOP      q="The box cannot be found in the scene."
+  [47/70] ✗ s5_trial_007                 gold=ASK      pred=STOP      q="The box cannot be found in the scene."
+  [48/70] ✗ s5_trial_008                 gold=ASK      pred=STOP      q="The box cannot be found in the scene."
+  [49/70] ✗ s5_trial_009                 gold=ASK      pred=STOP      q="The box cannot be found in the scene."
+  [50/70] ✗ s5_trial_010                 gold=ASK      pred=STOP      q="The box cannot be found in the scene."
+  [51/70] ✗ s6_trial_001                 gold=STOP     pred=CONTINUE  q=""
+  [52/70] ✗ s6_trial_002                 gold=STOP     pred=CONTINUE  q=""
+  [53/70] ✓ s6_trial_003                 gold=STOP     pred=STOP      q="The red box cannot be found in the scene."
+  [54/70] ✗ s6_trial_004                 gold=STOP     pred=CONTINUE  q=""
+  [55/70] ✗ s6_trial_005                 gold=STOP     pred=CONTINUE  q=""
+  [56/70] ✓ s6_trial_006                 gold=STOP     pred=STOP      q="The red box cannot be found in the scene."
+  [57/70] ✓ s6_trial_007                 gold=STOP     pred=STOP      q="The red box cannot be found in the scene."
+  [58/70] ✓ s6_trial_008                 gold=STOP     pred=STOP      q="The red box cannot be found in the scene."
+  [59/70] ✓ s6_trial_009                 gold=STOP     pred=STOP      q="The red box cannot be found in the scene."
+  [60/70] ✓ s6_trial_010                 gold=STOP     pred=STOP      q="The red box cannot be found in the scene."
+  [61/70] ✗ s7_trial_001                 gold=ASK      pred=CONTINUE  q=""
+  [62/70] ✗ s7_trial_002                 gold=ASK      pred=CONTINUE  q=""
+  [63/70] ✗ s7_trial_003                 gold=ASK      pred=CONTINUE  q=""
+  [64/70] ✗ s7_trial_004                 gold=ASK      pred=CONTINUE  q=""
+  [65/70] ✗ s7_trial_005                 gold=ASK      pred=CONTINUE  q=""
+  [66/70] ✗ s7_trial_006                 gold=ASK      pred=CONTINUE  q=""
+  [67/70] ✗ s7_trial_007                 gold=ASK      pred=CONTINUE  q=""
+  [68/70] ✗ s7_trial_008                 gold=ASK      pred=CONTINUE  q=""
+  [69/70] ✗ s7_trial_009                 gold=ASK      pred=CONTINUE  q=""
+  [70/70] ✗ s7_trial_010                 gold=ASK      pred=CONTINUE  q=""
+
+────────────────────────────────────────────────────────────────
+  cond4: FT + DINO, no G0
+────────────────────────────────────────────────────────────────
+  Accuracy : 48.6%  (34/70)
+  Miss     : 51.7%
+  FAR      : 0.0%
+    AMBIGUOUS_DESTINATION               3/20
+    AMBIGUOUS_TARGET                    10/20
+    CLEAR                               10/10
+    INVALID_DESTINATION                 6/10
+    INVALID_TARGET                      5/10
+
+[VRAM 정리]
+
+════════════════════════════════════════════════════════════════
+  최종 비교 (Holdout — vla-evaluation-v4)
+════════════════════════════════════════════════════════════════
+  조건                                     Acc   Miss    FAR
+  ─────────────────────────────────────────────────────
+  cond2: FT image only                 57.1%   0.0% 100.0%
+  cond4: FT + DINO, no G0              48.6%  51.7%   0.0%
+
+저장: /workspace/COSE461-proj/logs/eval_holdout_v2_fixed.csv
+메트릭: /workspace/COSE461-proj/logs/eval_holdout_v2_fixed_metrics.json

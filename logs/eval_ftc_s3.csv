@@ -1,0 +1,11 @@
+id,scenario,gold_state,gold_decision,predicted_decision,correct,clarifying_question
+s3_trial_001,S3,INVALID_TARGET,STOP,STOP,True,The cup cannot be found in the scene.
+s3_trial_002,S3,INVALID_TARGET,STOP,STOP,True,The cup cannot be found in the scene.
+s3_trial_003,S3,INVALID_TARGET,STOP,STOP,True,The cup cannot be found in the scene.
+s3_trial_004,S3,INVALID_TARGET,STOP,STOP,True,The cup cannot be found in the scene.
+s3_trial_005,S3,INVALID_TARGET,STOP,STOP,True,The cup cannot be found in the scene.
+s3_trial_006,S3,INVALID_TARGET,STOP,ASK,False,Which cube would you like me to pick?
+s3_trial_007,S3,INVALID_TARGET,STOP,ASK,False,Which cube would you like me to pick?
+s3_trial_008,S3,INVALID_TARGET,STOP,ASK,False,Which cube would you like me to pick?
+s3_trial_009,S3,INVALID_TARGET,STOP,ASK,False,Which cube would you like me to pick?
+s3_trial_010,S3,INVALID_TARGET,STOP,ASK,False,Which cube would you like me to pick?

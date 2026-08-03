@@ -1,0 +1,33 @@
+/usr/local/lib/python3.11/dist-packages/huggingface_hub/file_download.py:986: UserWarning: `local_dir_use_symlinks` parameter is deprecated and will be ignored. The process to download files to a local folder has been updated and do not rely on symlinks anymore. You only need to pass a destination folder as`local_dir`.
+For more details, check out https://huggingface.co/docs/huggingface_hub/main/en/guides/download#download-files-to-local-folder.
+  warnings.warn(
+원본 항목: 61개
+  [중복 제거] s3_trial_006
+중복 제거 후: 60개
+  진행: 10/60
+  진행: 20/60
+  진행: 30/60
+  진행: 40/60
+  진행: 50/60
+  진행: 60/60
+
+생성 완료: dataset/ambres-training/manifest_train_local.jsonl  (60개)
+gold_decision : {'CONTINUE': 20, 'ASK': 30, 'STOP': 10}
+scenario      : {'S1': 10, 'S2': 10, 'S3': 10, 'S4': 10, 'S5': 10, 'S6': 10}
+checkpoint    : {'C1': 50, 'C2': 10}
+
+예시:
+{
+  "id": "s1_trial_001",
+  "scenario": "S1",
+  "task": "pick the cup and put it in the red box",
+  "initial_img": "/workspace/train_imgs/train_s1_trial_001_t0.png",
+  "c1_img": "/workspace/train_imgs/train_s1_trial_001_c1.png",
+  "c2_img": "/workspace/train_imgs/train_s1_trial_001_c2.png",
+  "checkpoint": "C1",
+  "gold_state": "CLEAR",
+  "gold_decision": "CONTINUE",
+  "target_label": "cup",
+  "destination_label": "red box",
+  "notes": "(none — keep the scene as is)"
+}

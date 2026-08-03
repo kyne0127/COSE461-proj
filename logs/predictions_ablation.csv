@@ -1,0 +1,61 @@
+sample_id,scenario,method,checkpoint,gold_state,gold_decision,predicted_decision,predicted_state,reason,question,correct
+s1_trial_001,S1,VLM_IMG_ONLY,C1,CLEAR,CONTINUE,ASK,,VLM detected grounding anomaly: Which cup do you mean?,Which cup do you mean?,False
+s1_trial_001,S1,VLM_TAX,C1,CLEAR,CONTINUE,ASK,,VLM detected grounding anomaly: Which red box do you mean?,Which red box do you mean?,False
+s1_trial_001,S1,VLM_TAX_DINO,C1,CLEAR,CONTINUE,ASK,,VLM detected grounding anomaly: Which cup do you mean?,Which cup do you mean?,False
+s1_trial_001,S1,VLM_BLANK_DINO,C1,CLEAR,CONTINUE,ASK,,VLM detected grounding anomaly: Which 'cup' do you mean?,Which 'cup' do you mean?,False
+s1_trial_002,S1,VLM_IMG_ONLY,C1,CLEAR,CONTINUE,CONTINUE,,VLM judged grounding still valid,,True
+s1_trial_002,S1,VLM_TAX,C1,CLEAR,CONTINUE,ASK,,VLM detected grounding anomaly: Which cup do you want me to pick?,Which cup do you want me to pick?,False
+s1_trial_002,S1,VLM_TAX_DINO,C1,CLEAR,CONTINUE,CONTINUE,,VLM judged grounding still valid,,True
+s1_trial_002,S1,VLM_BLANK_DINO,C1,CLEAR,CONTINUE,CONTINUE,,VLM judged grounding still valid,,True
+s1_trial_003,S1,VLM_IMG_ONLY,C1,CLEAR,CONTINUE,CONTINUE,,VLM judged grounding still valid,,True
+s1_trial_003,S1,VLM_TAX,C1,CLEAR,CONTINUE,CONTINUE,,VLM judged grounding still valid,,True
+s1_trial_003,S1,VLM_TAX_DINO,C1,CLEAR,CONTINUE,ASK,,VLM detected grounding anomaly: Which cup do you mean?,Which cup do you mean?,False
+s1_trial_003,S1,VLM_BLANK_DINO,C1,CLEAR,CONTINUE,ASK,,VLM detected grounding anomaly: Which cup do you mean?,Which cup do you mean?,False
+s1_trial_004,S1,VLM_IMG_ONLY,C1,CLEAR,CONTINUE,ASK,,VLM detected grounding anomaly: Which cup do you mean?,Which cup do you mean?,False
+s1_trial_004,S1,VLM_TAX,C1,CLEAR,CONTINUE,ASK,,VLM detected grounding anomaly: Which cup do you mean?,Which cup do you mean?,False
+s1_trial_004,S1,VLM_TAX_DINO,C1,CLEAR,CONTINUE,ASK,,VLM detected grounding anomaly: Which box do you want?,Which box do you want?,False
+s1_trial_004,S1,VLM_BLANK_DINO,C1,CLEAR,CONTINUE,CONTINUE,,VLM judged grounding still valid,,True
+s1_trial_005,S1,VLM_IMG_ONLY,C1,CLEAR,CONTINUE,ASK,,VLM detected grounding anomaly: Which cup do you mean?,Which cup do you mean?,False
+s1_trial_005,S1,VLM_TAX,C1,CLEAR,CONTINUE,CONTINUE,,VLM judged grounding still valid,,True
+s1_trial_005,S1,VLM_TAX_DINO,C1,CLEAR,CONTINUE,ASK,,VLM detected grounding anomaly: Which cup do you mean?,Which cup do you mean?,False
+s1_trial_005,S1,VLM_BLANK_DINO,C1,CLEAR,CONTINUE,ASK,,VLM detected grounding anomaly: Which one do you mean?,Which one do you mean?,False
+s1_trial_006,S1,VLM_IMG_ONLY,C1,CLEAR,CONTINUE,CONTINUE,,VLM judged grounding still valid,,True
+s1_trial_006,S1,VLM_TAX,C1,CLEAR,CONTINUE,ASK,,VLM detected grounding anomaly: Which cube do you mean?,Which cube do you mean?,False
+s1_trial_006,S1,VLM_TAX_DINO,C1,CLEAR,CONTINUE,ASK,,VLM detected grounding anomaly: Which cube do you mean?,Which cube do you mean?,False
+s1_trial_006,S1,VLM_BLANK_DINO,C1,CLEAR,CONTINUE,CONTINUE,,VLM judged grounding still valid,,True
+s1_trial_007,S1,VLM_IMG_ONLY,C1,CLEAR,CONTINUE,ASK,,VLM detected grounding anomaly: Which cube do you mean?,Which cube do you mean?,False
+s1_trial_007,S1,VLM_TAX,C1,CLEAR,CONTINUE,ASK,,VLM detected grounding anomaly: Which box do you mean?,Which box do you mean?,False
+s1_trial_007,S1,VLM_TAX_DINO,C1,CLEAR,CONTINUE,CONTINUE,,VLM judged grounding still valid,,True
+s1_trial_007,S1,VLM_BLANK_DINO,C1,CLEAR,CONTINUE,ASK,,VLM detected grounding anomaly: Which box do you mean?,Which box do you mean?,False
+s1_trial_008,S1,VLM_IMG_ONLY,C1,CLEAR,CONTINUE,ASK,,VLM detected grounding anomaly: Which cube would you like me to pick?,Which cube would you like me to pick?,False
+s1_trial_008,S1,VLM_TAX,C1,CLEAR,CONTINUE,ASK,,VLM detected grounding anomaly: Which cube do you mean?,Which cube do you mean?,False
+s1_trial_008,S1,VLM_TAX_DINO,C1,CLEAR,CONTINUE,CONTINUE,,VLM judged grounding still valid,,True
+s1_trial_008,S1,VLM_BLANK_DINO,C1,CLEAR,CONTINUE,ASK,,VLM detected grounding anomaly: Which cube do you mean?,Which cube do you mean?,False
+s1_trial_009,S1,VLM_IMG_ONLY,C1,CLEAR,CONTINUE,ASK,,VLM detected grounding anomaly: Which cube do you mean?,Which cube do you mean?,False
+s1_trial_009,S1,VLM_TAX,C1,CLEAR,CONTINUE,ASK,,VLM detected grounding anomaly: Which cube do you mean?,Which cube do you mean?,False
+s1_trial_009,S1,VLM_TAX_DINO,C1,CLEAR,CONTINUE,CONTINUE,,VLM judged grounding still valid,,True
+s1_trial_009,S1,VLM_BLANK_DINO,C1,CLEAR,CONTINUE,CONTINUE,,VLM judged grounding still valid,,True
+s1_trial_010,S1,VLM_IMG_ONLY,C1,CLEAR,CONTINUE,CONTINUE,,VLM judged grounding still valid,,True
+s1_trial_010,S1,VLM_TAX,C1,CLEAR,CONTINUE,ASK,,VLM detected grounding anomaly: Which cube do you mean?,Which cube do you mean?,False
+s1_trial_010,S1,VLM_TAX_DINO,C1,CLEAR,CONTINUE,ASK,,VLM detected grounding anomaly: Which cube do you mean?,Which cube do you mean?,False
+s1_trial_010,S1,VLM_BLANK_DINO,C1,CLEAR,CONTINUE,CONTINUE,,VLM judged grounding still valid,,True
+s2_trial_001,S2,VLM_IMG_ONLY,C1,AMBIGUOUS_TARGET,ASK,ASK,,VLM detected grounding anomaly: Which cup do you mean?,Which cup do you mean?,True
+s2_trial_001,S2,VLM_TAX,C1,AMBIGUOUS_TARGET,ASK,ASK,,VLM detected grounding anomaly: Which cup do you mean?,Which cup do you mean?,True
+s2_trial_001,S2,VLM_TAX_DINO,C1,AMBIGUOUS_TARGET,ASK,ASK,,VLM detected grounding anomaly: Which cup do you mean?,Which cup do you mean?,True
+s2_trial_001,S2,VLM_BLANK_DINO,C1,AMBIGUOUS_TARGET,ASK,ASK,,VLM detected grounding anomaly: Which object do you mean?,Which object do you mean?,True
+s2_trial_002,S2,VLM_IMG_ONLY,C1,AMBIGUOUS_TARGET,ASK,ASK,,VLM detected grounding anomaly: Which cup do you mean?,Which cup do you mean?,True
+s2_trial_002,S2,VLM_TAX,C1,AMBIGUOUS_TARGET,ASK,ASK,,VLM detected grounding anomaly: Which cup do you mean?,Which cup do you mean?,True
+s2_trial_002,S2,VLM_TAX_DINO,C1,AMBIGUOUS_TARGET,ASK,ASK,,VLM detected grounding anomaly: Which cup do you mean?,Which cup do you mean?,True
+s2_trial_002,S2,VLM_BLANK_DINO,C1,AMBIGUOUS_TARGET,ASK,ASK,,VLM detected grounding anomaly: Which cup do you mean?,Which cup do you mean?,True
+s2_trial_003,S2,VLM_IMG_ONLY,C1,AMBIGUOUS_TARGET,ASK,CONTINUE,,VLM judged grounding still valid,,False
+s2_trial_003,S2,VLM_TAX,C1,AMBIGUOUS_TARGET,ASK,ASK,,VLM detected grounding anomaly: Which cup do you mean?,Which cup do you mean?,True
+s2_trial_003,S2,VLM_TAX_DINO,C1,AMBIGUOUS_TARGET,ASK,ASK,,VLM detected grounding anomaly: Which one do you want me to pick?,Which one do you want me to pick?,True
+s2_trial_003,S2,VLM_BLANK_DINO,C1,AMBIGUOUS_TARGET,ASK,CONTINUE,,VLM judged grounding still valid,,False
+s2_trial_004,S2,VLM_IMG_ONLY,C1,AMBIGUOUS_TARGET,ASK,ASK,,VLM detected grounding anomaly: Which cup do you mean?,Which cup do you mean?,True
+s2_trial_004,S2,VLM_TAX,C1,AMBIGUOUS_TARGET,ASK,ASK,,VLM detected grounding anomaly: Which cup would you like me to pick?,Which cup would you like me to pick?,True
+s2_trial_004,S2,VLM_TAX_DINO,C1,AMBIGUOUS_TARGET,ASK,ASK,,VLM detected grounding anomaly: Which cup do you mean?,Which cup do you mean?,True
+s2_trial_004,S2,VLM_BLANK_DINO,C1,AMBIGUOUS_TARGET,ASK,ASK,,VLM detected grounding anomaly: Which cup is meant?,Which cup is meant?,True
+s2_trial_005,S2,VLM_IMG_ONLY,C1,AMBIGUOUS_TARGET,ASK,ASK,,VLM detected grounding anomaly: Which cup do you mean?,Which cup do you mean?,True
+s2_trial_005,S2,VLM_TAX,C1,AMBIGUOUS_TARGET,ASK,ASK,,VLM detected grounding anomaly: Which cup do you mean?,Which cup do you mean?,True
+s2_trial_005,S2,VLM_TAX_DINO,C1,AMBIGUOUS_TARGET,ASK,CONTINUE,,VLM judged grounding still valid,,False
+s2_trial_005,S2,VLM_BLANK_DINO,C1,AMBIGUOUS_TARGET,ASK,ASK,,VLM detected grounding anomaly: Which 'cup' do you mean?,Which 'cup' do you mean?,True

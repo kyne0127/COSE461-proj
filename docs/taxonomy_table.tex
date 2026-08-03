@@ -1,0 +1,73 @@
+% Grounding State Taxonomy Table
+% Insert in paper with: \input{taxonomy_table}
+% Requires: \usepackage{booktabs, multirow, xcolor, array}
+
+\definecolor{stopred}{RGB}{220,50,50}
+\definecolor{askamber}{RGB}{200,140,0}
+\definecolor{contgreen}{RGB}{40,150,60}
+
+\begin{table}[t]
+\centering
+\caption{Grounding State Taxonomy and Decision Policy.
+$n_\text{tgt}$ and $n_\text{dst}$ denote GroundingDINO detection counts for the
+target and destination at checkpoint $G_t$.
+$d(\cdot,\cdot)$ is Euclidean pixel distance; $\theta$ is a position threshold.
+$G_0$ stores the reference coordinates extracted at $t_0$.}
+\label{tab:taxonomy}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{lllll}
+\toprule
+\textbf{State} &
+\textbf{Condition} ($G_0$ vs $G_t$) &
+\textbf{Trigger} &
+\textbf{Ckpt} &
+\textbf{Decision} \\
+\midrule
+
+\textsc{Clear}
+  & $n_\text{tgt}{=}1,\; d(G_0^\text{tgt}, G_t^\text{tgt}) \leq \theta$
+  & Both objects at expected positions
+  & C1\,\&\,C2
+  & \textcolor{contgreen}{\textbf{Continue}} \\[2pt]
+
+\midrule
+
+\multirow{2}{*}{\textsc{Ambiguous}\textsubscript{target}}
+  & $n_\text{tgt} > 1$
+  & Multiple target candidates
+  & \multirow{2}{*}{C1}
+  & \multirow{2}{*}{\textcolor{askamber}{\textbf{Ask}}} \\
+  & $n_\text{tgt}{=}1,\; d(G_0^\text{tgt}, G_t^\text{tgt}) > \theta$
+  & Target displaced from $G_0$
+  & & \\[2pt]
+
+\midrule
+
+\textsc{Invalid}\textsubscript{target}
+  & $n_\text{tgt} = 0$
+  & Target absent from scene
+  & C1
+  & \textcolor{stopred}{\textbf{Stop}} \\[2pt]
+
+\midrule
+
+\multirow{2}{*}{\textsc{Ambiguous}\textsubscript{dest}}
+  & $n_\text{dst} > 1$
+  & Multiple destination candidates
+  & \multirow{2}{*}{C2}
+  & \multirow{2}{*}{\textcolor{askamber}{\textbf{Ask}}} \\
+  & $n_\text{dst}{=}1,\; d(G_0^\text{dst}, G_t^\text{dst}) > \theta$
+  & Destination displaced from $G_0$
+  & & \\[2pt]
+
+\midrule
+
+\textsc{Invalid}\textsubscript{dest}
+  & $n_\text{dst} = 0$
+  & Destination absent from scene
+  & C2
+  & \textcolor{stopred}{\textbf{Stop}} \\
+
+\bottomrule
+\end{tabular}
+\end{table}

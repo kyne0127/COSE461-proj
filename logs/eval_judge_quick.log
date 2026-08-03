@@ -1,0 +1,616 @@
+INFO __main__: Loaded 6 samples
+INFO __main__: Loading AmbRes handler (fs_prompt) …
+INFO module.models.ambres.handler: AmbResHandler.setup: model_type=fs_prompt  use_detection=False  use_sam=False
+Using a slow image processor as `use_fast` is unset and a slow processor was saved with this model. `use_fast=True` will be the default behavior in v4.48, even if the model was saved with a slow processor. This will result in minor differences in outputs. You'll still be able to use a slow processor with `use_fast=False`.
+Loading checkpoint shards:   0%|          | 0/7 [00:00<?, ?it/s]Loading checkpoint shards:  14%|█▍        | 1/7 [00:09<00:57,  9.55s/it]Loading checkpoint shards:  29%|██▊       | 2/7 [00:20<00:51, 10.27s/it]Loading checkpoint shards:  43%|████▎     | 3/7 [00:29<00:39, 10.00s/it]Loading checkpoint shards:  57%|█████▋    | 4/7 [00:39<00:29,  9.92s/it]Loading checkpoint shards:  71%|███████▏  | 5/7 [00:49<00:19,  9.79s/it]Loading checkpoint shards:  86%|████████▌ | 6/7 [00:58<00:09,  9.50s/it]Loading checkpoint shards: 100%|██████████| 7/7 [01:14<00:00, 11.85s/it]Loading checkpoint shards: 100%|██████████| 7/7 [01:14<00:00, 10.71s/it]
+INFO module.models.ambres.handler: AmbResHandler: ready (model_type=fs_prompt)
+INFO __main__: Loading GroundingDINO (box=0.25, text=0.25) …
+INFO module.models.ambres.gdino: GroundingDINO: loading IDEA-Research/grounding-dino-base on cuda …
+/usr/local/lib/python3.11/dist-packages/torch/utils/cpp_extension.py:1965: UserWarning: TORCH_CUDA_ARCH_LIST is not set, all archs for visible cards are included for compilation. 
+If this is not desired, please set os.environ['TORCH_CUDA_ARCH_LIST'].
+  warnings.warn(
+INFO module.models.ambres.gdino: GroundingDINO: ready  box_thr=0.25  text_thr=0.25  enrich=True
+INFO __main__: Models ready.
+INFO __main__: [1/6] s1_trial_001  method=memory_vlm_judge
+INFO memory_pipeline.pipeline: Memory t0: target=cup@[219, 151]  dest=red box@[466, 198]
+INFO ambres.ambres_model: [STEP1 raw] {"task_objects": ["cup", "red box"]}
+INFO ambres.ambres_model: [STEP2 raw] {"task_ambiguous": true, "explanation": "We don't know which way the cup is facing", "clarifying_question": "Do you know if the cup is right side up or upside down?"}
+INFO ambres.ambres_model: [STEP2 parsed] ambiguous=True | explanation=We don't know which way the cup is facing | question=Do you know if the cup is right side up or upside down?
+INFO ambres.inference: ══════════════════════════════════════════════════════════════════════
+[QUERY]  session=s1_trial_001_memory_vlm_judge_c1
+  task : pick the cup and put it in the red box
+
+[Episode Memory — prior observations]
+[t0]
+  target 'cup': detected at [219, 151]
+  destination 'red box': detected at [466, 198]
+[Now evaluating: C1]
+  image: 672x376
+
+  ┌─ STEP 1: Object Grounding (greedy)
+  │  추출된 작업 객체: ['cup', 'red box']
+
+  ├─ STEP 2: Instance Detection (detect_pretty)
+  │    'cup'                → 1개  ✓ 단일
+  │                           pts_raw: [[np.float64(221.0), np.float64(147.0)]]
+  │                           coords: (221,147)
+  │    'red box'            → 1개  ✓ 단일
+  │                           pts_raw: [[np.float64(456.0), np.float64(203.0)]]
+  │                           coords: (456,203)
+
+  ├─ STEP 3: Ambiguity Reasoning (do_sample=True)
+  │  ambiguous : True
+  │  explanation: We don't know which way the cup is facing
+  │  question  : Do you know if the cup is right side up or upside down?
+
+  └─ 처리 시간: 13.74s
+══════════════════════════════════════════════════════════════════════
+INFO ambres.inference: ──────────────────────────────────────────────────────────────────────
+[RESPOND]  session=s1_trial_001_memory_vlm_judge_c1
+  user_response: 
+  task_objects: ['cup', 'red box']
+  task_ambiguous: None
+  clarifying_question: 
+  explanation: 
+  elapsed_s: 2.83
+INFO memory_pipeline.vlm_judge: VLM judge C1 raw: {"decision":"ASK","explanation":"There are 2 white cups present in the scene, so the robot cannot determine which one is the target. The rule states to ASK when there are 2+ instances. The correct action would be for the human operator to specify which cup, or provide additional instructions for object selection."}
+INFO memory_pipeline.vlm_judge: VLM judge C1: decision=ASK state=AMBIGUOUS_TARGET  (t0 cup:1/red box:1 → ck cup:1/red box:1)
+INFO memory_pipeline.pipeline: Memory C1 (judge): state=AMBIGUOUS_TARGET decision=ASK
+INFO memory_pipeline.pipeline: Memory C1: using VLM question: [C1] There are 2 white cups present in the scene, so the robot cannot determine which one is the target. The rule states to ASK when there are 2+ instances. The correct action would be for the human operator to specify which cup, or provide additional instructions for object selection.
+INFO ambres.ambres_model: [STEP1 raw] {"task_objects": ["cup", "red box"]}
+INFO ambres.ambres_model: [STEP2 raw] {"task_ambiguous": true, "explanation": "There are 2 white cups", "clarifying_question": "Which cup do you mean?"}
+INFO ambres.ambres_model: [STEP2 parsed] ambiguous=True | explanation=There are 2 white cups | question=Which cup do you mean?
+INFO ambres.inference: ══════════════════════════════════════════════════════════════════════
+[QUERY]  session=s1_trial_001_memory_vlm_judge_c2
+  task : pick the cup and put it in the red box
+
+[Episode Memory — prior observations]
+[t0]
+  target 'cup': detected at [219, 151]
+  destination 'red box': detected at [466, 198]
+[C1]
+  target 'cup': detected at [219, 151]
+  destination 'red box': detected at [467, 198]
+  decision: ASK  (state: AMBIGUOUS_TARGET)
+  ambiguity reason: There are 2 white cups present in the scene, so the robot cannot determine which one is the target. The rule states to ASK when there are 2+ instances. The correct action would be for the human operator to specify which cup, or provide additional instructions for object selection.
+[Now evaluating: C2]
+  image: 672x376
+
+  ┌─ STEP 1: Object Grounding (greedy)
+  │  추출된 작업 객체: ['cup', 'red box']
+
+  ├─ STEP 2: Instance Detection (detect_pretty)
+  │    'cup'                → 1개  ✓ 단일
+  │                           pts_raw: [[np.float64(221.0), np.float64(147.0)]]
+  │                           coords: (221,147)
+  │    'red box'            → 1개  ✓ 단일
+  │                           pts_raw: [[np.float64(456.0), np.float64(191.0)]]
+  │                           coords: (456,191)
+
+  ├─ STEP 3: Ambiguity Reasoning (do_sample=True)
+  │  ambiguous : True
+  │  explanation: There are 2 white cups
+  │  question  : Which cup do you mean?
+
+  └─ 처리 시간: 11.82s
+══════════════════════════════════════════════════════════════════════
+INFO ambres.inference: ──────────────────────────────────────────────────────────────────────
+[RESPOND]  session=s1_trial_001_memory_vlm_judge_c2
+  user_response: 
+  task_objects: ['cup', 'red box']
+  task_ambiguous: None
+  clarifying_question: 
+  explanation: 
+  elapsed_s: 2.64
+INFO memory_pipeline.vlm_judge: VLM judge C2 raw: {"decision": "ASK", "explanation": "More than one red box is detected, so the robot cannot determine which specific box you want to use as the destination for the mug."}
+INFO memory_pipeline.vlm_judge: VLM judge C2: decision=ASK state=AMBIGUOUS_DESTINATION  (t0 cup:1/red box:1 → ck cup:1/red box:1)
+INFO memory_pipeline.pipeline: Memory C2 (judge): state=AMBIGUOUS_DESTINATION decision=ASK
+INFO memory_pipeline.pipeline: Memory C2: using VLM question: [C2] More than one red box is detected, so the robot cannot determine which specific box you want to use as the destination for the mug.
+INFO __main__:   FAIL  gold=CONTINUE  pred=ASK
+INFO __main__: [2/6] s2_trial_001  method=memory_vlm_judge
+INFO memory_pipeline.pipeline: Memory t0: target=cup@[271, 188]  dest=red box@[478, 195]
+INFO memory_pipeline.pipeline: Memory C1 changes: target 'cup' count increased 1 → 2
+INFO ambres.ambres_model: [STEP1 raw] {"task_objects": ["cup", "red box"]}
+INFO ambres.ambres_model: [STEP2 raw] {"task_ambiguous": true, "explanation": "More than one mug is identified", "clarifying_question": "Which cup do you want to put in the box?"}
+INFO ambres.ambres_model: [STEP2 parsed] ambiguous=True | explanation=More than one mug is identified | question=Which cup do you want to put in the box?
+INFO ambres.inference: ══════════════════════════════════════════════════════════════════════
+[QUERY]  session=s2_trial_001_memory_vlm_judge_c1
+  task : pick the cup and put it in the red box
+
+[Episode Memory — prior observations]
+[t0]
+  target 'cup': detected at [271, 188]
+  destination 'red box': detected at [478, 195]
+[Now evaluating: C1]
+  image: 672x376
+
+  ┌─ STEP 1: Object Grounding (greedy)
+  │  추출된 작업 객체: ['cup', 'red box']
+
+  ├─ STEP 2: Instance Detection (detect_pretty)
+  │    'cup'                → 2개  ⚠ 복수 인스턴스!
+  │                           pts_raw: [[np.float64(274.0), np.float64(186.0)], [np.float64(362.0), np.float64(158.0)]]
+  │                           coords: (274,186), (362,158)
+  │    'red box'            → 1개  ✓ 단일
+  │                           pts_raw: [[np.float64(463.0), np.float64(199.0)]]
+  │                           coords: (463,199)
+
+  ├─ STEP 3: Ambiguity Reasoning (do_sample=True)
+  │  ambiguous : True
+  │  explanation: More than one mug is identified
+  │  question  : Which cup do you want to put in the box?
+
+  └─ 처리 시간: 11.93s
+══════════════════════════════════════════════════════════════════════
+INFO ambres.inference: ──────────────────────────────────────────────────────────────────────
+[RESPOND]  session=s2_trial_001_memory_vlm_judge_c1
+  user_response: 
+  task_objects: ['cup', 'red box']
+  task_ambiguous: None
+  clarifying_question: 
+  explanation: 
+  elapsed_s: 2.40
+INFO memory_pipeline.vlm_judge: VLM judge C1 raw: { "decision": "ASK" ,"explanation": "There are 2 cups present, which makes the task ambiguous."}
+INFO memory_pipeline.vlm_judge: VLM judge C1: decision=ASK state=AMBIGUOUS_TARGET  (t0 cup:1/red box:1 → ck cup:2/red box:1)
+INFO memory_pipeline.pipeline: Memory C1 (judge): state=AMBIGUOUS_TARGET decision=ASK
+INFO memory_pipeline.pipeline: Memory C1: using VLM question: [C1] There are 2 cups present, which makes the task ambiguous.
+INFO ambres.ambres_model: [STEP1 raw] {"task_objects": ["cup", "red box"]}
+INFO ambres.ambres_model: [STEP2 raw] {"task_ambiguous": true, "explanation": "There are 2 cups present", "clarifying_question": "How many cups should I pick?"}
+INFO ambres.ambres_model: [STEP2 parsed] ambiguous=True | explanation=There are 2 cups present | question=How many cups should I pick?
+INFO ambres.inference: ══════════════════════════════════════════════════════════════════════
+[QUERY]  session=s2_trial_001_memory_vlm_judge_c2
+  task : pick the cup and put it in the red box
+
+[Episode Memory — prior observations]
+[t0]
+  target 'cup': detected at [271, 188]
+  destination 'red box': detected at [478, 195]
+[C1]
+  target 'cup': 2 instances detected at [272, 190], [362, 158]
+  destination 'red box': detected at [479, 195]
+  changes: target 'cup' count increased 1 → 2
+  decision: ASK  (state: AMBIGUOUS_TARGET)
+  ambiguity reason: There are 2 cups present, which makes the task ambiguous.
+[Now evaluating: C2]
+[Scene changes detected: target 'cup' count increased 1 → 2]
+[If asking a clarifying question, reference the specific changes above rather than asking a generic question]
+  image: 672x376
+
+  ┌─ STEP 1: Object Grounding (greedy)
+  │  추출된 작업 객체: ['cup', 'red box']
+
+  ├─ STEP 2: Instance Detection (detect_pretty)
+  │    'cup'                → 2개  ⚠ 복수 인스턴스!
+  │                           pts_raw: [[np.float64(274.0), np.float64(186.0)], [np.float64(361.0), np.float64(158.0)]]
+  │                           coords: (274,186), (361,158)
+  │    'red box'            → 1개  ✓ 단일
+  │                           pts_raw: [[np.float64(471.0), np.float64(210.0)]]
+  │                           coords: (471,210)
+
+  ├─ STEP 3: Ambiguity Reasoning (do_sample=True)
+  │  ambiguous : True
+  │  explanation: There are 2 cups present
+  │  question  : How many cups should I pick?
+
+  └─ 처리 시간: 10.50s
+══════════════════════════════════════════════════════════════════════
+INFO ambres.inference: ──────────────────────────────────────────────────────────────────────
+[RESPOND]  session=s2_trial_001_memory_vlm_judge_c2
+  user_response: 
+  task_objects: ['cup', 'red box']
+  task_ambiguous: None
+  clarifying_question: 
+  explanation: 
+  elapsed_s: 2.28
+INFO memory_pipeline.vlm_judge: VLM judge C2 raw: {"decision": "ASK", "explanation": "There is more than 1 red box present, so the robot is instructed to ask for further guidance to determine which one to use."}
+INFO memory_pipeline.vlm_judge: VLM judge C2: decision=ASK state=AMBIGUOUS_DESTINATION  (t0 cup:1/red box:1 → ck cup:2/red box:1)
+INFO memory_pipeline.pipeline: Memory C2 (judge): state=AMBIGUOUS_DESTINATION decision=ASK
+INFO memory_pipeline.pipeline: Memory C2: using VLM question: [C2] There is more than 1 red box present, so the robot is instructed to ask for further guidance to determine which one to use.
+INFO __main__:   OK   gold=ASK  pred=ASK
+INFO __main__: [3/6] s3_trial_001  method=memory_vlm_judge
+INFO memory_pipeline.pipeline: Memory t0: target=cup@[312, 197]  dest=red box@[460, 197]
+INFO memory_pipeline.pipeline: Memory C1 changes: target 'cup' moved 137px ([312, 197] → [330, 61])
+INFO ambres.ambres_model: [STEP1 raw] {"task_objects": ["cup", "red box"]}
+INFO ambres.ambres_model: [STEP2 raw] {"task_ambiguous": false, "explanation": "All objects are uniquely identified", "clarifying_question": "Everything is clear"}
+INFO ambres.ambres_model: [STEP2 parsed] ambiguous=False | explanation=All objects are uniquely identified | question=
+/workspace/AmbRes/ambres/molmo_chat.py:39: UserWarning: Invalid location format
+  warnings.warn("Invalid location format")
+INFO ambres.inference: ══════════════════════════════════════════════════════════════════════
+[QUERY]  session=s3_trial_001_memory_vlm_judge_c1
+  task : pick the cup and put it in the red box
+
+[Episode Memory — prior observations]
+[t0]
+  target 'cup': detected at [312, 197]
+  destination 'red box': detected at [460, 197]
+[Now evaluating: C1]
+  image: 672x376
+
+  ┌─ STEP 1: Object Grounding (greedy)
+  │  추출된 작업 객체: ['cup', 'red box']
+
+  ├─ STEP 2: Instance Detection (detect_pretty)
+  │    'cup'                → 0개  ✓ 단일
+  │                           pts_raw: []
+  │                           coords: 
+  │    'red box'            → 1개  ✓ 단일
+  │                           pts_raw: [[np.float64(456.0), np.float64(210.0)]]
+  │                           coords: (456,210)
+
+  ├─ STEP 3: Ambiguity Reasoning (do_sample=True)
+  │  ambiguous : False
+  │  explanation: All objects are uniquely identified
+  │  question  : (없음)
+
+  └─ 처리 시간: 8.84s
+══════════════════════════════════════════════════════════════════════
+INFO ambres.inference: ──────────────────────────────────────────────────────────────────────
+[RESPOND]  session=s3_trial_001_memory_vlm_judge_c1
+  user_response: 
+  task_objects: ['cup', 'red box']
+  task_ambiguous: None
+  clarifying_question: 
+  explanation: 
+  elapsed_s: 2.16
+INFO memory_pipeline.vlm_judge: VLM judge C1 raw: {"decision": "ASK", "explanation": "There is ambiguity in which specific cup to pick up from the three visible items. The robot should request clarification from the human operator before proceeding with the task."}
+INFO memory_pipeline.vlm_judge: VLM judge C1: decision=ASK state=AMBIGUOUS_TARGET  (t0 cup:1/red box:1 → ck cup:1/red box:1)
+INFO memory_pipeline.pipeline: Memory C1 (judge): state=AMBIGUOUS_TARGET decision=ASK
+INFO memory_pipeline.pipeline: Memory C1: using VLM question: [C1] There is ambiguity in which specific cup to pick up from the three visible items. The robot should request clarification from the human operator before proceeding with the task.
+INFO ambres.ambres_model: [STEP1 raw] {"task_objects": ["cup", "red box"]}
+INFO ambres.ambres_model: [STEP2 raw] {"task_ambiguous": true, "explanation": "There is ambiguity in which specific cup to pick up from the three visible items. The robot should request clarification from the human operator before proceeding with the task.","clarifying_question": "From which specific cup do you want me to pick up?"}
+INFO ambres.ambres_model: [STEP2 parsed] ambiguous=True | explanation=There is ambiguity in which specific cup to pick up from the three visible items. The robot should request clarification from the human operator before proceeding with the task. | question=From which specific cup do you want me to pick up?
+INFO ambres.inference: ══════════════════════════════════════════════════════════════════════
+[QUERY]  session=s3_trial_001_memory_vlm_judge_c2
+  task : pick the cup and put it in the red box
+
+[Episode Memory — prior observations]
+[t0]
+  target 'cup': detected at [312, 197]
+  destination 'red box': detected at [460, 197]
+[C1]
+  target 'cup': detected at [330, 61]
+  destination 'red box': detected at [460, 197]
+  changes: target 'cup' moved 137px ([312, 197] → [330, 61])
+  decision: ASK  (state: AMBIGUOUS_TARGET)
+  ambiguity reason: There is ambiguity in which specific cup to pick up from the three visible items. The robot should request clarification from the human operator before proceeding with the task.
+[Now evaluating: C2]
+[Scene changes detected: target 'cup' moved 137px ([312, 197] → [330, 61])]
+[If asking a clarifying question, reference the specific changes above rather than asking a generic question]
+  image: 672x376
+
+  ┌─ STEP 1: Object Grounding (greedy)
+  │  추출된 작업 객체: ['cup', 'red box']
+
+  ├─ STEP 2: Instance Detection (detect_pretty)
+  │    'cup'                → 0개  ✓ 단일
+  │                           pts_raw: []
+  │                           coords: 
+  │    'red box'            → 1개  ✓ 단일
+  │                           pts_raw: [[np.float64(456.0), np.float64(169.0)]]
+  │                           coords: (456,169)
+
+  ├─ STEP 3: Ambiguity Reasoning (do_sample=True)
+  │  ambiguous : True
+  │  explanation: There is ambiguity in which specific cup to pick up from the three visible items. The robot should request clarification from the human operator before proceeding with the task.
+  │  question  : From which specific cup do you want me to pick up?
+
+  └─ 처리 시간: 13.20s
+══════════════════════════════════════════════════════════════════════
+INFO ambres.inference: ──────────────────────────────────────────────────────────────────────
+[RESPOND]  session=s3_trial_001_memory_vlm_judge_c2
+  user_response: 
+  task_objects: ['cup', 'red box']
+  task_ambiguous: None
+  clarifying_question: 
+  explanation: 
+  elapsed_s: 2.53
+INFO memory_pipeline.vlm_judge: VLM judge C2 raw: {"decision": "ASK","explanation": "There are multiple red boxes visible, but we can't determine which one you're referring to. Could you please specify which red box you'd like the cup to be placed in?"}
+INFO memory_pipeline.vlm_judge: VLM judge C2: decision=ASK state=AMBIGUOUS_DESTINATION  (t0 cup:1/red box:1 → ck cup:1/red box:1)
+INFO memory_pipeline.pipeline: Memory C2 (judge): state=AMBIGUOUS_DESTINATION decision=ASK
+INFO memory_pipeline.pipeline: Memory C2: using VLM question: [C2] There are multiple red boxes visible, but we can't determine which one you're referring to. Could you please specify which red box you'd like the cup to be placed in?
+INFO __main__:   FAIL  gold=STOP  pred=ASK
+INFO __main__: [4/6] s4_trial_001  method=memory_vlm_judge
+INFO memory_pipeline.pipeline: Memory t0: target=cup@[221, 179]  dest=box@[501, 196]
+INFO ambres.ambres_model: [STEP1 raw] {"task_objects": ["cup", "box"]}
+INFO ambres.ambres_model: [STEP2 raw] {"task_ambiguous": true, "explanation": "Both the cup and box appear to be on the same white surface, with their shadows visible on the same surface as well. This suggests that the cup and box are likely in the same location, making it difficult to determine which one should be picked up and put in the box.","clarifying_question": "Where should I put the cup?"}
+INFO ambres.ambres_model: [STEP2 parsed] ambiguous=True | explanation=Both the cup and box appear to be on the same white surface, with their shadows visible on the same surface as well. This suggests that the cup and box are likely in the same location, making it difficult to determine which one should be picked up and put in the box. | question=Where should I put the cup?
+INFO ambres.inference: ══════════════════════════════════════════════════════════════════════
+[QUERY]  session=s4_trial_001_memory_vlm_judge_c1
+  task : pick the cup and put it in the box
+
+[Episode Memory — prior observations]
+[t0]
+  target 'cup': detected at [221, 179]
+  destination 'box': detected at [501, 196]
+[Now evaluating: C1]
+  image: 672x376
+
+  ┌─ STEP 1: Object Grounding (greedy)
+  │  추출된 작업 객체: ['cup', 'box']
+
+  ├─ STEP 2: Instance Detection (detect_pretty)
+  │    'cup'                → 1개  ✓ 단일
+  │                           pts_raw: [[np.float64(221.0), np.float64(176.0)]]
+  │                           coords: (221,176)
+  │    'box'                → 1개  ✓ 단일
+  │                           pts_raw: [[np.float64(490.0), np.float64(210.0)]]
+  │                           coords: (490,210)
+
+  ├─ STEP 3: Ambiguity Reasoning (do_sample=True)
+  │  ambiguous : True
+  │  explanation: Both the cup and box appear to be on the same white surface, with their shadows visible on the same surface as well. This suggests that the cup and box are likely in the same location, making it difficult to determine which one should be picked up and put in the box.
+  │  question  : Where should I put the cup?
+
+  └─ 처리 시간: 15.08s
+══════════════════════════════════════════════════════════════════════
+INFO ambres.inference: ──────────────────────────────────────────────────────────────────────
+[RESPOND]  session=s4_trial_001_memory_vlm_judge_c1
+  user_response: 
+  task_objects: ['cup', 'box']
+  task_ambiguous: None
+  clarifying_question: 
+  explanation: 
+  elapsed_s: 2.40
+INFO memory_pipeline.vlm_judge: VLM judge C1 raw: {"decision": "ASK", "explanation": "There are more than one cup visible in the image, with multiple cup-like shapes on the table and in the drawer. The robot cannot determine which cup to pick, so it should ask for further guidance."}
+INFO memory_pipeline.vlm_judge: VLM judge C1: decision=ASK state=AMBIGUOUS_TARGET  (t0 cup:1/box:1 → ck cup:1/box:1)
+INFO memory_pipeline.pipeline: Memory C1 (judge): state=AMBIGUOUS_TARGET decision=ASK
+INFO memory_pipeline.pipeline: Memory C1: using VLM question: [C1] There are more than one cup visible in the image, with multiple cup-like shapes on the table and in the drawer. The robot cannot determine which cup to pick, so it should ask for further guidance.
+INFO memory_pipeline.pipeline: Memory C2 changes: destination 'box' moved 157px ([501, 195] → [345, 181])
+INFO ambres.ambres_model: [STEP1 raw] {"task_objects": ["cup", "box"]}
+INFO ambres.ambres_model: [STEP2 raw] {"task_ambiguous": true, "explanation": "There are multiple cups visible", "clarifying_question": "Which cup would you like me to pick?"}
+INFO ambres.ambres_model: [STEP2 parsed] ambiguous=True | explanation=There are multiple cups visible | question=Which cup would you like me to pick?
+INFO ambres.inference: ══════════════════════════════════════════════════════════════════════
+[QUERY]  session=s4_trial_001_memory_vlm_judge_c2
+  task : pick the cup and put it in the box
+
+[Episode Memory — prior observations]
+[t0]
+  target 'cup': detected at [221, 179]
+  destination 'box': detected at [501, 196]
+[C1]
+  target 'cup': detected at [221, 179]
+  destination 'box': detected at [501, 195]
+  decision: ASK  (state: AMBIGUOUS_TARGET)
+  ambiguity reason: There are more than one cup visible in the image, with multiple cup-like shapes on the table and in the drawer. The robot cannot determine which cup to pick, so it should ask for further guidance.
+[Now evaluating: C2]
+  image: 672x376
+
+  ┌─ STEP 1: Object Grounding (greedy)
+  │  추출된 작업 객체: ['cup', 'box']
+
+  ├─ STEP 2: Instance Detection (detect_pretty)
+  │    'cup'                → 1개  ✓ 단일
+  │                           pts_raw: [[np.float64(221.0), np.float64(176.0)]]
+  │                           coords: (221,176)
+  │    'box'                → 2개  ⚠ 복수 인스턴스!
+  │                           pts_raw: [[np.float64(342.0), np.float64(188.0)], [np.float64(493.0), np.float64(210.0)]]
+  │                           coords: (342,188), (493,210)
+
+  ├─ STEP 3: Ambiguity Reasoning (do_sample=True)
+  │  ambiguous : True
+  │  explanation: There are multiple cups visible
+  │  question  : Which cup would you like me to pick?
+
+  └─ 처리 시간: 11.16s
+══════════════════════════════════════════════════════════════════════
+INFO ambres.inference: ──────────────────────────────────────────────────────────────────────
+[RESPOND]  session=s4_trial_001_memory_vlm_judge_c2
+  user_response: 
+  task_objects: ['cup', 'box']
+  task_ambiguous: None
+  clarifying_question: 
+  explanation: 
+  elapsed_s: 2.24
+INFO memory_pipeline.vlm_judge: VLM judge C2 raw: {"decision": "ASK", "explanation": "There are 2 boxes visible, but no clear instructions on which one to use for the mug. The robot needs additional guidance to determine the appropriate destination box for the mug."}
+INFO memory_pipeline.vlm_judge: VLM judge C2: decision=ASK state=AMBIGUOUS_DESTINATION  (t0 cup:1/box:1 → ck cup:1/box:1)
+INFO memory_pipeline.pipeline: Memory C2 (judge): state=AMBIGUOUS_DESTINATION decision=ASK
+INFO memory_pipeline.pipeline: Memory C2: using VLM question: [C2] There are 2 boxes visible, but no clear instructions on which one to use for the mug. The robot needs additional guidance to determine the appropriate destination box for the mug.
+INFO __main__:   OK   gold=ASK  pred=ASK
+INFO __main__: [5/6] s5_trial_001  method=memory_vlm_judge
+INFO memory_pipeline.pipeline: Memory t0: target=cup@[497, 197]  dest=red box@[363, 191]
+INFO ambres.ambres_model: [STEP1 raw] {"task_objects": ["cup", "red box"]}
+INFO ambres.ambres_model: [STEP2 raw] {"task_ambiguous": true, "explanation": "The cup may be already in the box or needs to be placed inside. The exact position and status of the cup and box are unclear from the given information.","clarifying_question": "What is the current state of the cup and red box?"}
+INFO ambres.ambres_model: [STEP2 parsed] ambiguous=True | explanation=The cup may be already in the box or needs to be placed inside. The exact position and status of the cup and box are unclear from the given information. | question=What is the current state of the cup and red box?
+INFO ambres.inference: ══════════════════════════════════════════════════════════════════════
+[QUERY]  session=s5_trial_001_memory_vlm_judge_c1
+  task : pick the cup and put it in the red box
+
+[Episode Memory — prior observations]
+[t0]
+  target 'cup': detected at [497, 197]
+  destination 'red box': detected at [363, 191]
+[Now evaluating: C1]
+  image: 672x376
+
+  ┌─ STEP 1: Object Grounding (greedy)
+  │  추출된 작업 객체: ['cup', 'red box']
+
+  ├─ STEP 2: Instance Detection (detect_pretty)
+  │    'cup'                → 1개  ✓ 단일
+  │                           pts_raw: [[np.float64(497.0), np.float64(194.0)]]
+  │                           coords: (497,194)
+  │    'red box'            → 1개  ✓ 단일
+  │                           pts_raw: [[np.float64(370.0), np.float64(184.0)]]
+  │                           coords: (370,184)
+
+  ├─ STEP 3: Ambiguity Reasoning (do_sample=True)
+  │  ambiguous : True
+  │  explanation: The cup may be already in the box or needs to be placed inside. The exact position and status of the cup and box are unclear from the given information.
+  │  question  : What is the current state of the cup and red box?
+
+  └─ 처리 시간: 13.36s
+══════════════════════════════════════════════════════════════════════
+INFO ambres.inference: ──────────────────────────────────────────────────────────────────────
+[RESPOND]  session=s5_trial_001_memory_vlm_judge_c1
+  user_response: 
+  task_objects: ['cup', 'red box']
+  task_ambiguous: None
+  clarifying_question: 
+  explanation: 
+  elapsed_s: 2.84
+INFO memory_pipeline.vlm_judge: VLM judge C1 raw: { "decision": "ASK", "explanation": "There are two cups visible, and the task provides no guidance on which cup to pick."}
+INFO memory_pipeline.vlm_judge: VLM judge C1: decision=ASK state=AMBIGUOUS_TARGET  (t0 cup:1/red box:1 → ck cup:1/red box:1)
+INFO memory_pipeline.pipeline: Memory C1 (judge): state=AMBIGUOUS_TARGET decision=ASK
+INFO memory_pipeline.pipeline: Memory C1: using VLM question: [C1] There are two cups visible, and the task provides no guidance on which cup to pick.
+INFO ambres.ambres_model: [STEP1 raw] {"task_objects": ["cup", "red box"]}
+INFO ambres.ambres_model: [STEP2 raw] {"task_ambiguous": true, "explanation": "There are two cups visible, and the task provides no guidance on which cup to pick.","clarifying_question":"Which cup should I pick?"}
+INFO ambres.ambres_model: [STEP2 parsed] ambiguous=True | explanation=There are two cups visible, and the task provides no guidance on which cup to pick. | question=Which cup should I pick?
+INFO ambres.inference: ══════════════════════════════════════════════════════════════════════
+[QUERY]  session=s5_trial_001_memory_vlm_judge_c2
+  task : pick the cup and put it in the red box
+
+[Episode Memory — prior observations]
+[t0]
+  target 'cup': detected at [497, 197]
+  destination 'red box': detected at [363, 191]
+[C1]
+  target 'cup': detected at [497, 197]
+  destination 'red box': detected at [363, 191]
+  decision: ASK  (state: AMBIGUOUS_TARGET)
+  ambiguity reason: There are two cups visible, and the task provides no guidance on which cup to pick.
+[Now evaluating: C2]
+  image: 672x376
+
+  ┌─ STEP 1: Object Grounding (greedy)
+  │  추출된 작업 객체: ['cup', 'red box']
+
+  ├─ STEP 2: Instance Detection (detect_pretty)
+  │    'cup'                → 1개  ✓ 단일
+  │                           pts_raw: [[np.float64(495.0), np.float64(196.0)]]
+  │                           coords: (495,196)
+  │    'red box'            → 1개  ✓ 단일
+  │                           pts_raw: [[np.float64(362.0), np.float64(184.0)]]
+  │                           coords: (362,184)
+
+  ├─ STEP 3: Ambiguity Reasoning (do_sample=True)
+  │  ambiguous : True
+  │  explanation: There are two cups visible, and the task provides no guidance on which cup to pick.
+  │  question  : Which cup should I pick?
+
+  └─ 처리 시간: 14.01s
+══════════════════════════════════════════════════════════════════════
+INFO ambres.inference: ──────────────────────────────────────────────────────────────────────
+[RESPOND]  session=s5_trial_001_memory_vlm_judge_c2
+  user_response: 
+  task_objects: ['cup', 'red box']
+  task_ambiguous: None
+  clarifying_question: 
+  explanation: 
+  elapsed_s: 2.55
+INFO memory_pipeline.vlm_judge: VLM judge C2 raw: {"decision": "ASK","explanation": "There are two red boxes visible, so the task is ambiguous. The robot cannot determine which red box the cup should be placed into. To resolve this, it should prompt for further instructions or clarification from the user about which specific red box should be used as the destination."}
+INFO memory_pipeline.vlm_judge: VLM judge C2: decision=ASK state=AMBIGUOUS_DESTINATION  (t0 cup:1/red box:1 → ck cup:1/red box:1)
+INFO memory_pipeline.pipeline: Memory C2 (judge): state=AMBIGUOUS_DESTINATION decision=ASK
+INFO memory_pipeline.pipeline: Memory C2: using VLM question: [C2] There are two red boxes visible, so the task is ambiguous. The robot cannot determine which red box the cup should be placed into. To resolve this, it should prompt for further instructions or clarification from the user about which specific red box should be used as the destination.
+INFO __main__:   FAIL  gold=CONTINUE  pred=ASK
+INFO __main__: [6/6] s6_trial_001  method=memory_vlm_judge
+INFO memory_pipeline.pipeline: Memory t0: target=cup@None  dest=red box@[516, 146]
+INFO memory_pipeline.pipeline: Memory C1 changes: target 'cup' appeared
+INFO ambres.ambres_model: [STEP1 raw] {"task_objects": ["cup", "red box"]}
+INFO ambres.ambres_model: [STEP2 raw] {"task_ambiguous": true, "explanation": "Multiple objects are mentioned with no clear prioritization or specification of which action should be taken first. The task requires choosing between manipulating the cup or putting something in the red box, both of which are potential actions. This lack of clear instruction and focus on a single primary action makes the task potentially ambiguous or multi-objective.", "clarifying_question": "What action should I take first? Should I prioritize manipulating the cup or putting something in the red box?"}
+INFO ambres.ambres_model: [STEP2 parsed] ambiguous=True | explanation=Multiple objects are mentioned with no clear prioritization or specification of which action should be taken first. The task requires choosing between manipulating the cup or putting something in the red box, both of which are potential actions. This lack of clear instruction and focus on a single primary action makes the task potentially ambiguous or multi-objective. | question=What action should I take first? Should I prioritize manipulating the cup or putting something in the red box?
+INFO ambres.inference: ══════════════════════════════════════════════════════════════════════
+[QUERY]  session=s6_trial_001_memory_vlm_judge_c1
+  task : pick the cup and put it in the red box
+
+[Episode Memory — prior observations]
+[t0]
+  target 'cup': NOT DETECTED
+  destination 'red box': detected at [516, 146]
+[Now evaluating: C1]
+  image: 672x376
+
+  ┌─ STEP 1: Object Grounding (greedy)
+  │  추출된 작업 객체: ['cup', 'red box']
+
+  ├─ STEP 2: Instance Detection (detect_pretty)
+  │    'cup'                → 1개  ✓ 단일
+  │                           pts_raw: [[np.float64(261.0), np.float64(186.0)]]
+  │                           coords: (261,186)
+  │    'red box'            → 1개  ✓ 단일
+  │                           pts_raw: [[np.float64(490.0), np.float64(148.0)]]
+  │                           coords: (490,148)
+
+  ├─ STEP 3: Ambiguity Reasoning (do_sample=True)
+  │  ambiguous : True
+  │  explanation: Multiple objects are mentioned with no clear prioritization or specification of which action should be taken first. The task requires choosing between manipulating the cup or putting something in the red box, both of which are potential actions. This lack of clear instruction and focus on a single primary action makes the task potentially ambiguous or multi-objective.
+  │  question  : What action should I take first? Should I prioritize manipulating the cup or putting something in the red box?
+
+  └─ 처리 시간: 19.21s
+══════════════════════════════════════════════════════════════════════
+INFO ambres.inference: ──────────────────────────────────────────────────────────────────────
+[RESPOND]  session=s6_trial_001_memory_vlm_judge_c1
+  user_response: 
+  task_objects: ['cup', 'red box']
+  task_ambiguous: None
+  clarifying_question: 
+  explanation: 
+  elapsed_s: 2.53
+INFO memory_pipeline.vlm_judge: VLM judge C1 raw: {"decision": "ASK", "explanation": "Multiple cups are present, so the robot cannot determine which one to pick. It should request clarification from the human operator to select the correct cup to move to the red box."}
+INFO memory_pipeline.vlm_judge: VLM judge C1: decision=ASK state=AMBIGUOUS_TARGET  (t0 cup:0/red box:1 → ck cup:1/red box:1)
+INFO memory_pipeline.pipeline: Memory C1 (judge): state=AMBIGUOUS_TARGET decision=ASK
+INFO memory_pipeline.pipeline: Memory C1: using VLM question: [C1] Multiple cups are present, so the robot cannot determine which one to pick. It should request clarification from the human operator to select the correct cup to move to the red box.
+INFO ambres.ambres_model: [STEP1 raw] {"task_objects": ["cup", "red box"]}
+INFO ambres.ambres_model: [STEP2 raw] {"task_ambiguous": true, "explanation": "Multiple cups are present, so the robot cannot determine which one to pick. It should request clarification from the human operator to select the correct cup to move to the red box.","clarifying_question": "Which cup would you like me to pick and put in the red box?"}
+INFO ambres.ambres_model: [STEP2 parsed] ambiguous=True | explanation=Multiple cups are present, so the robot cannot determine which one to pick. It should request clarification from the human operator to select the correct cup to move to the red box. | question=Which cup would you like me to pick and put in the red box?
+INFO ambres.inference: ══════════════════════════════════════════════════════════════════════
+[QUERY]  session=s6_trial_001_memory_vlm_judge_c2
+  task : pick the cup and put it in the red box
+
+[Episode Memory — prior observations]
+[t0]
+  target 'cup': NOT DETECTED
+  destination 'red box': detected at [516, 146]
+[C1]
+  target 'cup': detected at [255, 187]
+  destination 'red box': detected at [516, 146]
+  changes: target 'cup' appeared
+  decision: ASK  (state: AMBIGUOUS_TARGET)
+  ambiguity reason: Multiple cups are present, so the robot cannot determine which one to pick. It should request clarification from the human operator to select the correct cup to move to the red box.
+[Now evaluating: C2]
+[Scene changes detected: target 'cup' appeared]
+[If asking a clarifying question, reference the specific changes above rather than asking a generic question]
+  image: 672x376
+
+  ┌─ STEP 1: Object Grounding (greedy)
+  │  추출된 작업 객체: ['cup', 'red box']
+
+  ├─ STEP 2: Instance Detection (detect_pretty)
+  │    'cup'                → 1개  ✓ 단일
+  │                           pts_raw: [[np.float64(258.0), np.float64(186.0)]]
+  │                           coords: (258,186)
+  │    'red box'            → 1개  ✓ 단일
+  │                           pts_raw: [[np.float64(497.0), np.float64(148.0)]]
+  │                           coords: (497,148)
+
+  ├─ STEP 3: Ambiguity Reasoning (do_sample=True)
+  │  ambiguous : True
+  │  explanation: Multiple cups are present, so the robot cannot determine which one to pick. It should request clarification from the human operator to select the correct cup to move to the red box.
+  │  question  : Which cup would you like me to pick and put in the red box?
+
+  └─ 처리 시간: 14.14s
+══════════════════════════════════════════════════════════════════════
+INFO ambres.inference: ──────────────────────────────────────────────────────────────────────
+[RESPOND]  session=s6_trial_001_memory_vlm_judge_c2
+  user_response: 
+  task_objects: ['cup', 'red box']
+  task_ambiguous: None
+  clarifying_question: 
+  explanation: 
+  elapsed_s: 2.53
+INFO memory_pipeline.vlm_judge: VLM judge C2 raw: {"decision": "ASK", "explanation": "There are two instances of the red box, which makes the task ambiguous"}
+INFO memory_pipeline.vlm_judge: VLM judge C2: decision=ASK state=AMBIGUOUS_DESTINATION  (t0 cup:0/red box:1 → ck cup:1/red box:1)
+INFO memory_pipeline.pipeline: Memory C2 (judge): state=AMBIGUOUS_DESTINATION decision=ASK
+INFO memory_pipeline.pipeline: Memory C2: using VLM question: [C2] There are two instances of the red box, which makes the task ambiguous
+INFO __main__:   OK   gold=ASK  pred=ASK
+INFO __main__: Predictions saved → results/quick_test_judge.csv
+INFO __main__: Metrics saved → results/quick_test_judge.json
+{
+  "MEMORY_VLM_JUDGE": {
+    "n": 6,
+    "correct": 3,
+    "decision_accuracy": 0.5,
+    "miss_rate": 0.0,
+    "false_alarm_rate": 1.0,
+    "state_accuracy": 0.5
+  }
+}

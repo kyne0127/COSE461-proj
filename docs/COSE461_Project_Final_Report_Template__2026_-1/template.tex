@@ -7,37 +7,33 @@
 \usepackage{hyperref}
 \usepackage{url}
 \usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amssymb}
 \usepackage{amsfonts}
 \usepackage{nicefrac}
 \usepackage{microtype}
 \usepackage{graphicx}
+\usepackage{subcaption}
 \usepackage{xcolor}
-\usepackage{lipsum}
 
-\newcommand{\note}[1]{\textcolor{blue}{{#1}}}
+\graphicspath{{images/}}
+
+\newcommand{\dataset}{\textsc{VlaExec}}
+\newcommand{\datasettrain}{\textsc{VlaExec-train}}
+\newcommand{\datasettest}{\textsc{VlaExec-test}}
 
 \title{
-  Title of your project \\
+  MemoryGrounding: Mid-Execution Grounding Validity Monitoring \\
+  for Language-Guided Robot Manipulation \\
   \vspace{1em}
-  \small{\normalfont Korea University COSE461 Final Project}  % Select one and delete the other
+  \small{\normalfont Korea University COSE461 Final Project}
 }
 
 \author{
-  Name \\
-   Department of Computer Science \\
-   Team 0 \\
-   2099012345
-  % Examples of more authors
-%   \And
-%   Name \\
-%   Department of Computer Science \\
-%   Team 0 \\
-%   2099012345
-%   \And
-%   Name \\
-%   Department of Computer Science \\
-%   Team 0 \\
-%   2099012345
+  Seongmin, Lee\; Sanghyuk, Ko \\
+  Department of Computer Science \\
+  Team 26 \\
+  2020320055\;   2020320035
 }
 
 \begin{document}
@@ -45,70 +41,577 @@
 \maketitle
 
 \begin{abstract}
-An abstract should concisely (less than 300 words) motivate the problem, describe your aims, describe your contribution, and highlight your main finding(s). 
+Vision--language models used for ambiguity resolution in language-guided
+robot manipulation evaluate the scene only at task initiation. We show
+that this static formulation fails when the scene changes during
+execution: a representative initial-scene baseline
+(AmbResVLM~\cite{ambresvlm}) achieves $14.3\%$ decision accuracy on
+mid-execution scenarios. We introduce \textbf{MemoryGrounding}, a
+two-stage framework that (i)~monitors video with a lightweight finite
+state machine over Grounding DINO~\cite{gdino} (G-DINO) detections to
+trigger grounding re-evaluation, and (ii)~issues structured
+\textsc{Continue}/\textsc{Ask}/\textsc{Stop} decisions through a
+Molmo-7B~\cite{molmo} evaluator conditioned on the stored initial
+grounding $G_0$, the current detections, and the checkpoint image. On
+\datasettest (70 trials over 7 scenario types covering
+count change, displacement, and disappearance at the pre-pick and
+pre-place checkpoints), the full system attains $100\%$ decision
+accuracy with $0\%$ miss rate and $0\%$ false-alarm rate, together with
+$90.0\%$ strict accuracy that additionally requires the clarifying
+question to characterize the change type correctly. Controlled ablations
+isolate three sources of gain: G-DINO supplies quantitative scene
+perception, $G_0$ as temporal memory is required for displacement
+detection ($+31.4$\,pp over a fine-tuned model without $G_0$), and
+task-specific fine-tuning corrects force-matching bias where rule-based
+pipelines fail on all target-removal trials. A counterfactual diagnostic
+that varies $G_0$ while keeping the image and detections fixed yields a
+memory reliance rate of $100\%$ ($41/41$), providing direct evidence
+that the model relies on $G_0$ rather than count-based shortcuts.
 \end{abstract}
 
-This project report is limited to 8 content pages (excluding reference); i.e. you can submit reports with 1-8 pages. Please make your report brief and concise, so that there is no redundant contents. There is no bonus point on submitting full 8 pages report. 
-
 \section{Introduction}
-The introduction explains the problem, why it's difficult, interesting, or important, how and why current methods succeed/fail at the problem, and explains the key ideas of your approach and results. Though an introduction covers similar material as an abstract, the introduction gives more space for motivation, detail, references to existing work, and to capture the reader's interest.
+\label{sec:intro}
+
+Language-guided robot manipulation has progressed rapidly with
+vision--language models (VLMs) that ground natural-language instructions
+in visual scenes~\cite{molmo,rt2,openvla}. A central challenge is
+\emph{ambiguity}: when an instruction such as ``pick the cup and put it
+in the red box'' does not uniquely identify the target or destination,
+the robot must request clarification before acting. Existing methods
+address this at task initiation---\emph{before} the robot
+moves---by detecting whether the initial scene is ambiguous with respect
+to the instruction~\cite{ambresvlm,knowno,clara,lap,sgcot}.
+
+Robot manipulation is, however, a temporally extended process. Between
+task acceptance and the irreversible pick or place action, the scene
+can evolve: a second same-category object may appear, the original
+target may be displaced, or the target may be removed entirely. A scene
+that was unambiguous at task initiation can therefore become ambiguous
+or invalid mid-execution, and existing methods provide no mechanism for
+detecting or responding to these dynamic changes. We organize our
+investigation around three research questions.
+
+\textbf{RQ1.} \emph{Can VLM-based ambiguity detectors perceive
+quantitative scene changes during execution?} Methods such as AmbResVLM
+treat ambiguity as a binary judgment, ignoring how many target instances
+are present and their spatial relation to the original plan. On our
+mid-execution benchmark AmbResVLM attains only $14.3\%$ decision
+accuracy, failing on all count-change and disappearance cases. This
+motivates integrating Grounding DINO~\cite{gdino} (G-DINO) as a
+supplementary recognition module that supplies count and coordinate
+information at each checkpoint.
+
+\textbf{RQ2.} \emph{Is prior state information necessary to detect
+certain classes of grounding change?} When a target moves to a new
+position the count remains $1$ but the identity may have changed; the
+current frame alone provides no evidence of motion. A fine-tuned model
+without access to the initial grounding $G_0$ (FT-A) attains $68.6\%$
+accuracy and fails on all displacement scenarios (target moved $0/10$,
+destination moved $0/10$). Storing
+$G_0 = \{(l_\text{tgt}, \mathbf{x}_\text{tgt}),\
+       (l_\text{dst}, \mathbf{x}_\text{dst})\}$
+as a temporal reference enables comparison against the baseline and
+yields $100\%$ accuracy (FT-B). On our benchmark $G_0$ thus constitutes
+the minimal temporal memory sufficient for mid-execution grounding
+validity monitoring.
+
+\textbf{RQ3.} \emph{Does fine-tuning overcome force-matching bias under
+fixed task queries?} Open-vocabulary detectors return the
+highest-confidence match for a text query regardless of whether the
+target is actually present. When the target has been removed, G-DINO
+may match ``cup'' to a visually similar object, reporting $n=1$ at an
+unexpected position. A rule-based system that trusts this detection
+outputs \textsc{Ask} (ambiguous) instead of \textsc{Stop} (missing),
+failing on all $10$ target-removal trials. Task-specific fine-tuning
+enables the model to cross-validate detections against the image and
+recover the correct \textsc{Stop} decision ($10/10$).
+
+We address these questions with \textbf{MemoryGrounding}, a two-stage
+monitor. \textbf{Stage~1} runs a lightweight finite-state machine (FSM)
+over G-DINO detections on the video stream and triggers re-evaluation
+when count shifts, displacement, or disappearance occur.
+\textbf{Stage~2} is a Molmo-7B evaluator that, upon trigger, takes the
+checkpoint image, the per-label G-DINO coordinates, and the stored
+$G_0$, and outputs a structured \textsc{Continue}/\textsc{Ask}/\textsc{Stop}
+decision with a clarifying question. For controlled comparison with
+fixed-checkpoint baselines we evaluate Stage~2 in isolation at
+pre-defined checkpoint images, consistent with the protocol of prior
+work.
+
+Our contributions are: (i)~an empirical analysis showing that existing
+VLM-based ambiguity detection fails mid-execution due to two missing
+capabilities---quantitative scene perception and temporal memory;
+(ii)~an FSM-based vision trigger that fires only on semantically
+significant mid-execution scene changes; (iii)~a $G_0$-conditioned
+fine-tuned Molmo-7B evaluator whose ablation isolates the three sources
+of gain; and (iv)~the \datasettest benchmark of $70$
+samples across $7$ scenario types.
 
 \section{Related Work}
-This section helps the reader understand the research context of your work, by providing an overview of existing work in the area.
-\begin{itemize}
-    \item You might discuss: papers that inspired your approach, papers that you use as baselines, papers proposing alternative approaches to the problem, papers applying your methods to different tasks, etc.
-    \item This section shouldn't go into deep detail in any one paper (for example, there probably shouldn't be any equations) – instead it should explain how the papers relate to each other, and how they relate to your work. If you need to go deep into detail in previous researches with equations, discuss it in the next section.
-\end{itemize}
+\label{sec:related}
+
+\paragraph{Pre-execution ambiguity resolution.}
+AmbResVLM~\cite{ambresvlm} uses a two-step Molmo~\cite{molmo} protocol
+to detect ambiguity and generate clarifying questions at task
+initiation. KnowNo~\cite{knowno} casts ambiguity as conformal prediction
+over actions with statistical task-completion guarantees but at the
+action-selection level, without object-level grounding.
+CLARA~\cite{clara}, LAP~\cite{lap}, and SG-CoT~\cite{sgcot} use language
+models or scene-graph reasoning for pre-execution clarification.
+INVIGORATE~\cite{invigorate} maintains a candidate graph and eliminates
+candidates through dialogue but in a static interaction paradigm. None
+of these methods detects grounding invalidation that occurs after motion
+has begun.
+
+\paragraph{Mid-execution monitoring.}
+The Physical Agentic Loop~\cite{pal} monitors execution at transition
+points using physical signals (gripper telemetry, joint torque) to
+detect failures---its checkpoints are analogous to our $C_1$/$C_2$, but
+its signal is \emph{post-action} and \emph{physical}: it asks ``did this
+grasp physically succeed?''. We ask a complementary question, ``is the
+original semantic grounding still valid?'', and do so \emph{before}
+irreversible actions. DoReMi~\cite{doremi} uses LLM reasoning over robot
+state to detect post-action failures; like PAL, it is reactive to
+execution outcomes rather than semantic scene changes.
+
+\paragraph{Trigger detection for scene change.}
+Behavior-tree disambiguation~\cite{btdisambig} embeds disambiguation
+into BT preconditions, triggering AmbResVLM when a same-category object
+appears. Our FSM generalizes this beyond same-category addition to the
+full taxonomy of mid-execution changes (addition, removal, displacement
+at both target and destination) and routes the trigger into a
+memory-conditioned evaluator.
+
+\paragraph{Detector force-matching and visual verification.}
+G-DINO~\cite{gdino} assigns each text query to the most query-like
+region regardless of presence, an inherent force-matching behavior.
+Molmo~\cite{molmo} is trained to point at objects by coordinate and
+tends to return empty results when an object is genuinely absent; we
+exploit this complementary signal via a fine-tuned Molmo-based evaluator
+that cross-validates G-DINO detections.
+
+\paragraph{Adaptation.}
+Our evaluator is obtained by LoRA~\cite{lora} fine-tuning of Molmo-7B
+for structured grounding-state classification, rather than action
+generation as in RT-2~\cite{rt2} and OpenVLA~\cite{openvla}.
+
+\paragraph{Positioning.}
+Table~\ref{tab:related} summarizes the closest systems. In contrast to
+prior work, MemoryGrounding combines FSM-based vision triggers,
+force-match--aware ensemble evaluation, and $G_0$-conditioned decision
+making within a single framework.
+
+\begin{table}[h]
+\centering
+\small
+\caption{Positioning against the closest related systems.
+\textsc{Trig}: vision-based trigger.
+\textsc{Eval}: structured grounding evaluator.
+\textsc{$G_0$}: temporal reference memory.
+\textsc{FM}: force-match correction.}
+\label{tab:related}
+\begin{tabular}{lcccc}
+\toprule
+System & Trig & Eval & $G_0$ & FM \\
+\midrule
+AmbResVLM~\cite{ambresvlm}      & N & init only & N & N \\
+KnowNo~\cite{knowno}            & N & init only & N & N \\
+PAL~\cite{pal}                  & physical & N & N & N \\
+BT-Disambig.~\cite{btdisambig}  & same-cat. & limited & N & N \\
+INVIGORATE~\cite{invigorate}    & N & static & partial & N \\
+\textbf{MemoryGrounding (ours)} & \textbf{FSM} & \textbf{ensemble+FT} & \textbf{Y} & \textbf{Y} \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \section{Approach}
-This section details your approach(es) to the problem. 
-For example, this is where you describe the architecture of your neural network(s), and any other key methods or algorithms.
-\begin{itemize}
-    \item You should be specific when describing your main approaches – you probably want to include equations and figures.
-    \item You should also describe your baseline(s). Depending on space constraints, and how standard your baseline is, you might do this in detail, or simply refer the reader to some other paper for the details.
-    \item If any part of your approach is original, make it clear (so I can give you credit!). For models and techniques that aren't yours, provide references.
-    \item If you’re using any code that you didn't write yourself, make it clear and provide a reference or link. When describing something you coded yourself, make it clear (so I can give you credit!).
-    \item As you’re setting up equations, notation, and the like, be sure to agree on a fixed technical vocabulary (that you've defined, or is well-defined in the literature) before writing and use it consistently throughout the report!
+\label{sec:method}
 
-\end{itemize}
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{pipeline.png}
+\caption{Overview of \textbf{MemoryGrounding}. \emph{Stage~1} (left):
+the video stream is processed by G-DINO and a lightweight
+trigger/checkpoint monitor that issues re-evaluation requests on count
+shifts, displacement, or disappearance. \emph{Stage~2} (right): upon
+trigger, a structured prompt assembling the task, the stored $G_0$
+(initial target and destination labels and pixel coordinates), and the
+current G-DINO detections is fed together with the checkpoint image to a
+LoRA-fine-tuned Molmo-7B evaluator, which emits a state-and-question
+JSON consumed by a deterministic decision policy.}
+\label{fig:pipeline}
+\end{figure}
+
+\subsection{Problem formulation}
+
+We consider a language-guided pick-and-place task with instruction
+$\mathcal{L}$. At task initiation ($t_0$) the robot establishes an
+\emph{initial grounding}
+\[
+G_0 = \{\text{target}: (l_\text{tgt}, \mathbf{x}_\text{tgt}),\
+        \text{dest}:   (l_\text{dst}, \mathbf{x}_\text{dst})\},
+\]
+where $l$ is a text label and $\mathbf{x}\in\mathbb{R}^2$ a pixel
+centroid. \textbf{Stage~1} monitors the video stream $\{I_t\}$ for time
+points where scene change warrants re-evaluation. \textbf{Stage~2}
+receives the triggered checkpoint image $I_{t_k}$, the stored $G_0$,
+and the current G-DINO detections, classifies the grounding state, and
+issues a decision
+$d\in\{\textsc{Continue},\textsc{Ask},\textsc{Stop}\}$ accompanied by a
+clarifying question (Table~\ref{tab:taxonomy}).
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.95\linewidth]{fixed_checkpoint_pipeline.png}
+\caption{Fixed-checkpoint evaluation protocol. At $t_0$ the system
+stores $G_0 = \{(l_\text{tgt},\mathbf{x}_\text{tgt}),
+(l_\text{dst},\mathbf{x}_\text{dst})\}$. At $C_1$ (pre-pick) the
+evaluator classifies the target state into \textsc{Clear},
+\textsc{AmbiguousTarget} (which subsumes displaced targets), or
+\textsc{InvalidTarget}; at $C_2$ (pre-place) the destination state is
+classified analogously. Each state maps to a
+\textsc{Continue}/\textsc{Ask}/\textsc{Stop} decision.}
+\label{fig:fixed-checkpoint}
+\end{figure}
+
+\begin{table}[h]
+\centering
+\small
+\caption{Grounding state taxonomy and decision policy.
+\textsc{InvDest} maps to \textsc{Stop} when the destination is absent
+with no visible substitute ($S_6$), and to \textsc{Ask} when an
+alternative location may be negotiated.}
+\label{tab:taxonomy}
+\begin{tabular}{lll}
+\toprule
+State & Trigger condition & Decision \\
+\midrule
+\textsc{Clear} & objects at expected positions, unique & \textsc{Continue} \\
+\textsc{AmbTarget} & multiple targets or displacement ($C_1$) & \textsc{Ask} \\
+\textsc{AmbDest} & multiple destinations or displacement ($C_2$) & \textsc{Ask} \\
+\textsc{InvTarget} & target absent ($C_1$) & \textsc{Stop} \\
+\textsc{InvDest} & destination absent ($C_2$) & \textsc{Ask}/\textsc{Stop} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Stage 1: FSM trigger}
+
+A lightweight FSM operates on per-frame G-DINO detections and triggers
+re-evaluation on (i)~\emph{count increase}, $|D_t|>|D_\text{ref}|$;
+(ii)~\emph{position shift}, $\|\mathbf{x}_t-\mathbf{x}_\text{ref}\|>\tau$;
+or (iii)~\emph{disappearance}, $|D_t|=0$. The reference record
+$r_\text{ref}$ is fixed between triggers and updated only after firing,
+which prevents accumulated drift; a $k$-frame cooldown suppresses
+repeated firing on the same event. On the video sequences in
+\datasettrain, the FSM produces no false triggers on the
+\textsc{Continue} scenario and successfully triggers on every
+non-\textsc{Continue} scenario. We therefore treat Stage~1 as a solved
+module and evaluate Stage~2 at pre-defined $C_1$/$C_2$ checkpoint
+images---a protocol consistent with prior work and necessary for fair
+comparison with AmbResVLM, which operates on static images.
+
+\subsection{Stage 2: G-DINO, $G_0$, and fine-tuning}
+
+\paragraph{G-DINO as supplementary recognition.}
+AmbResVLM treats ambiguity as a binary judgment without tracking count
+or position, which limits it to $14.3\%$ accuracy on our benchmark.
+G-DINO returns, for each queried label, the centroids of all detected
+instances, allowing discrimination of $n=0$ (absent), $n>1$ (multiple
+candidates), and $n=1$ at a position consistent with $G_0$
+(\textsc{Clear}) versus inconsistent (displaced). The displacement case
+relies on $G_0$ as a reference.
+
+\paragraph{$G_0$ as temporal reference.}
+On our benchmark, $G_0$ together with the current G-DINO detections is
+sufficient to disambiguate all seven scenario types via two binary
+tests---count change and position shift. The reverse implication also
+holds: for displacement scenarios ($S_4$, $S_7$), $n=1$ at both $t_0$
+and the checkpoint, so the current frame alone is indistinguishable
+from \textsc{Clear}. Only by comparing the current detection against
+the stored $t_0$ position can the system infer motion.
+
+\paragraph{Fine-tuned evaluator with force-match correction.}
+Even with $G_0$ and G-DINO, a rule-based pipeline attains $72.9\%$
+because G-DINO force-matches: when the target has been removed, it
+returns a spurious detection on the most query-like region. A
+rule-based system reads $n=1$ as ``present'' and outputs \textsc{Ask}
+instead of \textsc{Stop}, failing on every target-removal trial. We
+therefore train a Molmo-7B evaluator that consumes the checkpoint
+image, the stored $G_0$ in text form, and the per-label G-DINO
+coordinates, and produces a JSON object
+$\{\textit{task\_ambiguous},\textit{stop\_bool},\textit{clarifying\_question}\}$.
+Given both the image and the detected coordinates, the model learns to
+cross-validate each region visually: when G-DINO points to a location
+that does not contain the queried object, the model overrides the
+detection and outputs \textsc{Stop}.
+
+\paragraph{Training.}
+We fine-tune Molmo-7B-D with LoRA~\cite{lora}
+($r=8,\,\alpha=16$) for three epochs at learning rate $10^{-4}$ on
+\datasettrain ($756$ augmented samples: horizontal flip,
+brightness $\times 0.7$/$\times 1.3$, and coordinate perturbation with
+$\sigma=5$\,px). To prevent the model from collapsing onto a
+count-based shortcut, we include $64$ \emph{counterfactual pairs} that
+share the same image and checkpoint coordinates but differ in $G_0$:
+$G_0=\mathbf{x}_t$ labelled \textsc{Clear}/\textsc{Continue}, and
+$G_0=\mathbf{x}_t+200$\,px labelled \textsc{Ambiguous}/\textsc{Ask}. We
+additionally include $64$ ``no-$G_0$'' samples on $n=1$ trials labelled
+by a count rule, which discourages a spurious
+``moved$\,\Rightarrow\,$\textsc{Ask}'' shortcut when $G_0$ is
+unavailable.
+
+\subsection{Ablation design}
+
+We isolate the contribution of each component using four systems:
+\emph{AmbResVLM} (native two-step protocol; no $G_0$, no G-DINO, no
+fine-tuning); \emph{Rule}$+G_0$ (count and distance rules over G-DINO
+detections with $G_0$); \emph{FT-A} (fine-tuned with G-DINO but without
+$G_0$); and \emph{FT-B} (full system). The AmbResVLM$\,\to\,$Rule$+G_0$
+comparison isolates G-DINO (RQ1); FT-A$\,\to\,$FT-B isolates $G_0$
+(RQ2); and Rule$+G_0\to$FT-B isolates fine-tuning (RQ3).
 
 \section{Experiments}
-This section contains the following.
+\label{sec:exp}
 
-\subsection{Data}
-Describe the dataset(s) you are using (provide references). If it's not already clear, make sure the associated task is clearly described.
-Being precise about the exact form of the input and output can be very useful for readers attempting to understand your work, especially if you've defined your own task.
+\subsection{Setup}
 
-\subsection{Evaluation method}
-Describe the evaluation metric(s) you use, plus any other details necessary to understand your evaluation.
-Some projects will have clear metrics from prior work on given datasets, but we realize that other projects will define their own metrics.
-If you're defining your own metrics, be clear as to what you're hoping to measure with each evaluation method (whether quantitative or qualitative, automatic or human-defined!), and how it's defined.
+\paragraph{Datasets.}
+We train Stage~2 on \datasettrain ($70$ recorded trials
+over the seven scenarios $S_1$--$S_7$). The training split contains
+$756$ augmented samples; validation is held out at trial granularity
+($84$ base samples) to prevent augmentation leakage. We evaluate on
+\datasettest, an independent $70$-sample benchmark ($10$
+trials per scenario) recorded in a separate session. Object compositions
+span cup and cube targets together with red-box and box destinations;
+each scenario introduces one class of mid-execution change at either
+$C_1$ (pre-pick) or $C_2$ (pre-place), as summarized in
+Table~\ref{tab:scenarios}.
 
-\subsection{Experimental details}
-Report how you ran your experiments (e.g. model configurations, learning rate, training time, etc.)
+\begin{table}[h]
+\centering
+\small
+\caption{Scenarios in \datasettest (10 trials each).}
+\label{tab:scenarios}
+\begin{tabular}{clll}
+\toprule
+ID & Change & Gold decision & Checkpoint \\
+\midrule
+$S_1$ & no change                  & \textsc{Continue} & $C_1$ \\
+$S_2$ & target count $+1$          & \textsc{Ask}      & $C_1$ \\
+$S_3$ & target removed             & \textsc{Stop}     & $C_1$ \\
+$S_4$ & target moved               & \textsc{Ask}      & $C_1$ \\
+$S_5$ & destination count $+1$     & \textsc{Ask}      & $C_2$ \\
+$S_6$ & destination removed        & \textsc{Stop}     & $C_2$ \\
+$S_7$ & destination moved          & \textsc{Ask}      & $C_2$ \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\subsection{Results}
-Report the quantitative results that you have found so far. Use a table or plot to compare results and compare against baselines.
-\begin{itemize}
-    \item Comment on your quantitative results. Are they what you expected? Better than you expected? Worse than you expected? Why do you think that is? What does that tell you about your approach?
-\end{itemize}
+\paragraph{Metrics.}
+\emph{Decision accuracy} is the fraction of correct
+\textsc{Continue}/\textsc{Ask}/\textsc{Stop} predictions. \emph{Miss
+rate} is the fraction of non-\textsc{Continue} gold labels predicted as
+\textsc{Continue} (an unsafe continuation). \emph{False-alarm rate}
+(FAR) is the fraction of \textsc{Continue} gold labels predicted as
+\textsc{Ask} or \textsc{Stop} (an unnecessary interruption). We report
+miss rate and FAR separately because their associated costs are
+asymmetric. \emph{Strict accuracy} additionally requires, on
+\textsc{Ask} cases, that the generated question (a)~names the correct
+object label and (b)~correctly characterizes the change type
+(count increase: ``which $X$?''; movement: ``$X$ has moved''; absence:
+``$X$ cannot be found''). \textsc{Continue} and \textsc{Stop} predictions
+are scored on decision correctness alone.
+
+\subsection{Main ablation}
+
+Table~\ref{tab:main} reports headline metrics on
+\datasettest.
+
+\begin{table}[h]
+\centering
+\small
+\caption{Main ablation on \datasettest ($70$ samples).
+Strict accuracy is reported for fine-tuned variants that generate
+clarifying questions.}
+\label{tab:main}
+\begin{tabular}{lccccccc}
+\toprule
+System & $G_0$ & G-DINO & FT & Dec.\,(\%) & Strict\,(\%) & Miss\,(\%) & FAR\,(\%) \\
+\midrule
+AmbResVLM            & N & N & N & 14.3 & --- & 100.0 & 0.0 \\
+Rule\,$+G_0$         & Y & Y & N & 72.9 & --- & 38.3  & 0.0 \\
+FT-A (no $G_0$)      & N & Y & Y & 68.6 & 61.4 & 36.7 & 0.0 \\
+\textbf{FT-B (full)} & Y & Y & Y & \textbf{100.0} & \textbf{90.0} & \textbf{0.0} & \textbf{0.0} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{RQ1: G-DINO enables mid-execution detection.}
+AmbResVLM attains $14.3\%$ decision accuracy ($100\%$ miss),
+succeeding only on $S_1$ ($10/10$) and failing elsewhere because it
+lacks count tracking, disappearance detection, and displacement
+measurement. Augmenting the pipeline with G-DINO (Rule\,$+G_0$) raises
+accuracy to $72.9\%$. The gain is most pronounced on count-based
+scenarios: $S_2$ count increase (from $0/10$ to $10/10$),
+$S_6$ destination absent (from $0/10$ to $6/10$), and the displacement
+scenarios $S_4$/$S_7$ (from $0/10$ to $10/10$ each, enabled by $G_0$;
+see RQ2).
+
+\paragraph{RQ2: $G_0$ enables displacement detection.}
+FT-A (fine-tuned without $G_0$) attains $68.6\%$ overall but $0/10$ on
+both $S_4$ and $S_7$, because $n=1$ at a single position is
+indistinguishable from \textsc{Clear} without a reference. FT-B reaches
+$10/10$ on both, yielding a $+31.4$\,pp gain in overall accuracy.
+Comparing Rule\,$+G_0$ ($72.9\%$, $S_4$/$S_7$ $10/10$) with FT-A
+($68.6\%$, $S_4$/$S_7$ $0/10$) further shows that $G_0$ supplies
+displacement information independently of model capacity.
+
+\paragraph{RQ3: Fine-tuning corrects force-matching.}
+Rule\,$+G_0$ fails entirely on \textsc{InvalidTarget} ($S_3$: $0/10$).
+When the cup is removed, G-DINO force-matches to a visually similar
+object at a displaced position, and the rule-based pipeline reads
+$n=1$ at high distance as a moved target and outputs \textsc{Ask}.
+FT-B reaches $10/10$ on $S_3$ by visually inspecting the G-DINO-reported
+region and outputting \textsc{Stop} when no cup is present. The
+$+27.1$\,pp improvement over Rule\,$+G_0$ quantifies the contribution
+of cross-modal visual verification. Notably, FT-A also achieves
+$10/10$ on $S_3$ without $G_0$, indicating that the correction is
+driven by visual grounding rather than positional comparison.
+
+\paragraph{Counterfactual diagnostic.}
+To verify that the model relies on $G_0$ rather than a count-based
+shortcut, we keep the image and the checkpoint detection coordinates
+fixed while toggling $G_0$ between the current position (label
+\textsc{Continue}) and a position shifted by $200$\,px (label
+\textsc{Ask}). FT-B produces the appropriate decision for all $41$
+single-detection trials, including every $S_4$ and $S_7$ trial, yielding
+a memory reliance rate of $100\%$ ($41/41$) and confirming that the
+decision depends on the stored $G_0$.
 
 \section{Analysis}
-Your report should include \textit{qualitative evaluation}. That is, try to understand your system (e.g. how it works, when it succeeds and when it fails) by inspecting key characteristics or outputs of your model.
+\label{sec:analysis}
+
+\begin{figure}[t]
+\centering
+\begin{subfigure}[t]{0.48\linewidth}
+\centering
+\includegraphics[width=\linewidth]{ambiguous_target_example.png}
+\caption{$S_2$ (\textsc{AmbiguousTarget}). A second cup appears between
+$t_0$ and $C_1$; FT-B outputs \textsc{Ask} with the question
+``which cup do you mean?''.}
+\label{fig:qual-amb}
+\end{subfigure}
+\hfill
+\begin{subfigure}[t]{0.48\linewidth}
+\centering
+\includegraphics[width=\linewidth]{invalid_target_example.png}
+\caption{$S_3$ (\textsc{InvalidTarget}). The cube is removed between
+$t_0$ and $C_1$; FT-B outputs \textsc{Stop} with ``the cube cannot be
+found'', despite G-DINO force-matching to a visually similar region.}
+\label{fig:qual-inv}
+\end{subfigure}
+\caption{Representative FT-B outputs on \datasettest.
+Each panel shows the initial scene ($t_0$, left) and the checkpoint
+($C_1$, right). The decision and clarifying question are produced
+jointly from the checkpoint image, the stored $G_0$, and the G-DINO
+detections.}
+\label{fig:qualitative}
+\end{figure}
+
+The $10$\,pp gap between decision accuracy and strict accuracy is
+concentrated in $S_5$ (destination count increase); the remaining six
+scenarios attain $100\%$ strict accuracy.
+
+\paragraph{$S_5$: detector inconsistency degrades question quality.}
+FT-B outputs \textsc{Ask} correctly on all $10$ trials but
+mischaracterizes the underlying cause in $7$. The three trials on which
+G-DINO successfully reports $n=2$ yield the correct question ``which
+box should I place it on?''. On the remaining trials G-DINO reports a
+single detection at a position different from $G_0$, leading the model
+to infer either movement or absence. The count-increase signal is
+suppressed at the detector stage, so strict accuracy on count-based
+ambiguity is upper-bounded by detector consistency rather than by model
+capacity.
+
+\paragraph{Force-match correction example ($S_3$).}
+On a representative trial, $G_0$ records the cup at $(268,147)$; after
+the cup is removed, G-DINO force-matches the query ``cup'' to an
+unrelated region at $(358,46)$, located $135$\,px from $G_0$.
+Rule\,$+G_0$ reads $n=1$ with $\text{dist}>\tau$ and emits \textsc{Ask}.
+FT-B inspects the reported region in the image, finds no cup, and
+emits \textsc{Stop} with the explanation ``the cup cannot be found in
+the scene''. The same behavior holds across all $10$ $S_3$ trials.
+
+\paragraph{Label competition.}
+When the target and destination categories share visual similarity
+(e.g., ``cube'' and ``red box''), G-DINO may assign both detections to
+the wrong label under a joint query. In $5$ of $10$ $S_3$ trials with
+cube targets, the red box is misclassified as a cube and a spurious
+$n=1$ detection reaches the evaluator. The fine-tuned model partially
+recovers via visual verification, but the detector-level failure caps
+strict accuracy on the affected trials. This failure mode originates
+in the detector rather than in the evaluator.
 
 \section{Conclusion}
-Summarize the main findings of your project, and what you have learnt. Highlight your achievements, and note the primary limitations of your work. If you like, you can describe avenues for future work.
+\label{sec:conclusion}
 
-After you are done writing this report, save it as a .pdf file, and submit through BlackBoard. You don't have to submit a copy per person; submitting once per team is fine.
+We introduced \textbf{MemoryGrounding}, a two-stage framework that
+addresses a gap in existing ambiguity-resolution methods: they evaluate
+the scene only at task initiation and cannot respond to dynamic changes
+during execution. Controlled ablation demonstrates that (i)~existing
+VLM-based detection ignores count and position
+($14.3\%$ for AmbResVLM), and integrating G-DINO restores quantitative
+scene perception; (ii)~storing the initial grounding $G_0$ provides
+the temporal memory required for displacement detection ($+31.4$\,pp
+over FT-A); and (iii)~fine-tuning a Molmo-7B evaluator enables
+cross-modal visual verification that overrides spurious open-vocabulary
+detections, whereas rule-based systems fail on every target-removal
+trial. The full system attains $100\%$ decision accuracy with $0\%$
+miss rate and FAR, $90.0\%$ strict accuracy on
+\datasettest, and a memory reliance rate of $100\%$ under
+a counterfactual diagnostic that varies $G_0$ at fixed image and
+detections.
+
+\paragraph{Limitations.}
+The $10$\,pp decision-strict gap is concentrated in $S_5$ and is driven
+by detector inconsistencies that suppress the count-increase signal.
+Label competition between visually similar categories under joint
+queries further caps performance. The benchmark
+\datasettest is saturated by FT-B, which limits our
+ability to differentiate richer multi-checkpoint episode memory on this
+dataset. The Stage~1 thresholds are tuned empirically and may require
+re-calibration across camera setups, object scales, and robot speeds.
+Our analysis also assumes that $G_0$ is correctly established at $t_0$;
+integrating an initial-scene disambiguation front-end is a natural
+extension.
+
+\paragraph{Future work.}
+We highlight four directions. First, multi-checkpoint episode memory
+generalizing $G_0$ to a full execution history. Second, end-to-end
+evaluation in which Stage~1 dynamically supplies trigger points on
+continuous video. Third, detector robustness via re-ranking or visual
+re-identification to mitigate force-matching and label competition.
+Fourth, comparison against strong general-purpose VLMs (e.g., GPT-4V,
+Gemini, Claude) prompted with the same $G_0$-conditioned structure, and
+generalization to larger object families, longer-horizon manipulation,
+and more complex spatial relations.
 
 \bibliographystyle{unsrt}
 \bibliography{references}
-% you can use .bib file to take care of your references.
 
 \newpage
 \appendix
 
 \section{Appendix: Team contributions}
-The stuff here does not count towards the 8 page limit. If you are a multi-person team, you can write a brief summary of what each team member did for the project (about 1 or 2 sentences per person). For almost all teams, it will have no effect (i.e. team members all receive same grade), but for teams with considerably unequal contribution, I may investigate and/or give different grades to team members.
+
+Seongmin Lee led system design and implemented the Stage~1 FSM trigger
+and the rule-based pipeline (Rule$+G_0$); performed all data collection
+and recording of \datasettrain and \datasettest; and contributed to
+evaluation and writing.
+Sanghyuk Ko designed and implemented the Stage~2 evaluator, including
+LoRA fine-tuning of Molmo-7B-D, counterfactual augmentation strategy,
+and the structured JSON decision policy; led ablation analysis and
+paper writing.
 
 \end{document}

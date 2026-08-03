@@ -1,0 +1,71 @@
+condition,id,scenario,gold_state,gold_decision,predicted_decision,correct,clarifying_question
+cond1: FT + DINO + G0,s1_trial_001,S1,CLEAR,CONTINUE,CONTINUE,True,
+cond1: FT + DINO + G0,s1_trial_002,S1,CLEAR,CONTINUE,CONTINUE,True,
+cond1: FT + DINO + G0,s1_trial_003,S1,CLEAR,CONTINUE,CONTINUE,True,
+cond1: FT + DINO + G0,s1_trial_004,S1,CLEAR,CONTINUE,CONTINUE,True,
+cond1: FT + DINO + G0,s1_trial_005,S1,CLEAR,CONTINUE,CONTINUE,True,
+cond1: FT + DINO + G0,s1_trial_006,S1,CLEAR,CONTINUE,CONTINUE,True,
+cond1: FT + DINO + G0,s1_trial_007,S1,CLEAR,CONTINUE,CONTINUE,True,
+cond1: FT + DINO + G0,s1_trial_008,S1,CLEAR,CONTINUE,CONTINUE,True,
+cond1: FT + DINO + G0,s1_trial_009,S1,CLEAR,CONTINUE,CONTINUE,True,
+cond1: FT + DINO + G0,s1_trial_010,S1,CLEAR,CONTINUE,CONTINUE,True,
+cond1: FT + DINO + G0,s2_trial_001,S2,AMBIGUOUS_TARGET,ASK,ASK,True,Which cup would you like me to pick?
+cond1: FT + DINO + G0,s2_trial_002,S2,AMBIGUOUS_TARGET,ASK,ASK,True,Which cup would you like me to pick?
+cond1: FT + DINO + G0,s2_trial_003,S2,AMBIGUOUS_TARGET,ASK,ASK,True,Which cup would you like me to pick?
+cond1: FT + DINO + G0,s2_trial_004,S2,AMBIGUOUS_TARGET,ASK,ASK,True,Which cup would you like me to pick?
+cond1: FT + DINO + G0,s2_trial_005,S2,AMBIGUOUS_TARGET,ASK,ASK,True,Which cup would you like me to pick?
+cond1: FT + DINO + G0,s2_trial_006,S2,AMBIGUOUS_TARGET,ASK,ASK,True,Which cube would you like me to pick?
+cond1: FT + DINO + G0,s2_trial_007,S2,AMBIGUOUS_TARGET,ASK,ASK,True,Which cube would you like me to pick?
+cond1: FT + DINO + G0,s2_trial_008,S2,AMBIGUOUS_TARGET,ASK,ASK,True,Which cube would you like me to pick?
+cond1: FT + DINO + G0,s2_trial_009,S2,AMBIGUOUS_TARGET,ASK,ASK,True,Which cube would you like me to pick?
+cond1: FT + DINO + G0,s2_trial_010,S2,AMBIGUOUS_TARGET,ASK,ASK,True,Which cube would you like me to pick?
+cond1: FT + DINO + G0,s3_trial_001,S3,INVALID_TARGET,STOP,STOP,True,The cup cannot be found in the scene.
+cond1: FT + DINO + G0,s3_trial_002,S3,INVALID_TARGET,STOP,STOP,True,The cup cannot be found in the scene.
+cond1: FT + DINO + G0,s3_trial_003,S3,INVALID_TARGET,STOP,STOP,True,The cup cannot be found in the scene.
+cond1: FT + DINO + G0,s3_trial_004,S3,INVALID_TARGET,STOP,STOP,True,The cup cannot be found in the scene.
+cond1: FT + DINO + G0,s3_trial_005,S3,INVALID_TARGET,STOP,STOP,True,The cup cannot be found in the scene.
+cond1: FT + DINO + G0,s3_trial_006,S3,INVALID_TARGET,STOP,CONTINUE,False,
+cond1: FT + DINO + G0,s3_trial_007,S3,INVALID_TARGET,STOP,CONTINUE,False,
+cond1: FT + DINO + G0,s3_trial_008,S3,INVALID_TARGET,STOP,STOP,True,The cube cannot be found in the scene.
+cond1: FT + DINO + G0,s3_trial_009,S3,INVALID_TARGET,STOP,STOP,True,The cube cannot be found in the scene.
+cond1: FT + DINO + G0,s3_trial_010,S3,INVALID_TARGET,STOP,STOP,True,The cube cannot be found in the scene.
+cond1: FT + DINO + G0,s4_trial_001,S4,AMBIGUOUS_TARGET,ASK,ASK,True,The cup has moved. Continue with the moved target?
+cond1: FT + DINO + G0,s4_trial_002,S4,AMBIGUOUS_TARGET,ASK,ASK,True,The cup has moved. Continue with the moved target?
+cond1: FT + DINO + G0,s4_trial_003,S4,AMBIGUOUS_TARGET,ASK,ASK,True,The cup has moved. Continue with the moved target?
+cond1: FT + DINO + G0,s4_trial_004,S4,AMBIGUOUS_TARGET,ASK,ASK,True,The cup has moved. Continue with the moved target?
+cond1: FT + DINO + G0,s4_trial_005,S4,AMBIGUOUS_TARGET,ASK,ASK,True,The cup has moved. Continue with the moved target?
+cond1: FT + DINO + G0,s4_trial_006,S4,AMBIGUOUS_TARGET,ASK,ASK,True,The cube has moved. Continue with the moved target?
+cond1: FT + DINO + G0,s4_trial_007,S4,AMBIGUOUS_TARGET,ASK,ASK,True,The cube has moved. Continue with the moved target?
+cond1: FT + DINO + G0,s4_trial_008,S4,AMBIGUOUS_TARGET,ASK,ASK,True,The cube has moved. Continue with the moved target?
+cond1: FT + DINO + G0,s4_trial_009,S4,AMBIGUOUS_TARGET,ASK,ASK,True,The cube has moved. Continue with the moved target?
+cond1: FT + DINO + G0,s4_trial_010,S4,AMBIGUOUS_TARGET,ASK,ASK,True,The cube has moved. Continue with the moved target?
+cond1: FT + DINO + G0,s5_trial_001,S5,AMBIGUOUS_DESTINATION,ASK,ASK,True,The box has moved. Continue with the moved destination?
+cond1: FT + DINO + G0,s5_trial_002,S5,AMBIGUOUS_DESTINATION,ASK,ASK,True,Which box should I place it on?
+cond1: FT + DINO + G0,s5_trial_003,S5,AMBIGUOUS_DESTINATION,ASK,ASK,True,Which box should I place it on?
+cond1: FT + DINO + G0,s5_trial_004,S5,AMBIGUOUS_DESTINATION,ASK,ASK,True,The box has moved. Continue with the moved destination?
+cond1: FT + DINO + G0,s5_trial_005,S5,AMBIGUOUS_DESTINATION,ASK,ASK,True,Which box should I place it on?
+cond1: FT + DINO + G0,s5_trial_006,S5,AMBIGUOUS_DESTINATION,ASK,ASK,True,I cannot locate the box. Where should I place it?
+cond1: FT + DINO + G0,s5_trial_007,S5,AMBIGUOUS_DESTINATION,ASK,ASK,True,I cannot locate the box. Where should I place it?
+cond1: FT + DINO + G0,s5_trial_008,S5,AMBIGUOUS_DESTINATION,ASK,ASK,True,I cannot locate the box. Where should I place it?
+cond1: FT + DINO + G0,s5_trial_009,S5,AMBIGUOUS_DESTINATION,ASK,ASK,True,I cannot locate the box. Where should I place it?
+cond1: FT + DINO + G0,s5_trial_010,S5,AMBIGUOUS_DESTINATION,ASK,ASK,True,I cannot locate the box. Where should I place it?
+cond1: FT + DINO + G0,s6_trial_001,S6,INVALID_DESTINATION,STOP,STOP,True,The red box cannot be found in the scene.
+cond1: FT + DINO + G0,s6_trial_002,S6,INVALID_DESTINATION,STOP,STOP,True,The red box cannot be found in the scene.
+cond1: FT + DINO + G0,s6_trial_003,S6,INVALID_DESTINATION,STOP,STOP,True,The red box cannot be found in the scene.
+cond1: FT + DINO + G0,s6_trial_004,S6,INVALID_DESTINATION,STOP,STOP,True,The red box cannot be found in the scene.
+cond1: FT + DINO + G0,s6_trial_005,S6,INVALID_DESTINATION,STOP,STOP,True,The red box cannot be found in the scene.
+cond1: FT + DINO + G0,s6_trial_006,S6,INVALID_DESTINATION,STOP,STOP,True,The red box cannot be found in the scene.
+cond1: FT + DINO + G0,s6_trial_007,S6,INVALID_DESTINATION,STOP,STOP,True,The red box cannot be found in the scene.
+cond1: FT + DINO + G0,s6_trial_008,S6,INVALID_DESTINATION,STOP,STOP,True,The red box cannot be found in the scene.
+cond1: FT + DINO + G0,s6_trial_009,S6,INVALID_DESTINATION,STOP,STOP,True,The red box cannot be found in the scene.
+cond1: FT + DINO + G0,s6_trial_010,S6,INVALID_DESTINATION,STOP,STOP,True,The red box cannot be found in the scene.
+cond1: FT + DINO + G0,s7_trial_001,S7,AMBIGUOUS_DESTINATION,ASK,ASK,True,The red box has moved. Continue with the moved destination?
+cond1: FT + DINO + G0,s7_trial_002,S7,AMBIGUOUS_DESTINATION,ASK,ASK,True,The red box has moved. Continue with the moved destination?
+cond1: FT + DINO + G0,s7_trial_003,S7,AMBIGUOUS_DESTINATION,ASK,ASK,True,The red box has moved. Continue with the moved destination?
+cond1: FT + DINO + G0,s7_trial_004,S7,AMBIGUOUS_DESTINATION,ASK,ASK,True,The red box has moved. Continue with the moved destination?
+cond1: FT + DINO + G0,s7_trial_005,S7,AMBIGUOUS_DESTINATION,ASK,ASK,True,The red box has moved. Continue with the moved destination?
+cond1: FT + DINO + G0,s7_trial_006,S7,AMBIGUOUS_DESTINATION,ASK,ASK,True,The red box has moved. Continue with the moved destination?
+cond1: FT + DINO + G0,s7_trial_007,S7,AMBIGUOUS_DESTINATION,ASK,ASK,True,The red box has moved. Continue with the moved destination?
+cond1: FT + DINO + G0,s7_trial_008,S7,AMBIGUOUS_DESTINATION,ASK,ASK,True,The red box has moved. Continue with the moved destination?
+cond1: FT + DINO + G0,s7_trial_009,S7,AMBIGUOUS_DESTINATION,ASK,ASK,True,The red box has moved. Continue with the moved destination?
+cond1: FT + DINO + G0,s7_trial_010,S7,AMBIGUOUS_DESTINATION,ASK,ASK,True,The red box has moved. Continue with the moved destination?

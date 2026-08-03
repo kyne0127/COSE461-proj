@@ -1,0 +1,340 @@
+Using a slow image processor as `use_fast` is unset and a slow processor was saved with this model. `use_fast=True` will be the default behavior in v4.48, even if the model was saved with a slow processor. This will result in minor differences in outputs. You'll still be able to use a slow processor with `use_fast=False`.
+val 샘플: 48개
+gold_state: {'AMBIGUOUS_TARGET': 8, 'CLEAR': 13, 'INVALID_DESTINATION': 12, 'AMBIGUOUS_DESTINATION': 9, 'INVALID_TARGET': 6}
+
+[FT 모델 로드]
+  [1/2] Loading Molmo-7B base...
+Loading checkpoint shards:   0%|          | 0/7 [00:00<?, ?it/s]Loading checkpoint shards:  14%|█▍        | 1/7 [00:10<01:02, 10.45s/it]Loading checkpoint shards:  29%|██▊       | 2/7 [00:21<00:55, 11.08s/it]Loading checkpoint shards:  43%|████▎     | 3/7 [00:32<00:42, 10.72s/it]Loading checkpoint shards:  57%|█████▋    | 4/7 [00:43<00:32, 10.97s/it]Loading checkpoint shards:  71%|███████▏  | 5/7 [00:54<00:21, 10.89s/it]Loading checkpoint shards:  86%|████████▌ | 6/7 [01:04<00:10, 10.70s/it]Loading checkpoint shards: 100%|██████████| 7/7 [01:20<00:00, 12.45s/it]Loading checkpoint shards: 100%|██████████| 7/7 [01:20<00:00, 11.54s/it]
+  [2/2] Merging AmbRes LoRA: /workspace/AmbRes/ckpt/AB5siP8DA78aA78wR5Y8Mw/checkpoint-390
+  [+LoRA] Loading v3 LoRA: /workspace/COSE461-proj/ckpt/grounding_ft/BvFsfsf4/checkpoint-162
+
+▶ cond1: FT + DINO coords
+  [ 1/48] ✓ s4_trial_007_C1                        gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [ 2/48] ✓ old_s1_trial_004_C1_flip               gold=CONTINUE pred=CONTINUE  raw={"task_ambiguous": false, "stop_bool": false, "clarifying_qu
+  [ 3/48] ✓ s6_trial_006_C2                        gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [ 4/48] ✓ s1_trial_008_C1_bright                 gold=CONTINUE pred=CONTINUE  raw={"task_ambiguous": false, "stop_bool": false, "clarifying_qu
+  [ 5/48] ✓ s5_trial_005_C2_bright                 gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [ 6/48] ✓ s6_trial_009_C2_noise1                 gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [ 7/48] ✓ s7_trial_004_C2                        gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [ 8/48] ✓ old_s1_trial_001_C1_dark               gold=CONTINUE pred=CONTINUE  raw={"task_ambiguous": false, "stop_bool": false, "clarifying_qu
+  [ 9/48] ✓ s6_trial_010_C2_bright                 gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [10/48] ✓ s6_trial_008_C2_noise0                 gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [11/48] ✓ s2_trial_001_C1_bright                 gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [12/48] ✓ s7_trial_010_C2_noise1                 gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [13/48] ✓ old_s1_trial_010_C1_dark               gold=CONTINUE pred=CONTINUE  raw={"task_ambiguous": false, "stop_bool": false, "clarifying_qu
+  [14/48] ✓ s7_trial_008_C2_flip                   gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [15/48] ✓ s6_trial_005_C2_bright                 gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [16/48] ✓ s4_trial_003_C1                        gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [17/48] ✓ s5_trial_008_C2_dark                   gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [18/48] ✓ old_s1_trial_007_C1_noise1             gold=CONTINUE pred=CONTINUE  raw={"task_ambiguous": false, "stop_bool": false, "clarifying_qu
+  [19/48] ✓ s1_trial_008_C1_noise0                 gold=CONTINUE pred=CONTINUE  raw={"task_ambiguous": false, "stop_bool": false, "clarifying_qu
+  [20/48] ✓ s7_trial_001_C2_noise1                 gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [21/48] ✓ s6_trial_001_C2_dark                   gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [22/48] ✓ s2_trial_002_C1                        gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [23/48] ✓ s4_trial_004_C1_noise1                 gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [24/48] ✓ old_s1_trial_007_C1_bright             gold=CONTINUE pred=CONTINUE  raw={"task_ambiguous": false, "stop_bool": false, "clarifying_qu
+  [25/48] ✓ s6_trial_010_C2_flip                   gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [26/48] ✓ s6_trial_006_C2_bright                 gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [27/48] ✓ s3_trial_007_C1_noise1                 gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [28/48] ✓ s3_trial_010_C1_bright                 gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [29/48] ✓ s2_trial_003_C1                        gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [30/48] ✓ s6_trial_007_C2_flip                   gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [31/48] ✓ s5_trial_010_C2_dark                   gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [32/48] ✓ s1_trial_007_C1_bright                 gold=CONTINUE pred=CONTINUE  raw={"task_ambiguous": false, "stop_bool": false, "clarifying_qu
+  [33/48] ✓ s3_trial_009_C1_noise1                 gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [34/48] ✓ s2_trial_003_C1_dark                   gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [35/48] ✓ old_s1_trial_005_C1_flip               gold=CONTINUE pred=CONTINUE  raw={"task_ambiguous": false, "stop_bool": false, "clarifying_qu
+  [36/48] ✓ s6_trial_002_C2_noise1                 gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [37/48] ✓ old_s1_trial_008_C1_noise1             gold=CONTINUE pred=CONTINUE  raw={"task_ambiguous": false, "stop_bool": false, "clarifying_qu
+  [38/48] ✓ s6_trial_007_C2                        gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [39/48] ✓ old_s1_trial_003_C1_dark               gold=CONTINUE pred=CONTINUE  raw={"task_ambiguous": false, "stop_bool": false, "clarifying_qu
+  [40/48] ✓ s7_trial_002_C2_dark                   gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [41/48] ✓ s3_trial_002_C1_flip                   gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [42/48] ✓ s3_trial_005_C1_noise0                 gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [43/48] ✓ s4_trial_003_C1_bright                 gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [44/48] ✓ s6_trial_008_C2_bright                 gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [45/48] ✓ s5_trial_008_C2_flip                   gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [46/48] ✓ s1_trial_009_C1                        gold=CONTINUE pred=CONTINUE  raw={"task_ambiguous": false, "stop_bool": false, "clarifying_qu
+  [47/48] ✓ s3_trial_009_C1                        gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [48/48] ✓ s1_trial_006_C1_flip                   gold=CONTINUE pred=CONTINUE  raw={"task_ambiguous": false, "stop_bool": false, "clarifying_qu
+
+──────────────────────────────────────────────────────────────
+  cond1: FT + DINO coords
+──────────────────────────────────────────────────────────────
+  Accuracy : 100.0%  (48/48)
+  Miss     : 0.0%
+  FAR      : 0.0%
+    AMBIGUOUS_DESTINATION               9/9
+    AMBIGUOUS_TARGET                    8/8
+    CLEAR                               13/13
+    INVALID_DESTINATION                 12/12
+    INVALID_TARGET                      6/6
+
+▶ cond2: FT - DINO (image only)
+  [ 1/48] ✓ s4_trial_007_C1                        gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [ 2/48] ✗ old_s1_trial_004_C1_flip               gold=CONTINUE pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [ 3/48] ✗ s6_trial_006_C2                        gold=STOP     pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [ 4/48] ✗ s1_trial_008_C1_bright                 gold=CONTINUE pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [ 5/48] ✓ s5_trial_005_C2_bright                 gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [ 6/48] ✗ s6_trial_009_C2_noise1                 gold=STOP     pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [ 7/48] ✓ s7_trial_004_C2                        gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [ 8/48] ✗ old_s1_trial_001_C1_dark               gold=CONTINUE pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [ 9/48] ✗ s6_trial_010_C2_bright                 gold=STOP     pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [10/48] ✗ s6_trial_008_C2_noise0                 gold=STOP     pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [11/48] ✓ s2_trial_001_C1_bright                 gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [12/48] ✓ s7_trial_010_C2_noise1                 gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [13/48] ✗ old_s1_trial_010_C1_dark               gold=CONTINUE pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [14/48] ✓ s7_trial_008_C2_flip                   gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [15/48] ✗ s6_trial_005_C2_bright                 gold=STOP     pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [16/48] ✓ s4_trial_003_C1                        gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [17/48] ✓ s5_trial_008_C2_dark                   gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [18/48] ✗ old_s1_trial_007_C1_noise1             gold=CONTINUE pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [19/48] ✗ s1_trial_008_C1_noise0                 gold=CONTINUE pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [20/48] ✓ s7_trial_001_C2_noise1                 gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [21/48] ✗ s6_trial_001_C2_dark                   gold=STOP     pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [22/48] ✓ s2_trial_002_C1                        gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [23/48] ✓ s4_trial_004_C1_noise1                 gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [24/48] ✗ old_s1_trial_007_C1_bright             gold=CONTINUE pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [25/48] ✗ s6_trial_010_C2_flip                   gold=STOP     pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [26/48] ✗ s6_trial_006_C2_bright                 gold=STOP     pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [27/48] ✗ s3_trial_007_C1_noise1                 gold=STOP     pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [28/48] ✗ s3_trial_010_C1_bright                 gold=STOP     pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [29/48] ✓ s2_trial_003_C1                        gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [30/48] ✗ s6_trial_007_C2_flip                   gold=STOP     pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [31/48] ✓ s5_trial_010_C2_dark                   gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [32/48] ✗ s1_trial_007_C1_bright                 gold=CONTINUE pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [33/48] ✗ s3_trial_009_C1_noise1                 gold=STOP     pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [34/48] ✓ s2_trial_003_C1_dark                   gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [35/48] ✗ old_s1_trial_005_C1_flip               gold=CONTINUE pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [36/48] ✗ s6_trial_002_C2_noise1                 gold=STOP     pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [37/48] ✗ old_s1_trial_008_C1_noise1             gold=CONTINUE pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [38/48] ✗ s6_trial_007_C2                        gold=STOP     pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [39/48] ✗ old_s1_trial_003_C1_dark               gold=CONTINUE pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [40/48] ✓ s7_trial_002_C2_dark                   gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [41/48] ✗ s3_trial_002_C1_flip                   gold=STOP     pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [42/48] ✗ s3_trial_005_C1_noise0                 gold=STOP     pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [43/48] ✓ s4_trial_003_C1_bright                 gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [44/48] ✗ s6_trial_008_C2_bright                 gold=STOP     pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [45/48] ✓ s5_trial_008_C2_flip                   gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [46/48] ✗ s1_trial_009_C1                        gold=CONTINUE pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [47/48] ✗ s3_trial_009_C1                        gold=STOP     pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [48/48] ✗ s1_trial_006_C1_flip                   gold=CONTINUE pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+
+──────────────────────────────────────────────────────────────
+  cond2: FT - DINO (image only)
+──────────────────────────────────────────────────────────────
+  Accuracy : 35.4%  (17/48)
+  Miss     : 0.0%
+  FAR      : 100.0%
+    AMBIGUOUS_DESTINATION               9/9
+    AMBIGUOUS_TARGET                    8/8
+    CLEAR                               0/13
+    INVALID_DESTINATION                 0/12
+    INVALID_TARGET                      0/6
+
+▶ cond4: FT + DINO, no G0
+  [ 1/48] ✓ s4_trial_007_C1                        gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [ 2/48] ✗ old_s1_trial_004_C1_flip               gold=CONTINUE pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [ 3/48] ✓ s6_trial_006_C2                        gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [ 4/48] ✗ s1_trial_008_C1_bright                 gold=CONTINUE pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [ 5/48] ✓ s5_trial_005_C2_bright                 gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [ 6/48] ✓ s6_trial_009_C2_noise1                 gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [ 7/48] ✓ s7_trial_004_C2                        gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [ 8/48] ✗ old_s1_trial_001_C1_dark               gold=CONTINUE pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [ 9/48] ✓ s6_trial_010_C2_bright                 gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [10/48] ✓ s6_trial_008_C2_noise0                 gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [11/48] ✓ s2_trial_001_C1_bright                 gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [12/48] ✓ s7_trial_010_C2_noise1                 gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [13/48] ✗ old_s1_trial_010_C1_dark               gold=CONTINUE pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [14/48] ✓ s7_trial_008_C2_flip                   gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [15/48] ✓ s6_trial_005_C2_bright                 gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [16/48] ✓ s4_trial_003_C1                        gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [17/48] ✓ s5_trial_008_C2_dark                   gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [18/48] ✗ old_s1_trial_007_C1_noise1             gold=CONTINUE pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [19/48] ✗ s1_trial_008_C1_noise0                 gold=CONTINUE pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [20/48] ✓ s7_trial_001_C2_noise1                 gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [21/48] ✓ s6_trial_001_C2_dark                   gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [22/48] ✓ s2_trial_002_C1                        gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [23/48] ✓ s4_trial_004_C1_noise1                 gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [24/48] ✗ old_s1_trial_007_C1_bright             gold=CONTINUE pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [25/48] ✓ s6_trial_010_C2_flip                   gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [26/48] ✓ s6_trial_006_C2_bright                 gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [27/48] ✓ s3_trial_007_C1_noise1                 gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [28/48] ✓ s3_trial_010_C1_bright                 gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [29/48] ✓ s2_trial_003_C1                        gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [30/48] ✓ s6_trial_007_C2_flip                   gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [31/48] ✓ s5_trial_010_C2_dark                   gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [32/48] ✗ s1_trial_007_C1_bright                 gold=CONTINUE pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [33/48] ✓ s3_trial_009_C1_noise1                 gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [34/48] ✓ s2_trial_003_C1_dark                   gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [35/48] ✗ old_s1_trial_005_C1_flip               gold=CONTINUE pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [36/48] ✓ s6_trial_002_C2_noise1                 gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [37/48] ✗ old_s1_trial_008_C1_noise1             gold=CONTINUE pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [38/48] ✓ s6_trial_007_C2                        gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [39/48] ✗ old_s1_trial_003_C1_dark               gold=CONTINUE pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [40/48] ✓ s7_trial_002_C2_dark                   gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [41/48] ✓ s3_trial_002_C1_flip                   gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [42/48] ✓ s3_trial_005_C1_noise0                 gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [43/48] ✓ s4_trial_003_C1_bright                 gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [44/48] ✓ s6_trial_008_C2_bright                 gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [45/48] ✓ s5_trial_008_C2_flip                   gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [46/48] ✗ s1_trial_009_C1                        gold=CONTINUE pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [47/48] ✓ s3_trial_009_C1                        gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [48/48] ✗ s1_trial_006_C1_flip                   gold=CONTINUE pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+
+──────────────────────────────────────────────────────────────
+  cond4: FT + DINO, no G0
+──────────────────────────────────────────────────────────────
+  Accuracy : 72.9%  (35/48)
+  Miss     : 0.0%
+  FAR      : 100.0%
+    AMBIGUOUS_DESTINATION               9/9
+    AMBIGUOUS_TARGET                    8/8
+    CLEAR                               0/13
+    INVALID_DESTINATION                 12/12
+    INVALID_TARGET                      6/6
+
+▶ cond5: FT + DINO, no taxonomy
+  [ 1/48] ✓ s4_trial_007_C1                        gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [ 2/48] ✓ old_s1_trial_004_C1_flip               gold=CONTINUE pred=CONTINUE  raw={"task_ambiguous": false, "stop_bool": false, "clarifying_qu
+  [ 3/48] ✓ s6_trial_006_C2                        gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [ 4/48] ✓ s1_trial_008_C1_bright                 gold=CONTINUE pred=CONTINUE  raw={"task_ambiguous": false, "stop_bool": false, "clarifying_qu
+  [ 5/48] ✓ s5_trial_005_C2_bright                 gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [ 6/48] ✓ s6_trial_009_C2_noise1                 gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [ 7/48] ✓ s7_trial_004_C2                        gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [ 8/48] ✓ old_s1_trial_001_C1_dark               gold=CONTINUE pred=CONTINUE  raw={"task_ambiguous": false, "stop_bool": false, "clarifying_qu
+  [ 9/48] ✓ s6_trial_010_C2_bright                 gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [10/48] ✓ s6_trial_008_C2_noise0                 gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [11/48] ✓ s2_trial_001_C1_bright                 gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [12/48] ✓ s7_trial_010_C2_noise1                 gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [13/48] ✓ old_s1_trial_010_C1_dark               gold=CONTINUE pred=CONTINUE  raw={"task_ambiguous": false, "stop_bool": false, "clarifying_qu
+  [14/48] ✓ s7_trial_008_C2_flip                   gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [15/48] ✓ s6_trial_005_C2_bright                 gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [16/48] ✓ s4_trial_003_C1                        gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [17/48] ✓ s5_trial_008_C2_dark                   gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [18/48] ✓ old_s1_trial_007_C1_noise1             gold=CONTINUE pred=CONTINUE  raw={"task_ambiguous": false, "stop_bool": false, "clarifying_qu
+  [19/48] ✓ s1_trial_008_C1_noise0                 gold=CONTINUE pred=CONTINUE  raw={"task_ambiguous": false, "stop_bool": false, "clarifying_qu
+  [20/48] ✓ s7_trial_001_C2_noise1                 gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [21/48] ✓ s6_trial_001_C2_dark                   gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [22/48] ✓ s2_trial_002_C1                        gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [23/48] ✓ s4_trial_004_C1_noise1                 gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [24/48] ✓ old_s1_trial_007_C1_bright             gold=CONTINUE pred=CONTINUE  raw={"task_ambiguous": false, "stop_bool": false, "clarifying_qu
+  [25/48] ✓ s6_trial_010_C2_flip                   gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [26/48] ✓ s6_trial_006_C2_bright                 gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [27/48] ✓ s3_trial_007_C1_noise1                 gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [28/48] ✓ s3_trial_010_C1_bright                 gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [29/48] ✓ s2_trial_003_C1                        gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [30/48] ✓ s6_trial_007_C2_flip                   gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [31/48] ✓ s5_trial_010_C2_dark                   gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [32/48] ✓ s1_trial_007_C1_bright                 gold=CONTINUE pred=CONTINUE  raw={"task_ambiguous": false, "stop_bool": false, "clarifying_qu
+  [33/48] ✓ s3_trial_009_C1_noise1                 gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [34/48] ✓ s2_trial_003_C1_dark                   gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [35/48] ✓ old_s1_trial_005_C1_flip               gold=CONTINUE pred=CONTINUE  raw={"task_ambiguous": false, "stop_bool": false, "clarifying_qu
+  [36/48] ✓ s6_trial_002_C2_noise1                 gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [37/48] ✓ old_s1_trial_008_C1_noise1             gold=CONTINUE pred=CONTINUE  raw={"task_ambiguous": false, "stop_bool": false, "clarifying_qu
+  [38/48] ✓ s6_trial_007_C2                        gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [39/48] ✓ old_s1_trial_003_C1_dark               gold=CONTINUE pred=CONTINUE  raw={"task_ambiguous": false, "stop_bool": false, "clarifying_qu
+  [40/48] ✓ s7_trial_002_C2_dark                   gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [41/48] ✓ s3_trial_002_C1_flip                   gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [42/48] ✓ s3_trial_005_C1_noise0                 gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [43/48] ✓ s4_trial_003_C1_bright                 gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [44/48] ✓ s6_trial_008_C2_bright                 gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [45/48] ✓ s5_trial_008_C2_flip                   gold=ASK      pred=ASK  raw={"task_ambiguous": true, "stop_bool": false, "clarifying_que
+  [46/48] ✓ s1_trial_009_C1                        gold=CONTINUE pred=CONTINUE  raw={"task_ambiguous": false, "stop_bool": false, "clarifying_qu
+  [47/48] ✓ s3_trial_009_C1                        gold=STOP     pred=STOP  raw={"task_ambiguous": true, "stop_bool": true, "clarifying_ques
+  [48/48] ✓ s1_trial_006_C1_flip                   gold=CONTINUE pred=CONTINUE  raw={"task_ambiguous": false, "stop_bool": false, "clarifying_qu
+
+──────────────────────────────────────────────────────────────
+  cond5: FT + DINO, no taxonomy
+──────────────────────────────────────────────────────────────
+  Accuracy : 100.0%  (48/48)
+  Miss     : 0.0%
+  FAR      : 0.0%
+    AMBIGUOUS_DESTINATION               9/9
+    AMBIGUOUS_TARGET                    8/8
+    CLEAR                               13/13
+    INVALID_DESTINATION                 12/12
+    INVALID_TARGET                      6/6
+
+[VRAM 정리]
+
+[pre-FT 모델 로드] (Molmo + AmbRes merged, no v3 LoRA)
+  [1/2] Loading Molmo-7B base...
+Loading checkpoint shards:   0%|          | 0/7 [00:00<?, ?it/s]Loading checkpoint shards:  14%|█▍        | 1/7 [00:08<00:50,  8.44s/it]Loading checkpoint shards:  29%|██▊       | 2/7 [00:18<00:45,  9.19s/it]Loading checkpoint shards:  43%|████▎     | 3/7 [00:27<00:37,  9.38s/it]Loading checkpoint shards:  57%|█████▋    | 4/7 [00:37<00:29,  9.71s/it]Loading checkpoint shards:  71%|███████▏  | 5/7 [00:47<00:19,  9.75s/it]Loading checkpoint shards:  86%|████████▌ | 6/7 [00:56<00:09,  9.43s/it]Loading checkpoint shards: 100%|██████████| 7/7 [01:12<00:00, 11.70s/it]Loading checkpoint shards: 100%|██████████| 7/7 [01:12<00:00, 10.43s/it]
+  [2/2] Merging AmbRes LoRA: /workspace/AmbRes/ckpt/AB5siP8DA78aA78wR5Y8Mw/checkpoint-390
+
+▶ cond3: pre-FT + DINO coords
+  [ 1/48] ✗ s4_trial_007_C1                        gold=ASK      pred=CONTINUE  raw={"task_objects": ["cube", "red box"]}
+  [ 2/48] ✓ old_s1_trial_004_C1_flip               gold=CONTINUE pred=CONTINUE  raw={"task_objects": ["cup", "red box"]}
+  [ 3/48] ✗ s6_trial_006_C2                        gold=STOP     pred=CONTINUE  raw={"task_objects": ["cube"]}
+  [ 4/48] ✓ s1_trial_008_C1_bright                 gold=CONTINUE pred=CONTINUE  raw={"task_objects": ["cube", "red box"]}
+  [ 5/48] ✗ s5_trial_005_C2_bright                 gold=ASK      pred=CONTINUE  raw={"task_objects": ["cup", "box"]}
+  [ 6/48] ✗ s6_trial_009_C2_noise1                 gold=STOP     pred=CONTINUE  raw={"task_objects": ["cube", "red box"]}
+  [ 7/48] ✗ s7_trial_004_C2                        gold=ASK      pred=CONTINUE  raw={"task_objects": ["cup", "red box"]}
+  [ 8/48] ✓ old_s1_trial_001_C1_dark               gold=CONTINUE pred=CONTINUE  raw={"task_objects": ["cup", "red box"]}
+  [ 9/48] ✗ s6_trial_010_C2_bright                 gold=STOP     pred=CONTINUE  raw={"task_objects": ["cube", "red box"]}
+  [10/48] ✗ s6_trial_008_C2_noise0                 gold=STOP     pred=CONTINUE  raw={"task_objects": ["cube", "red box"]}
+  [11/48] ✗ s2_trial_001_C1_bright                 gold=ASK      pred=CONTINUE  raw={"task_objects": ["cup", "red box"]}
+  [12/48] ✗ s7_trial_010_C2_noise1                 gold=ASK      pred=CONTINUE  raw={"task_objects": ["cube", "red box"]}
+  [13/48] ✓ old_s1_trial_010_C1_dark               gold=CONTINUE pred=CONTINUE  raw={"task_objects": ["cube", "red box"]}
+  [14/48] ✗ s7_trial_008_C2_flip                   gold=ASK      pred=CONTINUE  raw={"task_objects": ["cube", "red box"]}
+  [15/48] ✗ s6_trial_005_C2_bright                 gold=STOP     pred=CONTINUE  raw={"task_objects": ["cup"]}
+  [16/48] ✗ s4_trial_003_C1                        gold=ASK      pred=CONTINUE  raw={"task_objects": ["cup", "red box"]}
+  [17/48] ✗ s5_trial_008_C2_dark                   gold=ASK      pred=CONTINUE  raw={"task_objects": ["cube", "box"]}
+  [18/48] ✓ old_s1_trial_007_C1_noise1             gold=CONTINUE pred=CONTINUE  raw={"task_objects": ["cube", "red box"]}
+  [19/48] ✓ s1_trial_008_C1_noise0                 gold=CONTINUE pred=CONTINUE  raw={"task_objects": ["cube", "red box"]}
+  [20/48] ✗ s7_trial_001_C2_noise1                 gold=ASK      pred=CONTINUE  raw={"task_objects": ["cup", "red box"]}
+  [21/48] ✗ s6_trial_001_C2_dark                   gold=STOP     pred=CONTINUE  raw={"task_objects": ["cup"]}
+  [22/48] ✗ s2_trial_002_C1                        gold=ASK      pred=CONTINUE  raw={"task_objects": ["cup", "red box"]}
+  [23/48] ✗ s4_trial_004_C1_noise1                 gold=ASK      pred=CONTINUE  raw={"task_objects": ["cup", "red box"]}
+  [24/48] ✓ old_s1_trial_007_C1_bright             gold=CONTINUE pred=CONTINUE  raw={"task_objects": ["cube", "red box"]}
+  [25/48] ✗ s6_trial_010_C2_flip                   gold=STOP     pred=CONTINUE  raw={"task_objects": ["cube", "red box"]}
+  [26/48] ✗ s6_trial_006_C2_bright                 gold=STOP     pred=CONTINUE  raw={"task_objects": ["cube", "red box"]}
+  [27/48] ✗ s3_trial_007_C1_noise1                 gold=STOP     pred=CONTINUE  raw={"task_objects": ["cube", "red box"]}
+  [28/48] ✗ s3_trial_010_C1_bright                 gold=STOP     pred=CONTINUE  raw={"task_objects": ["cube", "red box"]}
+  [29/48] ✗ s2_trial_003_C1                        gold=ASK      pred=CONTINUE  raw={"task_objects": ["cup", "red box"]}
+  [30/48] ✗ s6_trial_007_C2_flip                   gold=STOP     pred=CONTINUE  raw={"task_objects": ["cube", "red box"]}
+  [31/48] ✗ s5_trial_010_C2_dark                   gold=ASK      pred=CONTINUE  raw={"task_objects": ["cube", "box"]}
+  [32/48] ✓ s1_trial_007_C1_bright                 gold=CONTINUE pred=CONTINUE  raw={"task_objects": ["cube", "red box"]}
+  [33/48] ✗ s3_trial_009_C1_noise1                 gold=STOP     pred=CONTINUE  raw={"task_objects": ["cube", "red box"]}
+  [34/48] ✗ s2_trial_003_C1_dark                   gold=ASK      pred=CONTINUE  raw={"task_objects": ["cup", "red box"]}
+  [35/48] ✓ old_s1_trial_005_C1_flip               gold=CONTINUE pred=CONTINUE  raw={"task_objects": ["cup", "red box"]}
+  [36/48] ✗ s6_trial_002_C2_noise1                 gold=STOP     pred=CONTINUE  raw={"task_objects": ["cup"]}
+  [37/48] ✓ old_s1_trial_008_C1_noise1             gold=CONTINUE pred=CONTINUE  raw={"task_objects": ["cube", "red box"]}
+  [38/48] ✗ s6_trial_007_C2                        gold=STOP     pred=CONTINUE  raw={"task_objects": ["cube", "red box"]}
+  [39/48] ✓ old_s1_trial_003_C1_dark               gold=CONTINUE pred=CONTINUE  raw={"task_objects": ["cup", "red box"]}
+  [40/48] ✗ s7_trial_002_C2_dark                   gold=ASK      pred=CONTINUE  raw={"task_objects": ["cup", "red box"]}
+  [41/48] ✗ s3_trial_002_C1_flip                   gold=STOP     pred=CONTINUE  raw={"task_objects": ["cup", "red box"]}
+  [42/48] ✗ s3_trial_005_C1_noise0                 gold=STOP     pred=CONTINUE  raw={"task_objects": ["cup", "red box"]}
+  [43/48] ✗ s4_trial_003_C1_bright                 gold=ASK      pred=CONTINUE  raw={"task_objects": ["cup", "red box"]}
+  [44/48] ✗ s6_trial_008_C2_bright                 gold=STOP     pred=CONTINUE  raw={"task_objects": ["cube", "red box"]}
+  [45/48] ✗ s5_trial_008_C2_flip                   gold=ASK      pred=CONTINUE  raw={"task_objects": ["cube", "box"]}
+  [46/48] ✓ s1_trial_009_C1                        gold=CONTINUE pred=CONTINUE  raw={"task_objects": ["cube", "red box"]}
+  [47/48] ✗ s3_trial_009_C1                        gold=STOP     pred=CONTINUE  raw={"task_objects": ["cube", "red box"]}
+  [48/48] ✓ s1_trial_006_C1_flip                   gold=CONTINUE pred=CONTINUE  raw={"task_objects": ["cube", "red box"]}
+
+──────────────────────────────────────────────────────────────
+  cond3: pre-FT + DINO coords
+──────────────────────────────────────────────────────────────
+  Accuracy : 27.1%  (13/48)
+  Miss     : 100.0%
+  FAR      : 0.0%
+    AMBIGUOUS_DESTINATION               0/9
+    AMBIGUOUS_TARGET                    0/8
+    CLEAR                               13/13
+    INVALID_DESTINATION                 0/12
+    INVALID_TARGET                      0/6
+
+══════════════════════════════════════════════════════════════
+  최종 비교
+══════════════════════════════════════════════════════════════
+  조건                                     Acc   Miss    FAR
+  ───────────────────────────────────────────────────────
+  cond1: FT + DINO coords             100.0%   0.0%   0.0%
+  cond2: FT - DINO (image only)        35.4%   0.0% 100.0%
+  cond4: FT + DINO, no G0              72.9%   0.0% 100.0%
+  cond5: FT + DINO, no taxonomy       100.0%   0.0%   0.0%
+  cond3: pre-FT + DINO coords          27.1% 100.0%   0.0%
+
+저장: /workspace/COSE461-proj/logs/eval_conditions.csv
+메트릭: /workspace/COSE461-proj/logs/eval_conditions_metrics.json

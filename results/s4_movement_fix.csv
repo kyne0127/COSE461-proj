@@ -1,0 +1,11 @@
+sample_id,scenario,method,checkpoint,gold_state,gold_decision,predicted_decision,predicted_state,reason,question,explanation,correct
+s4_trial_001,S4,MEMORY,C1,AMBIGUOUS_TARGET,ASK,ASK,AMBIGUOUS_TARGET,,"[C1 AMBIGUOUS_TARGET] 씬 변화(target 'cup' moved 212px ([361, 187] → [151, 156]))가 감지됐습니다. 어떤 'cup'을(를) 집어야 하나요?",All objects are uniquely identified,True
+s4_trial_002,S4,MEMORY,C1,AMBIGUOUS_TARGET,ASK,ASK,AMBIGUOUS_TARGET,,[C1] Which drawer do you mean?,There are multiple drawers,True
+s4_trial_003,S4,MEMORY,C1,AMBIGUOUS_TARGET,ASK,ASK,AMBIGUOUS_TARGET,,[C1] Which cup and box do you want me to pick?,Multiple potential picks from memory and current view,True
+s4_trial_004,S4,MEMORY,C1,AMBIGUOUS_TARGET,ASK,ASK,AMBIGUOUS_TARGET,,[C1] What position of the cup are you referring to?,The cup's position is not clearly defined,True
+s4_trial_005,S4,MEMORY,C1,AMBIGUOUS_TARGET,ASK,CONTINUE,CLEAR,,,All objects are uniquely identified,False
+s4_trial_006,S4,MEMORY,C1,AMBIGUOUS_TARGET,ASK,ASK,AMBIGUOUS_TARGET,,[C1] Which cube do you want to pick?,Multiple cubes are visible,True
+s4_trial_007,S4,MEMORY,C1,AMBIGUOUS_TARGET,ASK,ASK,AMBIGUOUS_TARGET,,[C1] Which red box do you want me to put the cube in?, There are multiple red boxes visible,True
+s4_trial_008,S4,MEMORY,C1,AMBIGUOUS_TARGET,ASK,ASK,AMBIGUOUS_TARGET,,[C1 AMBIGUOUS_TARGET] 씬 변화(target 'cube' count decreased 3 → 1)가 감지됐습니다. 어떤 'cube'을(를) 집어야 하나요?,All objects are uniquely identified by their color and shape,True
+s4_trial_009,S4,MEMORY,C1,AMBIGUOUS_TARGET,ASK,ASK,AMBIGUOUS_TARGET,,[C1] Which cube do you mean?,The exact cube to be moved is not specified,True
+s4_trial_010,S4,MEMORY,C1,AMBIGUOUS_TARGET,ASK,ASK,AMBIGUOUS_TARGET,,[C1] Which of the two objects should I pick?,Multiple objects are available,True

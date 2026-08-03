@@ -1,0 +1,90 @@
+Using a slow image processor as `use_fast` is unset and a slow processor was saved with this model. `use_fast=True` will be the default behavior in v4.48, even if the model was saved with a slow processor. This will result in minor differences in outputs. You'll still be able to use a slow processor with `use_fast=False`.
+[모델 로드] Molmo + AmbRes merged + v3 LoRA (FT model)...
+Loading checkpoint shards:   0%|          | 0/7 [00:00<?, ?it/s]Loading checkpoint shards:  14%|█▍        | 1/7 [00:08<00:48,  8.04s/it]Loading checkpoint shards:  29%|██▊       | 2/7 [00:17<00:43,  8.74s/it]Loading checkpoint shards:  43%|████▎     | 3/7 [00:25<00:33,  8.41s/it]Loading checkpoint shards:  57%|█████▋    | 4/7 [00:33<00:25,  8.47s/it]Loading checkpoint shards:  71%|███████▏  | 5/7 [00:42<00:17,  8.71s/it]Loading checkpoint shards:  86%|████████▌ | 6/7 [00:51<00:08,  8.54s/it]Loading checkpoint shards: 100%|██████████| 7/7 [01:14<00:00, 13.42s/it]Loading checkpoint shards: 100%|██████████| 7/7 [01:14<00:00, 10.67s/it]
+완료
+
+[C1: image only] 70개 실행 중...
+  [ 1/70] ✗ s1_trial_001                 gold=CONTINUE pred=ASK      q="The cup cannot be found in the scene."
+  [ 2/70] ✗ s1_trial_002                 gold=CONTINUE pred=ASK      q="The cup cannot be found in the scene."
+  [ 3/70] ✗ s1_trial_003                 gold=CONTINUE pred=ASK      q="The cup cannot be found in the scene."
+  [ 4/70] ✗ s1_trial_004                 gold=CONTINUE pred=ASK      q="The cup cannot be found in the scene."
+  [ 5/70] ✗ s1_trial_005                 gold=CONTINUE pred=ASK      q="The cup cannot be found in the scene."
+  [ 6/70] ✗ s1_trial_006                 gold=CONTINUE pred=ASK      q="The cube cannot be found in the scene."
+  [ 7/70] ✗ s1_trial_007                 gold=CONTINUE pred=ASK      q="The cube cannot be found in the scene."
+  [ 8/70] ✗ s1_trial_008                 gold=CONTINUE pred=ASK      q="The cube cannot be found in the scene."
+  [ 9/70] ✗ s1_trial_009                 gold=CONTINUE pred=ASK      q="The cube cannot be found in the scene."
+  [10/70] ✗ s1_trial_010                 gold=CONTINUE pred=ASK      q="The cube cannot be found in the scene."
+  [11/70] ✓ s2_trial_001                 gold=ASK      pred=ASK      q="The cup cannot be found in the scene."
+  [12/70] ✓ s2_trial_002                 gold=ASK      pred=ASK      q="The cup cannot be found in the scene."
+  [13/70] ✓ s2_trial_003                 gold=ASK      pred=ASK      q="The cup cannot be found in the scene."
+  [14/70] ✓ s2_trial_004                 gold=ASK      pred=ASK      q="The cup cannot be found in the scene."
+  [15/70] ✓ s2_trial_005                 gold=ASK      pred=ASK      q="The cup cannot be found in the scene."
+  [16/70] ✓ s2_trial_006                 gold=ASK      pred=ASK      q="The cube cannot be found in the scene."
+  [17/70] ✓ s2_trial_007                 gold=ASK      pred=ASK      q="The cube cannot be found in the scene."
+  [18/70] ✓ s2_trial_008                 gold=ASK      pred=ASK      q="The cube cannot be found in the scene."
+  [19/70] ✓ s2_trial_009                 gold=ASK      pred=ASK      q="The cube cannot be found in the scene."
+  [20/70] ✓ s2_trial_010                 gold=ASK      pred=ASK      q="The cube cannot be found in the scene."
+  [21/70] ✗ s3_trial_001                 gold=STOP     pred=ASK      q="The cup cannot be found in the scene."
+  [22/70] ✗ s3_trial_002                 gold=STOP     pred=ASK      q="The cup cannot be found in the scene."
+  [23/70] ✗ s3_trial_003                 gold=STOP     pred=ASK      q="The cup cannot be found in the scene."
+  [24/70] ✗ s3_trial_004                 gold=STOP     pred=ASK      q="The cup cannot be found in the scene."
+  [25/70] ✗ s3_trial_005                 gold=STOP     pred=ASK      q="The cup cannot be found in the scene."
+  [26/70] ✗ s3_trial_006                 gold=STOP     pred=ASK      q="The cube cannot be found in the scene."
+  [27/70] ✗ s3_trial_007                 gold=STOP     pred=ASK      q="The cube cannot be found in the scene."
+  [28/70] ✗ s3_trial_008                 gold=STOP     pred=ASK      q="The cube cannot be found in the scene."
+  [29/70] ✗ s3_trial_009                 gold=STOP     pred=ASK      q="The cube cannot be found in the scene."
+  [30/70] ✗ s3_trial_010                 gold=STOP     pred=ASK      q="The cube cannot be found in the scene."
+  [31/70] ✓ s4_trial_001                 gold=ASK      pred=ASK      q="The cup cannot be found in the scene."
+  [32/70] ✓ s4_trial_002                 gold=ASK      pred=ASK      q="The cup cannot be found in the scene."
+  [33/70] ✓ s4_trial_003                 gold=ASK      pred=ASK      q="The cup cannot be found in the scene."
+  [34/70] ✓ s4_trial_004                 gold=ASK      pred=ASK      q="The cup cannot be found in the scene."
+  [35/70] ✓ s4_trial_005                 gold=ASK      pred=ASK      q="The cup cannot be found in the scene."
+  [36/70] ✓ s4_trial_006                 gold=ASK      pred=ASK      q="The cube cannot be found in the scene."
+  [37/70] ✓ s4_trial_007                 gold=ASK      pred=ASK      q="The cube cannot be found in the scene."
+  [38/70] ✓ s4_trial_008                 gold=ASK      pred=ASK      q="The cube cannot be found in the scene."
+  [39/70] ✓ s4_trial_009                 gold=ASK      pred=ASK      q="The cube cannot be found in the scene."
+  [40/70] ✓ s4_trial_010                 gold=ASK      pred=ASK      q="The cube cannot be found in the scene."
+  [41/70] ✓ s5_trial_001                 gold=ASK      pred=ASK      q="The box has moved. Continue with the mov"
+  [42/70] ✓ s5_trial_002                 gold=ASK      pred=ASK      q="The cup cannot be found in the scene."
+  [43/70] ✓ s5_trial_003                 gold=ASK      pred=ASK      q="The cup cannot be found in the scene."
+  [44/70] ✓ s5_trial_004                 gold=ASK      pred=ASK      q="The box has moved. Continue with the mov"
+  [45/70] ✓ s5_trial_005                 gold=ASK      pred=ASK      q="The cup cannot be found in the scene."
+  [46/70] ✓ s5_trial_006                 gold=ASK      pred=ASK      q="Which box should I place it on?"
+  [47/70] ✓ s5_trial_007                 gold=ASK      pred=ASK      q="Which box should I place it on?"
+  [48/70] ✓ s5_trial_008                 gold=ASK      pred=ASK      q="Which box should I place it on?"
+  [49/70] ✓ s5_trial_009                 gold=ASK      pred=ASK      q="The cube cannot be found in the scene."
+  [50/70] ✓ s5_trial_010                 gold=ASK      pred=ASK      q="The cube cannot be found in the scene."
+  [51/70] ✗ s6_trial_001                 gold=STOP     pred=ASK      q="The red box cannot be found in the scene"
+  [52/70] ✗ s6_trial_002                 gold=STOP     pred=ASK      q="The red box cannot be found in the scene"
+  [53/70] ✗ s6_trial_003                 gold=STOP     pred=ASK      q="The red box cannot be found in the scene"
+  [54/70] ✗ s6_trial_004                 gold=STOP     pred=ASK      q="The red box cannot be found in the scene"
+  [55/70] ✗ s6_trial_005                 gold=STOP     pred=ASK      q="The red box cannot be found in the scene"
+  [56/70] ✗ s6_trial_006                 gold=STOP     pred=ASK      q="The red box cannot be found in the scene"
+  [57/70] ✗ s6_trial_007                 gold=STOP     pred=ASK      q="The red box cannot be found in the scene"
+  [58/70] ✗ s6_trial_008                 gold=STOP     pred=ASK      q="The red box cannot be found in the scene"
+  [59/70] ✗ s6_trial_009                 gold=STOP     pred=ASK      q="The red box cannot be found in the scene"
+  [60/70] ✗ s6_trial_010                 gold=STOP     pred=ASK      q="The red box cannot be found in the scene"
+  [61/70] ✓ s7_trial_001                 gold=ASK      pred=ASK      q="The cup cannot be found in the scene."
+  [62/70] ✓ s7_trial_002                 gold=ASK      pred=ASK      q="The cup cannot be found in the scene."
+  [63/70] ✓ s7_trial_003                 gold=ASK      pred=ASK      q="The cup cannot be found in the scene."
+  [64/70] ✓ s7_trial_004                 gold=ASK      pred=ASK      q="The cup cannot be found in the scene."
+  [65/70] ✓ s7_trial_005                 gold=ASK      pred=ASK      q="The cup cannot be found in the scene."
+  [66/70] ✓ s7_trial_006                 gold=ASK      pred=ASK      q="The cube cannot be found in the scene."
+  [67/70] ✓ s7_trial_007                 gold=ASK      pred=ASK      q="The cube cannot be found in the scene."
+  [68/70] ✓ s7_trial_008                 gold=ASK      pred=ASK      q="The cube cannot be found in the scene."
+  [69/70] ✓ s7_trial_009                 gold=ASK      pred=ASK      q="The cube cannot be found in the scene."
+  [70/70] ✓ s7_trial_010                 gold=ASK      pred=ASK      q="The cube cannot be found in the scene."
+
+============================================================
+C1: image only (FT model, no DINO, no memory)
+============================================================
+Decision Acc : 40/70 = 57.1%
+Miss Rate    : 0/60 = 0.0%
+FAR          : 10/10 = 100.0%
+  AMBIGUOUS_DESTINATION               20/20
+  AMBIGUOUS_TARGET                    20/20
+  CLEAR                               0/10
+  INVALID_DESTINATION                 0/10
+  INVALID_TARGET                      0/10
+
+저장: logs/eval_c1_imageonly.csv

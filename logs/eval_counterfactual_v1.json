@@ -1,0 +1,889 @@
+{
+  "BvFsfsf4": {
+    "metrics": {
+      "mrr": 0.7317073170731707,
+      "same_acc": 1.0,
+      "shifted_acc": 0.7317073170731707,
+      "passed": 30,
+      "total": 41,
+      "by_scenario": {
+        "S1": "7/10",
+        "S3": "0/5",
+        "S4": "9/10",
+        "S5": "2/2",
+        "S6": "2/4",
+        "S7": "10/10"
+      },
+      "by_gold_state": {
+        "AMBIGUOUS_DESTINATION": "12/12",
+        "AMBIGUOUS_TARGET": "9/10",
+        "CLEAR": "7/10",
+        "INVALID_DESTINATION": "2/4",
+        "INVALID_TARGET": "0/5"
+      }
+    },
+    "results": [
+      {
+        "id": "s1_trial_001",
+        "scenario": "S1",
+        "checkpoint": "C1",
+        "gold_state": "CLEAR",
+        "g0_same": [
+          581,
+          151
+        ],
+        "g0_shifted": [
+          381,
+          151
+        ],
+        "dec_same": "CONTINUE",
+        "dec_shifted": "ASK",
+        "pass_same": true,
+        "pass_shifted": true,
+        "passed": true,
+        "cq_same": "",
+        "cq_shifted": "The cup has moved. Continue with the moved target?"
+      },
+      {
+        "id": "s1_trial_002",
+        "scenario": "S1",
+        "checkpoint": "C1",
+        "gold_state": "CLEAR",
+        "g0_same": [
+          495,
+          144
+        ],
+        "g0_shifted": [
+          295,
+          144
+        ],
+        "dec_same": "CONTINUE",
+        "dec_shifted": "CONTINUE",
+        "pass_same": true,
+        "pass_shifted": false,
+        "passed": false,
+        "cq_same": "",
+        "cq_shifted": ""
+      },
+      {
+        "id": "s1_trial_003",
+        "scenario": "S1",
+        "checkpoint": "C1",
+        "gold_state": "CLEAR",
+        "g0_same": [
+          301,
+          124
+        ],
+        "g0_shifted": [
+          501,
+          124
+        ],
+        "dec_same": "CONTINUE",
+        "dec_shifted": "CONTINUE",
+        "pass_same": true,
+        "pass_shifted": false,
+        "passed": false,
+        "cq_same": "",
+        "cq_shifted": ""
+      },
+      {
+        "id": "s1_trial_004",
+        "scenario": "S1",
+        "checkpoint": "C1",
+        "gold_state": "CLEAR",
+        "g0_same": [
+          320,
+          171
+        ],
+        "g0_shifted": [
+          520,
+          171
+        ],
+        "dec_same": "CONTINUE",
+        "dec_shifted": "ASK",
+        "pass_same": true,
+        "pass_shifted": true,
+        "passed": true,
+        "cq_same": "",
+        "cq_shifted": "The cup has moved. Continue with the moved target?"
+      },
+      {
+        "id": "s1_trial_005",
+        "scenario": "S1",
+        "checkpoint": "C1",
+        "gold_state": "CLEAR",
+        "g0_same": [
+          260,
+          135
+        ],
+        "g0_shifted": [
+          460,
+          135
+        ],
+        "dec_same": "CONTINUE",
+        "dec_shifted": "ASK",
+        "pass_same": true,
+        "pass_shifted": true,
+        "passed": true,
+        "cq_same": "",
+        "cq_shifted": "The cup has moved. Continue with the moved target?"
+      },
+      {
+        "id": "s1_trial_006",
+        "scenario": "S1",
+        "checkpoint": "C1",
+        "gold_state": "CLEAR",
+        "g0_same": [
+          493,
+          190
+        ],
+        "g0_shifted": [
+          293,
+          190
+        ],
+        "dec_same": "CONTINUE",
+        "dec_shifted": "CONTINUE",
+        "pass_same": true,
+        "pass_shifted": false,
+        "passed": false,
+        "cq_same": "",
+        "cq_shifted": ""
+      },
+      {
+        "id": "s1_trial_007",
+        "scenario": "S1",
+        "checkpoint": "C1",
+        "gold_state": "CLEAR",
+        "g0_same": [
+          507,
+          199
+        ],
+        "g0_shifted": [
+          307,
+          199
+        ],
+        "dec_same": "CONTINUE",
+        "dec_shifted": "ASK",
+        "pass_same": true,
+        "pass_shifted": true,
+        "passed": true,
+        "cq_same": "",
+        "cq_shifted": "The cube has moved. Continue with the moved target?"
+      },
+      {
+        "id": "s1_trial_008",
+        "scenario": "S1",
+        "checkpoint": "C1",
+        "gold_state": "CLEAR",
+        "g0_same": [
+          312,
+          171
+        ],
+        "g0_shifted": [
+          512,
+          171
+        ],
+        "dec_same": "CONTINUE",
+        "dec_shifted": "ASK",
+        "pass_same": true,
+        "pass_shifted": true,
+        "passed": true,
+        "cq_same": "",
+        "cq_shifted": "The cube has moved. Continue with the moved target?"
+      },
+      {
+        "id": "s1_trial_009",
+        "scenario": "S1",
+        "checkpoint": "C1",
+        "gold_state": "CLEAR",
+        "g0_same": [
+          264,
+          109
+        ],
+        "g0_shifted": [
+          464,
+          109
+        ],
+        "dec_same": "CONTINUE",
+        "dec_shifted": "ASK",
+        "pass_same": true,
+        "pass_shifted": true,
+        "passed": true,
+        "cq_same": "",
+        "cq_shifted": "The cube has moved. Continue with the moved target?"
+      },
+      {
+        "id": "s1_trial_010",
+        "scenario": "S1",
+        "checkpoint": "C1",
+        "gold_state": "CLEAR",
+        "g0_same": [
+          172,
+          142
+        ],
+        "g0_shifted": [
+          372,
+          142
+        ],
+        "dec_same": "CONTINUE",
+        "dec_shifted": "ASK",
+        "pass_same": true,
+        "pass_shifted": true,
+        "passed": true,
+        "cq_same": "",
+        "cq_shifted": "The cube has moved. Continue with the moved target?"
+      },
+      {
+        "id": "s3_trial_001",
+        "scenario": "S3",
+        "checkpoint": "C1",
+        "gold_state": "INVALID_TARGET",
+        "g0_same": [
+          358,
+          46
+        ],
+        "g0_shifted": [
+          158,
+          46
+        ],
+        "dec_same": "CONTINUE",
+        "dec_shifted": "CONTINUE",
+        "pass_same": true,
+        "pass_shifted": false,
+        "passed": false,
+        "cq_same": "",
+        "cq_shifted": ""
+      },
+      {
+        "id": "s3_trial_002",
+        "scenario": "S3",
+        "checkpoint": "C1",
+        "gold_state": "INVALID_TARGET",
+        "g0_same": [
+          358,
+          46
+        ],
+        "g0_shifted": [
+          158,
+          46
+        ],
+        "dec_same": "CONTINUE",
+        "dec_shifted": "CONTINUE",
+        "pass_same": true,
+        "pass_shifted": false,
+        "passed": false,
+        "cq_same": "",
+        "cq_shifted": ""
+      },
+      {
+        "id": "s3_trial_003",
+        "scenario": "S3",
+        "checkpoint": "C1",
+        "gold_state": "INVALID_TARGET",
+        "g0_same": [
+          358,
+          46
+        ],
+        "g0_shifted": [
+          158,
+          46
+        ],
+        "dec_same": "CONTINUE",
+        "dec_shifted": "CONTINUE",
+        "pass_same": true,
+        "pass_shifted": false,
+        "passed": false,
+        "cq_same": "",
+        "cq_shifted": ""
+      },
+      {
+        "id": "s3_trial_004",
+        "scenario": "S3",
+        "checkpoint": "C1",
+        "gold_state": "INVALID_TARGET",
+        "g0_same": [
+          358,
+          46
+        ],
+        "g0_shifted": [
+          158,
+          46
+        ],
+        "dec_same": "CONTINUE",
+        "dec_shifted": "CONTINUE",
+        "pass_same": true,
+        "pass_shifted": false,
+        "passed": false,
+        "cq_same": "",
+        "cq_shifted": ""
+      },
+      {
+        "id": "s3_trial_005",
+        "scenario": "S3",
+        "checkpoint": "C1",
+        "gold_state": "INVALID_TARGET",
+        "g0_same": [
+          358,
+          46
+        ],
+        "g0_shifted": [
+          158,
+          46
+        ],
+        "dec_same": "CONTINUE",
+        "dec_shifted": "CONTINUE",
+        "pass_same": true,
+        "pass_shifted": false,
+        "passed": false,
+        "cq_same": "",
+        "cq_shifted": ""
+      },
+      {
+        "id": "s4_trial_001",
+        "scenario": "S4",
+        "checkpoint": "C1",
+        "gold_state": "AMBIGUOUS_TARGET",
+        "g0_same": [
+          151,
+          156
+        ],
+        "g0_shifted": [
+          351,
+          156
+        ],
+        "dec_same": "CONTINUE",
+        "dec_shifted": "CONTINUE",
+        "pass_same": true,
+        "pass_shifted": false,
+        "passed": false,
+        "cq_same": "",
+        "cq_shifted": ""
+      },
+      {
+        "id": "s4_trial_002",
+        "scenario": "S4",
+        "checkpoint": "C1",
+        "gold_state": "AMBIGUOUS_TARGET",
+        "g0_same": [
+          312,
+          181
+        ],
+        "g0_shifted": [
+          512,
+          181
+        ],
+        "dec_same": "CONTINUE",
+        "dec_shifted": "ASK",
+        "pass_same": true,
+        "pass_shifted": true,
+        "passed": true,
+        "cq_same": "",
+        "cq_shifted": "The cup has moved. Continue with the moved target?"
+      },
+      {
+        "id": "s4_trial_003",
+        "scenario": "S4",
+        "checkpoint": "C1",
+        "gold_state": "AMBIGUOUS_TARGET",
+        "g0_same": [
+          422,
+          158
+        ],
+        "g0_shifted": [
+          222,
+          158
+        ],
+        "dec_same": "CONTINUE",
+        "dec_shifted": "ASK",
+        "pass_same": true,
+        "pass_shifted": true,
+        "passed": true,
+        "cq_same": "",
+        "cq_shifted": "The cup has moved. Continue with the moved target?"
+      },
+      {
+        "id": "s4_trial_004",
+        "scenario": "S4",
+        "checkpoint": "C1",
+        "gold_state": "AMBIGUOUS_TARGET",
+        "g0_same": [
+          121,
+          152
+        ],
+        "g0_shifted": [
+          321,
+          152
+        ],
+        "dec_same": "CONTINUE",
+        "dec_shifted": "ASK",
+        "pass_same": true,
+        "pass_shifted": true,
+        "passed": true,
+        "cq_same": "",
+        "cq_shifted": "The cup has moved. Continue with the moved target?"
+      },
+      {
+        "id": "s4_trial_005",
+        "scenario": "S4",
+        "checkpoint": "C1",
+        "gold_state": "AMBIGUOUS_TARGET",
+        "g0_same": [
+          592,
+          219
+        ],
+        "g0_shifted": [
+          392,
+          219
+        ],
+        "dec_same": "CONTINUE",
+        "dec_shifted": "ASK",
+        "pass_same": true,
+        "pass_shifted": true,
+        "passed": true,
+        "cq_same": "",
+        "cq_shifted": "The cup has moved. Continue with the moved target?"
+      },
+      {
+        "id": "s4_trial_006",
+        "scenario": "S4",
+        "checkpoint": "C1",
+        "gold_state": "AMBIGUOUS_TARGET",
+        "g0_same": [
+          602,
+          214
+        ],
+        "g0_shifted": [
+          402,
+          214
+        ],
+        "dec_same": "CONTINUE",
+        "dec_shifted": "ASK",
+        "pass_same": true,
+        "pass_shifted": true,
+        "passed": true,
+        "cq_same": "",
+        "cq_shifted": "The cube has moved. Continue with the moved target?"
+      },
+      {
+        "id": "s4_trial_007",
+        "scenario": "S4",
+        "checkpoint": "C1",
+        "gold_state": "AMBIGUOUS_TARGET",
+        "g0_same": [
+          307,
+          145
+        ],
+        "g0_shifted": [
+          507,
+          145
+        ],
+        "dec_same": "CONTINUE",
+        "dec_shifted": "ASK",
+        "pass_same": true,
+        "pass_shifted": true,
+        "passed": true,
+        "cq_same": "",
+        "cq_shifted": "The cube has moved. Continue with the moved target?"
+      },
+      {
+        "id": "s4_trial_008",
+        "scenario": "S4",
+        "checkpoint": "C1",
+        "gold_state": "AMBIGUOUS_TARGET",
+        "g0_same": [
+          190,
+          142
+        ],
+        "g0_shifted": [
+          390,
+          142
+        ],
+        "dec_same": "CONTINUE",
+        "dec_shifted": "ASK",
+        "pass_same": true,
+        "pass_shifted": true,
+        "passed": true,
+        "cq_same": "",
+        "cq_shifted": "The cube has moved. Continue with the moved target?"
+      },
+      {
+        "id": "s4_trial_009",
+        "scenario": "S4",
+        "checkpoint": "C1",
+        "gold_state": "AMBIGUOUS_TARGET",
+        "g0_same": [
+          217,
+          156
+        ],
+        "g0_shifted": [
+          417,
+          156
+        ],
+        "dec_same": "CONTINUE",
+        "dec_shifted": "ASK",
+        "pass_same": true,
+        "pass_shifted": true,
+        "passed": true,
+        "cq_same": "",
+        "cq_shifted": "The cube has moved. Continue with the moved target?"
+      },
+      {
+        "id": "s4_trial_010",
+        "scenario": "S4",
+        "checkpoint": "C1",
+        "gold_state": "AMBIGUOUS_TARGET",
+        "g0_same": [
+          205,
+          157
+        ],
+        "g0_shifted": [
+          405,
+          157
+        ],
+        "dec_same": "CONTINUE",
+        "dec_shifted": "ASK",
+        "pass_same": true,
+        "pass_shifted": true,
+        "passed": true,
+        "cq_same": "",
+        "cq_shifted": "The cube has moved. Continue with the moved target?"
+      },
+      {
+        "id": "s5_trial_001",
+        "scenario": "S5",
+        "checkpoint": "C2",
+        "gold_state": "AMBIGUOUS_DESTINATION",
+        "g0_same": [
+          380,
+          167
+        ],
+        "g0_shifted": [
+          180,
+          167
+        ],
+        "dec_same": "CONTINUE",
+        "dec_shifted": "ASK",
+        "pass_same": true,
+        "pass_shifted": true,
+        "passed": true,
+        "cq_same": "",
+        "cq_shifted": "The box has moved. Continue with the moved destination?"
+      },
+      {
+        "id": "s5_trial_004",
+        "scenario": "S5",
+        "checkpoint": "C2",
+        "gold_state": "AMBIGUOUS_DESTINATION",
+        "g0_same": [
+          216,
+          143
+        ],
+        "g0_shifted": [
+          416,
+          143
+        ],
+        "dec_same": "CONTINUE",
+        "dec_shifted": "ASK",
+        "pass_same": true,
+        "pass_shifted": true,
+        "passed": true,
+        "cq_same": "",
+        "cq_shifted": "The box has moved. Continue with the moved destination?"
+      },
+      {
+        "id": "s6_trial_001",
+        "scenario": "S6",
+        "checkpoint": "C2",
+        "gold_state": "INVALID_DESTINATION",
+        "g0_same": [
+          359,
+          46
+        ],
+        "g0_shifted": [
+          159,
+          46
+        ],
+        "dec_same": "CONTINUE",
+        "dec_shifted": "ASK",
+        "pass_same": true,
+        "pass_shifted": true,
+        "passed": true,
+        "cq_same": "",
+        "cq_shifted": "The red box has moved. Continue with the moved destination?"
+      },
+      {
+        "id": "s6_trial_002",
+        "scenario": "S6",
+        "checkpoint": "C2",
+        "gold_state": "INVALID_DESTINATION",
+        "g0_same": [
+          360,
+          47
+        ],
+        "g0_shifted": [
+          160,
+          47
+        ],
+        "dec_same": "CONTINUE",
+        "dec_shifted": "CONTINUE",
+        "pass_same": true,
+        "pass_shifted": false,
+        "passed": false,
+        "cq_same": "",
+        "cq_shifted": ""
+      },
+      {
+        "id": "s6_trial_004",
+        "scenario": "S6",
+        "checkpoint": "C2",
+        "gold_state": "INVALID_DESTINATION",
+        "g0_same": [
+          360,
+          47
+        ],
+        "g0_shifted": [
+          160,
+          47
+        ],
+        "dec_same": "CONTINUE",
+        "dec_shifted": "ASK",
+        "pass_same": true,
+        "pass_shifted": true,
+        "passed": true,
+        "cq_same": "",
+        "cq_shifted": "The red box has moved. Continue with the moved destination?"
+      },
+      {
+        "id": "s6_trial_005",
+        "scenario": "S6",
+        "checkpoint": "C2",
+        "gold_state": "INVALID_DESTINATION",
+        "g0_same": [
+          360,
+          46
+        ],
+        "g0_shifted": [
+          160,
+          46
+        ],
+        "dec_same": "CONTINUE",
+        "dec_shifted": "CONTINUE",
+        "pass_same": true,
+        "pass_shifted": false,
+        "passed": false,
+        "cq_same": "",
+        "cq_shifted": ""
+      },
+      {
+        "id": "s7_trial_001",
+        "scenario": "S7",
+        "checkpoint": "C2",
+        "gold_state": "AMBIGUOUS_DESTINATION",
+        "g0_same": [
+          192,
+          141
+        ],
+        "g0_shifted": [
+          392,
+          141
+        ],
+        "dec_same": "CONTINUE",
+        "dec_shifted": "ASK",
+        "pass_same": true,
+        "pass_shifted": true,
+        "passed": true,
+        "cq_same": "",
+        "cq_shifted": "The red box has moved. Continue with the moved destination?"
+      },
+      {
+        "id": "s7_trial_002",
+        "scenario": "S7",
+        "checkpoint": "C2",
+        "gold_state": "AMBIGUOUS_DESTINATION",
+        "g0_same": [
+          583,
+          190
+        ],
+        "g0_shifted": [
+          383,
+          190
+        ],
+        "dec_same": "CONTINUE",
+        "dec_shifted": "ASK",
+        "pass_same": true,
+        "pass_shifted": true,
+        "passed": true,
+        "cq_same": "",
+        "cq_shifted": "The red box has moved. Continue with the moved destination?"
+      },
+      {
+        "id": "s7_trial_003",
+        "scenario": "S7",
+        "checkpoint": "C2",
+        "gold_state": "AMBIGUOUS_DESTINATION",
+        "g0_same": [
+          229,
+          152
+        ],
+        "g0_shifted": [
+          429,
+          152
+        ],
+        "dec_same": "CONTINUE",
+        "dec_shifted": "ASK",
+        "pass_same": true,
+        "pass_shifted": true,
+        "passed": true,
+        "cq_same": "",
+        "cq_shifted": "The red box has moved. Continue with the moved destination?"
+      },
+      {
+        "id": "s7_trial_004",
+        "scenario": "S7",
+        "checkpoint": "C2",
+        "gold_state": "AMBIGUOUS_DESTINATION",
+        "g0_same": [
+          548,
+          177
+        ],
+        "g0_shifted": [
+          348,
+          177
+        ],
+        "dec_same": "CONTINUE",
+        "dec_shifted": "ASK",
+        "pass_same": true,
+        "pass_shifted": true,
+        "passed": true,
+        "cq_same": "",
+        "cq_shifted": "The red box has moved. Continue with the moved destination?"
+      },
+      {
+        "id": "s7_trial_005",
+        "scenario": "S7",
+        "checkpoint": "C2",
+        "gold_state": "AMBIGUOUS_DESTINATION",
+        "g0_same": [
+          267,
+          157
+        ],
+        "g0_shifted": [
+          467,
+          157
+        ],
+        "dec_same": "CONTINUE",
+        "dec_shifted": "ASK",
+        "pass_same": true,
+        "pass_shifted": true,
+        "passed": true,
+        "cq_same": "",
+        "cq_shifted": "The red box has moved. Continue with the moved destination?"
+      },
+      {
+        "id": "s7_trial_006",
+        "scenario": "S7",
+        "checkpoint": "C2",
+        "gold_state": "AMBIGUOUS_DESTINATION",
+        "g0_same": [
+          525,
+          194
+        ],
+        "g0_shifted": [
+          325,
+          194
+        ],
+        "dec_same": "CONTINUE",
+        "dec_shifted": "ASK",
+        "pass_same": true,
+        "pass_shifted": true,
+        "passed": true,
+        "cq_same": "",
+        "cq_shifted": "The red box has moved. Continue with the moved destination?"
+      },
+      {
+        "id": "s7_trial_007",
+        "scenario": "S7",
+        "checkpoint": "C2",
+        "gold_state": "AMBIGUOUS_DESTINATION",
+        "g0_same": [
+          350,
+          168
+        ],
+        "g0_shifted": [
+          150,
+          168
+        ],
+        "dec_same": "CONTINUE",
+        "dec_shifted": "ASK",
+        "pass_same": true,
+        "pass_shifted": true,
+        "passed": true,
+        "cq_same": "",
+        "cq_shifted": "The red box has moved. Continue with the moved destination?"
+      },
+      {
+        "id": "s7_trial_008",
+        "scenario": "S7",
+        "checkpoint": "C2",
+        "gold_state": "AMBIGUOUS_DESTINATION",
+        "g0_same": [
+          517,
+          193
+        ],
+        "g0_shifted": [
+          317,
+          193
+        ],
+        "dec_same": "CONTINUE",
+        "dec_shifted": "ASK",
+        "pass_same": true,
+        "pass_shifted": true,
+        "passed": true,
+        "cq_same": "",
+        "cq_shifted": "The red box has moved. Continue with the moved destination?"
+      },
+      {
+        "id": "s7_trial_009",
+        "scenario": "S7",
+        "checkpoint": "C2",
+        "gold_state": "AMBIGUOUS_DESTINATION",
+        "g0_same": [
+          270,
+          157
+        ],
+        "g0_shifted": [
+          470,
+          157
+        ],
+        "dec_same": "CONTINUE",
+        "dec_shifted": "ASK",
+        "pass_same": true,
+        "pass_shifted": true,
+        "passed": true,
+        "cq_same": "",
+        "cq_shifted": "The red box has moved. Continue with the moved destination?"
+      },
+      {
+        "id": "s7_trial_010",
+        "scenario": "S7",
+        "checkpoint": "C2",
+        "gold_state": "AMBIGUOUS_DESTINATION",
+        "g0_same": [
+          214,
+          150
+        ],
+        "g0_shifted": [
+          414,
+          150
+        ],
+        "dec_same": "CONTINUE",
+        "dec_shifted": "ASK",
+        "pass_same": true,
+        "pass_shifted": true,
+        "passed": true,
+        "cq_same": "",
+        "cq_shifted": "The red box has moved. Continue with the moved destination?"
+      }
+    ]
+  }
+}

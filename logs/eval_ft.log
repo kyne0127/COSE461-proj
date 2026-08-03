@@ -1,0 +1,16 @@
+Using a slow image processor as `use_fast` is unset and a slow processor was saved with this model. `use_fast=True` will be the default behavior in v4.48, even if the model was saved with a slow processor. This will result in minor differences in outputs. You'll still be able to use a slow processor with `use_fast=False`.
+Loading checkpoint shards:   0%|          | 0/7 [00:00<?, ?it/s]Loading checkpoint shards:  14%|█▍        | 1/7 [00:10<01:00, 10.13s/it]Loading checkpoint shards:  29%|██▊       | 2/7 [00:21<00:53, 10.73s/it]Loading checkpoint shards:  43%|████▎     | 3/7 [00:31<00:41, 10.29s/it]Loading checkpoint shards:  57%|█████▋    | 4/7 [00:41<00:30, 10.20s/it]Loading checkpoint shards:  71%|███████▏  | 5/7 [00:52<00:20, 10.48s/it]Loading checkpoint shards:  86%|████████▌ | 6/7 [01:01<00:10, 10.16s/it]Loading checkpoint shards: 100%|██████████| 7/7 [01:18<00:00, 12.28s/it]Loading checkpoint shards: 100%|██████████| 7/7 [01:18<00:00, 11.18s/it]
+Traceback (most recent call last):
+  File "/workspace/COSE461-proj/src/evaluate.py", line 971, in <module>
+    main()
+  File "/workspace/COSE461-proj/src/evaluate.py", line 891, in main
+    _make_handler(args.model_type, args.adapter_ckpt, use_detection=False)
+  File "/workspace/COSE461-proj/src/extraction/ambres_g0_extractor.py", line 75, in _make_handler
+    handler.setup(
+  File "/workspace/COSE461-proj/module/models/ambres/handler.py", line 129, in setup
+    self._model = AmbresFineTuned(
+                  ^^^^^^^^^^^^^^^^
+  File "/workspace/AmbRes/ambres/ambres_model.py", line 206, in __init__
+    latest_ckpt = ckpt_paths[-1]
+                  ~~~~~~~~~~^^^^
+IndexError: list index out of range

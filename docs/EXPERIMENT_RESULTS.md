@@ -787,6 +787,37 @@ python3 scripts/score_questions.py \
 
 ---
 
+## 13. Ablation Study 설계
+
+### 13-0. 올바른 ablation 구조
+
+STATIC을 "no memory"라고 부르는 것은 부정확하다. STATIC도 `check_grounding(g0, C1)`을 통해
+t0의 좌표를 기억하고 비교한다 — 이것 자체가 메모리다.
+
+올바른 ablation은 세 단계:
+
+| 조건 | 설명 | t0 기준 | Episode memory |
+|------|------|:-------:|:--------------:|
+| **B2** | AmbRes only, checkpoint 이미지만 봄 | ❌ | ❌ |
+| **STATIC** | GDino g0 + check_grounding, memory 주입 없음 | ✅ (좌표) | ❌ |
+| **MEMORY** | GDino g0 + check_grounding + EpisodeMemory 주입 | ✅ (좌표) | ✅ |
+
+각 단계가 보여주는 것:
+- **B2 → STATIC**: t0 좌표 기억(g0)의 필요성 — B2는 구조적으로 STOP 불가, S3 0/N 확정
+- **STATIC → MEMORY**: Episode memory의 추가 기여 — 질문 품질 및 decision accuracy 개선
+
+### 13-0-B. 평가 지표 일치 확인
+
+| 방법 | 데이터셋 | Decision Acc 기준 | 비교 가능 여부 |
+|------|---------|:-----------------:|:-------------:|
+| B2 (Exp H 결과 유용) | ambres-training 61 trials | ✓ | ✓ |
+| STATIC (메모리 파이프라인) | ambres-training 61 trials | ✓ | ✓ |
+| MEMORY (메모리 파이프라인) | ambres-training 61 trials | ✓ | ✓ |
+
+B2는 GDino를 사용하지 않으므로 detection stack 차이와 무관하게 재사용 가능.
+
+---
+
 ## 13. Experiment H — ambres-training 데이터셋 v6 재평가
 
 **데이터셋**: `kyne0127/ambres-training` — 61 trials (S1×10, S2×10, S3×11, S4×10, S5×10, S6×10)  

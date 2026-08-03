@@ -1,0 +1,87 @@
+Using a slow image processor as `use_fast` is unset and a slow processor was saved with this model. `use_fast=True` will be the default behavior in v4.48, even if the model was saved with a slow processor. This will result in minor differences in outputs. You'll still be able to use a slow processor with `use_fast=False`.
+Loading checkpoint shards:   0%|          | 0/7 [00:00<?, ?it/s]Loading checkpoint shards:  14%|█▍        | 1/7 [00:02<00:16,  2.68s/it]Loading checkpoint shards:  29%|██▊       | 2/7 [00:06<00:18,  3.61s/it]Loading checkpoint shards:  43%|████▎     | 3/7 [00:10<00:13,  3.42s/it]Loading checkpoint shards:  57%|█████▋    | 4/7 [00:13<00:10,  3.38s/it]Loading checkpoint shards:  71%|███████▏  | 5/7 [00:16<00:06,  3.22s/it]Loading checkpoint shards:  86%|████████▌ | 6/7 [00:18<00:03,  3.01s/it]Loading checkpoint shards: 100%|██████████| 7/7 [00:23<00:00,  3.37s/it]Loading checkpoint shards: 100%|██████████| 7/7 [00:23<00:00,  3.30s/it]
+/usr/local/lib/python3.11/dist-packages/torch/utils/cpp_extension.py:1965: UserWarning: TORCH_CUDA_ARCH_LIST is not set, all archs for visible cards are included for compilation. 
+If this is not desired, please set os.environ['TORCH_CUDA_ARCH_LIST'].
+  warnings.warn(
+loading_ckpt from:  /workspace/AmbRes/ckpt/AB5siP8DA78aA78wR5Y8Mw/checkpoint-390
+[GDino] 로딩 중 … (box_thr=0.25, text_thr=0.25)
+[GDino] 준비 완료
+[  1/60] s1_trial_001 (S1 C1)
+  VLM_IMG_ONLY     ASK       (gold=CONTINUE) ✗
+  VLM_TAX          ASK       (gold=CONTINUE) ✗
+  VLM_TAX_DINO     ASK       (gold=CONTINUE) ✗
+  VLM_BLANK_DINO   ASK       (gold=CONTINUE) ✗
+[  2/60] s1_trial_002 (S1 C1)  ETA 127.4min
+  VLM_IMG_ONLY     CONTINUE  (gold=CONTINUE) ✓
+  VLM_TAX          ASK       (gold=CONTINUE) ✗
+  VLM_TAX_DINO     CONTINUE  (gold=CONTINUE) ✓
+  VLM_BLANK_DINO   CONTINUE  (gold=CONTINUE) ✓
+[  3/60] s1_trial_003 (S1 C1)  ETA 121.5min
+  VLM_IMG_ONLY     CONTINUE  (gold=CONTINUE) ✓
+  VLM_TAX          CONTINUE  (gold=CONTINUE) ✓
+  VLM_TAX_DINO     ASK       (gold=CONTINUE) ✗
+  VLM_BLANK_DINO   ASK       (gold=CONTINUE) ✗
+[  4/60] s1_trial_004 (S1 C1)  ETA 114.4min
+  VLM_IMG_ONLY     ASK       (gold=CONTINUE) ✗
+  VLM_TAX          ASK       (gold=CONTINUE) ✗
+  VLM_TAX_DINO     ASK       (gold=CONTINUE) ✗
+  VLM_BLANK_DINO   CONTINUE  (gold=CONTINUE) ✓
+[  5/60] s1_trial_005 (S1 C1)  ETA 113.0min
+  VLM_IMG_ONLY     ASK       (gold=CONTINUE) ✗
+  VLM_TAX          CONTINUE  (gold=CONTINUE) ✓
+  VLM_TAX_DINO     ASK       (gold=CONTINUE) ✗
+  VLM_BLANK_DINO   ASK       (gold=CONTINUE) ✗
+[  6/60] s1_trial_006 (S1 C1)  ETA 110.4min
+  VLM_IMG_ONLY     CONTINUE  (gold=CONTINUE) ✓
+  VLM_TAX          ASK       (gold=CONTINUE) ✗
+  VLM_TAX_DINO     ASK       (gold=CONTINUE) ✗
+  VLM_BLANK_DINO   CONTINUE  (gold=CONTINUE) ✓
+[  7/60] s1_trial_007 (S1 C1)  ETA 111.8min
+  VLM_IMG_ONLY     ASK       (gold=CONTINUE) ✗
+  VLM_TAX          ASK       (gold=CONTINUE) ✗
+  VLM_TAX_DINO     CONTINUE  (gold=CONTINUE) ✓
+  VLM_BLANK_DINO   ASK       (gold=CONTINUE) ✗
+[  8/60] s1_trial_008 (S1 C1)  ETA 112.2min
+  VLM_IMG_ONLY     ASK       (gold=CONTINUE) ✗
+  VLM_TAX          ASK       (gold=CONTINUE) ✗
+  VLM_TAX_DINO     CONTINUE  (gold=CONTINUE) ✓
+  VLM_BLANK_DINO   ASK       (gold=CONTINUE) ✗
+[  9/60] s1_trial_009 (S1 C1)  ETA 112.7min
+  VLM_IMG_ONLY     ASK       (gold=CONTINUE) ✗
+  VLM_TAX          ASK       (gold=CONTINUE) ✗
+  VLM_TAX_DINO     CONTINUE  (gold=CONTINUE) ✓
+  VLM_BLANK_DINO   CONTINUE  (gold=CONTINUE) ✓
+[ 10/60] s1_trial_010 (S1 C1)  ETA 112.5min
+  VLM_IMG_ONLY     CONTINUE  (gold=CONTINUE) ✓
+  VLM_TAX          ASK       (gold=CONTINUE) ✗
+  VLM_TAX_DINO     ASK       (gold=CONTINUE) ✗
+  VLM_BLANK_DINO   CONTINUE  (gold=CONTINUE) ✓
+[ 11/60] s2_trial_001 (S2 C1)  ETA 110.9min
+  VLM_IMG_ONLY     ASK       (gold=ASK) ✓
+  VLM_TAX          ASK       (gold=ASK) ✓
+  VLM_TAX_DINO     ASK       (gold=ASK) ✓
+  VLM_BLANK_DINO   ASK       (gold=ASK) ✓
+[ 12/60] s2_trial_002 (S2 C1)  ETA 108.5min
+  VLM_IMG_ONLY     ASK       (gold=ASK) ✓
+  VLM_TAX          ASK       (gold=ASK) ✓
+  VLM_TAX_DINO     ASK       (gold=ASK) ✓
+  VLM_BLANK_DINO   ASK       (gold=ASK) ✓
+[ 13/60] s2_trial_003 (S2 C1)  ETA 112.6min
+  VLM_IMG_ONLY     CONTINUE  (gold=ASK) ✗
+  VLM_TAX          ASK       (gold=ASK) ✓
+  VLM_TAX_DINO     ASK       (gold=ASK) ✓
+  VLM_BLANK_DINO   CONTINUE  (gold=ASK) ✗
+[ 14/60] s2_trial_004 (S2 C1)  ETA 110.4min
+  VLM_IMG_ONLY     ASK       (gold=ASK) ✓
+  VLM_TAX          ASK       (gold=ASK) ✓
+  VLM_TAX_DINO     ASK       (gold=ASK) ✓
+  VLM_BLANK_DINO   ASK       (gold=ASK) ✓
+[ 15/60] s2_trial_005 (S2 C1)  ETA 107.6min
+  VLM_IMG_ONLY     ASK       (gold=ASK) ✓
+  VLM_TAX          ASK       (gold=ASK) ✓
+  VLM_TAX_DINO     CONTINUE  (gold=ASK) ✗
+  VLM_BLANK_DINO   ASK       (gold=ASK) ✓
+[ 16/60] s2_trial_006 (S2 C1)  ETA 104.7min
+  VLM_IMG_ONLY     CONTINUE  (gold=ASK) ✗
+  VLM_TAX          ASK       (gold=ASK) ✓
+  VLM_TAX_DINO     ASK       (gold=ASK) ✓
