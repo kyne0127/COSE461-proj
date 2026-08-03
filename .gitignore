@@ -32,3 +32,23 @@ dataset/finetune_v2/
 dataset/finetune_preview/
 dataset/ambres/
 dataset/ambres-training/
+
+# Local raw data / eval output directories (synced to HF Hub, not git)
+/data/
+/data_eval/
+/data_eval_test/
+/data-evaluation/
+/data-evaluation-v3/
+/data-evaluation-v4/
+/data-training/
+/data-training-v2/
+/checkpoints/
+
+# Runpod connection info (local only)
+.env.runpod
+
+# Python package build metadata
+*.egg-info/
+
+# Downloaded wheel files
+*.whl
